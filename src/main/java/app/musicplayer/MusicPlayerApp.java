@@ -36,7 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class MusicPlayer extends Application {
+public class MusicPlayerApp extends Application {
 
     private static MainController mainController;
     private static MediaPlayer mediaPlayer;
@@ -65,23 +65,23 @@ public class MusicPlayer extends Application {
 
     public static class Launcher {
         public static void main(String[] args) {
-            Application.launch(MusicPlayer.class);
+            Application.launch(MusicPlayerApp.class);
         }
     }
 
     @Override
     public void start(Stage stage) throws Exception {
         Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
-        Logger.get(MusicPlayer.class).info("start(Stage)");
+        Logger.get(MusicPlayerApp.class).info("start(Stage)");
 
         timer = new Timer();
         timerCounter = 0;
         secondsPlayed = 0;
 
-        MusicPlayer.stage = stage;
-        MusicPlayer.stage.setTitle("Music Player");
-        MusicPlayer.stage.getIcons().add(new Image(this.getClass().getResource(Resources.IMG + "Icon.png").toString()));
-        MusicPlayer.stage.setOnCloseRequest(event -> {
+        MusicPlayerApp.stage = stage;
+        MusicPlayerApp.stage.setTitle("Music Player");
+        MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(Resources.IMG + "Icon.png").toString()));
+        MusicPlayerApp.stage.setOnCloseRequest(event -> {
             Platform.exit();
 
             // TODO: find alive threads
@@ -185,7 +185,7 @@ public class MusicPlayer extends Application {
         // Finds the jar file and the path of its parent folder.
         File musicPlayerJAR = null;
         try {
-            musicPlayerJAR = new File(MusicPlayer.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            musicPlayerJAR = new File(MusicPlayerApp.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -331,7 +331,7 @@ public class MusicPlayer extends Application {
 
     private static void createLibraryXML() {
         try {
-            FXMLLoader loader = new FXMLLoader(MusicPlayer.class.getResource(Resources.FXML + "ImportMusicDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(Resources.FXML + "ImportMusicDialog.fxml"));
             Parent importView = loader.load();
 
             // Create the dialog Stage.
@@ -497,7 +497,7 @@ public class MusicPlayer extends Application {
     }
 
     public static void mute(boolean isMuted) {
-        MusicPlayer.isMuted = !isMuted;
+        MusicPlayerApp.isMuted = !isMuted;
         if (mediaPlayer != null) {
             mediaPlayer.setMute(!isMuted);
         }

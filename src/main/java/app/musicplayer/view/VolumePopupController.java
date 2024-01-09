@@ -1,6 +1,6 @@
 package app.musicplayer.view;
 
-import app.musicplayer.MusicPlayer;
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.util.CustomSliderSkin;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
@@ -48,7 +48,7 @@ public class VolumePopupController implements Initializable {
 	}
 
 	@FXML private void volumeClick() {
-		MusicPlayer.getMainController().volumeClick();
+		MusicPlayerApp.getMainController().volumeClick();
 	}
 
 	@FXML private void muteClick() {
@@ -60,6 +60,6 @@ public class VolumePopupController implements Initializable {
 		volumeSlider.pseudoClassStateChanged(muted, !isMuted);
 		frontVolumeTrack.pseudoClassStateChanged(muted, !isMuted);
 		volumeLabel.pseudoClassStateChanged(muted, !isMuted);
-		MusicPlayer.mute(isMuted);
+		MusicPlayerApp.mute(isMuted);
 	}
 }

@@ -1,6 +1,6 @@
 package app.musicplayer.view;
 
-import app.musicplayer.MusicPlayer;
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Album;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
@@ -67,7 +67,7 @@ public class ArtistsMainController implements Initializable, SubView {
             	ClipboardContent content = new ClipboardContent();
                 content.putString("Artist");
                 db.setContent(content);
-            	MusicPlayer.setDraggedItem(artist);
+            	MusicPlayerApp.setDraggedItem(artist);
             	db.setDragView(this.snapshot(null, null), 125, 25);
             	event.consume();
             });
@@ -115,7 +115,7 @@ public class ArtistsMainController implements Initializable, SubView {
             	ClipboardContent content = new ClipboardContent();
                 content.putString("Album");
                 db.setContent(content);
-            	MusicPlayer.setDraggedItem(album);
+            	MusicPlayerApp.setDraggedItem(album);
             	db.setDragView(this.snapshot(null, null), 75, 75);
                 event.consume();
             });
@@ -213,7 +213,7 @@ public class ArtistsMainController implements Initializable, SubView {
                     songs.addAll(album.getSongs());
                 }
                 
-                if (MusicPlayer.isShuffleActive()) {
+                if (MusicPlayerApp.isShuffleActive()) {
                 	Collections.shuffle(songs);
                 } else {
                     Collections.sort(songs, (first, second) -> {
@@ -229,9 +229,9 @@ public class ArtistsMainController implements Initializable, SubView {
                 }
 
                 Song song = songs.get(0);
-                MusicPlayer.setNowPlayingList(songs);
-                MusicPlayer.setNowPlaying(song);
-                MusicPlayer.play();
+                MusicPlayerApp.setNowPlayingList(songs);
+                MusicPlayerApp.setNowPlaying(song);
+                MusicPlayerApp.play();
 
             } else {
                 	
@@ -275,15 +275,15 @@ public class ArtistsMainController implements Initializable, SubView {
 
                 ArrayList<Song> songs = selectedAlbum.getSongs();
 
-                if (MusicPlayer.isShuffleActive()) {
+                if (MusicPlayerApp.isShuffleActive()) {
                 	Collections.shuffle(songs);
                 } else {
                 	Collections.sort(songs);
                 }
 
-                MusicPlayer.setNowPlayingList(songs);
-                MusicPlayer.setNowPlaying(songs.get(0));
-                MusicPlayer.play();
+                MusicPlayerApp.setNowPlayingList(songs);
+                MusicPlayerApp.setNowPlaying(songs.get(0));
+                MusicPlayerApp.play();
 
             } else {
             	
@@ -385,11 +385,11 @@ public class ArtistsMainController implements Initializable, SubView {
             	if (songTable.getSelectionModel().getSelectedIndices().size() > 1) {
             		content.putString("List");
                     db.setContent(content);
-                	MusicPlayer.setDraggedItem(songTable.getSelectionModel().getSelectedItems());
+                	MusicPlayerApp.setDraggedItem(songTable.getSelectionModel().getSelectedItems());
             	} else {
             		content.putString("Song");
                     db.setContent(content);
-                	MusicPlayer.setDraggedItem(row.getItem());
+                	MusicPlayerApp.setDraggedItem(row.getItem());
             	}
             	ImageView image = new ImageView(row.snapshot(null, null));
             	Rectangle2D rectangle = new Rectangle2D(0, 0, 250, 50);
@@ -588,8 +588,8 @@ public class ArtistsMainController implements Initializable, SubView {
         new Thread(() -> {
         	try {
         		if (fromMainController) {
-        			MusicPlayer.getMainController().getLatch().await();
-        			MusicPlayer.getMainController().resetLatch();
+        			MusicPlayerApp.getMainController().getLatch().await();
+        			MusicPlayerApp.getMainController().resetLatch();
         		} else {
         			loadedLatch.await();
         			loadedLatch = new CountDownLatch(1);
@@ -615,7 +615,7 @@ public class ArtistsMainController implements Initializable, SubView {
             }
         }
         
-        if (MusicPlayer.isShuffleActive()) {
+        if (MusicPlayerApp.isShuffleActive()) {
         	Collections.shuffle(songs);
         	songs.remove(song);
         	songs.add(0, song);
@@ -632,9 +632,9 @@ public class ArtistsMainController implements Initializable, SubView {
             });
         }
 
-        MusicPlayer.setNowPlayingList(songs);
-        MusicPlayer.setNowPlaying(song);
-        MusicPlayer.play();
+        MusicPlayerApp.setNowPlayingList(songs);
+        MusicPlayerApp.setNowPlaying(song);
+        MusicPlayerApp.play();
     }
     
     @Override

@@ -1,6 +1,6 @@
 package app.musicplayer.view;
 
-import app.musicplayer.MusicPlayer;
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
@@ -98,7 +98,7 @@ public class ArtistsController implements Initializable, SubView {
         cell.setAlignment(Pos.CENTER);
         cell.setOnMouseClicked(event -> {
 
-            MainController mainController = MusicPlayer.getMainController();
+            MainController mainController = MusicPlayerApp.getMainController();
             ArtistsMainController artistsMainController = (ArtistsMainController) mainController.loadView("ArtistsMain");
 
             VBox artistCell = (VBox) event.getSource();
@@ -114,7 +114,7 @@ public class ArtistsController implements Initializable, SubView {
         	ClipboardContent content = new ClipboardContent();
             content.putString("Artist");
             db.setContent(content);
-        	MusicPlayer.setDraggedItem(artist);
+        	MusicPlayerApp.setDraggedItem(artist);
         	db.setDragView(cell.snapshot(null, null), cell.widthProperty().divide(2).get(), cell.heightProperty().divide(2).get());
             event.consume();
         });
@@ -143,7 +143,7 @@ public class ArtistsController implements Initializable, SubView {
             }
         }
     	
-    	ScrollPane scrollpane = MusicPlayer.getMainController().getScrollPane();
+    	ScrollPane scrollpane = MusicPlayerApp.getMainController().getScrollPane();
     	
     	double row = (index / 5) * cellHeight;
     	double finalVvalue = row / (grid.getHeight() - scrollpane.getHeight());

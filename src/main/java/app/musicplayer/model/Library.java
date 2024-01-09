@@ -1,6 +1,6 @@
 package app.musicplayer.model;
 
-import app.musicplayer.MusicPlayer;
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.util.ImportMusicTask;
 import app.musicplayer.util.Resources;
 import javafx.collections.FXCollections;
@@ -653,7 +653,7 @@ public final class Library {
                     playingList.removeChild(nodes.item(0));
                 }
 
-                for (Song song : MusicPlayer.getNowPlayingList()) {
+                for (Song song : MusicPlayerApp.getNowPlayingList()) {
                     Element id = doc.createElement(ID);
                     id.setTextContent(Integer.toString(song.getId()));
                     playingList.appendChild(id);

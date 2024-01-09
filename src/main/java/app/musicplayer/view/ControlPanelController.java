@@ -1,6 +1,6 @@
 package app.musicplayer.view;
 
-import app.musicplayer.MusicPlayer;
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
@@ -45,7 +45,7 @@ public class ControlPanelController implements Initializable {
 
 	@FXML
 	private void playSong(Event e) {
-		SubView controller = MusicPlayer.getMainController().getSubViewController();
+		SubView controller = MusicPlayerApp.getMainController().getSubViewController();
 		controller.play();
 		e.consume();
 	}
@@ -58,7 +58,7 @@ public class ControlPanelController implements Initializable {
 		double y = mouseEvent.getScreenY();
 
 		// Retrieves the selected song to add to the desired playlist.
-		Song selectedSong = MusicPlayer.getMainController().getSubViewController().getSelectedSong();
+		Song selectedSong = MusicPlayerApp.getMainController().getSubViewController().getSelectedSong();
 
 		ObservableList<Playlist> playlists = Library.getPlaylists();
 
@@ -77,7 +77,7 @@ public class ControlPanelController implements Initializable {
 		MenuItem playing = new MenuItem("Playing");
 		playing.setStyle("-fx-text-fill: black");
 		playing.setOnAction(e1 -> {
-			MusicPlayer.addSongToNowPlayingList(selectedSong);
+			MusicPlayerApp.addSongToNowPlayingList(selectedSong);
 		});
 
 		contextMenu.getItems().add(playing);

@@ -1,6 +1,6 @@
 package app.musicplayer.view;
 
-import app.musicplayer.MusicPlayer;
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Library;
 import app.musicplayer.util.SubView;
 import app.musicplayer.util.XMLEditor;
@@ -22,7 +22,7 @@ public class ControlPanelPlaylistsController implements Initializable {
 	
 	@FXML
 	private void playSong(Event e) {
-		SubView controller = MusicPlayer.getMainController().getSubViewController();
+		SubView controller = MusicPlayerApp.getMainController().getSubViewController();
 		controller.play();
 		e.consume();
 	}
@@ -32,7 +32,7 @@ public class ControlPanelPlaylistsController implements Initializable {
 		// Gets the play lists controller sub view, which keeps track of the currently selected song.
 		// A PlayListsController object will always be returned since this button will only be visible
 		// when the user selects a song while in a play list.
-		PlaylistsController controller = (PlaylistsController) MusicPlayer.getMainController().getSubViewController();
+		PlaylistsController controller = (PlaylistsController) MusicPlayerApp.getMainController().getSubViewController();
 		
 		// Retrieves play list and song id to search for the song in the xml file.
 		int selectedPlayListId = controller.getSelectedPlaylist().getId();

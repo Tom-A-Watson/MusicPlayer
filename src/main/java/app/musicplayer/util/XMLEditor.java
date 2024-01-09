@@ -1,6 +1,6 @@
 package app.musicplayer.util;
 
-import app.musicplayer.MusicPlayer;
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import org.jaudiotagger.audio.AudioFile;
@@ -242,7 +242,7 @@ public class XMLEditor {
             }
             
             // Calculates the new xml file number, taking into account the new songs.
-            int newXMLFileNum = MusicPlayer.getXMLFileNum() + songFilesToAdd.size();
+            int newXMLFileNum = MusicPlayerApp.getXMLFileNum() + songFilesToAdd.size();
 
             // Creates node to update xml file number.
             expr = xpath.compile("/library/musicLibrary/fileNum");
@@ -251,7 +251,7 @@ public class XMLEditor {
             // Updates the fileNum field in the xml file.
             fileNum.setTextContent(Integer.toString(newXMLFileNum));
             // Updates the xmlFileNum in MusicPlayer. 
-            MusicPlayer.setXMLFileNum(newXMLFileNum);
+            MusicPlayerApp.setXMLFileNum(newXMLFileNum);
             
             // Gets the new last id assigned after adding all the new songs.
             int newLastIdAssigned = songsToAdd.get(songsToAdd.size() - 1).getId();
@@ -263,7 +263,7 @@ public class XMLEditor {
             // Updates the last id in the xml file.
             lastId.setTextContent(Integer.toString(newLastIdAssigned));
             // Updates the lastId in MusicPlayer.
-        	MusicPlayer.setLastIdAssigned(newLastIdAssigned);
+        	MusicPlayerApp.setLastIdAssigned(newLastIdAssigned);
             
             
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -325,7 +325,7 @@ public class XMLEditor {
 			}
 		}
 		// Updates the lastIdAssigned in MusicPlayer to account for the new songs.
-		MusicPlayer.setLastIdAssigned(lastIdAssigned);
+		MusicPlayerApp.setLastIdAssigned(lastIdAssigned);
 	}
 	
     private static int xmlLastIdAssignedFinder() {
@@ -364,7 +364,7 @@ public class XMLEditor {
 	
 	private static void deleteSongFromXML() {
 		// Gets the currentXMLFileNum.
-		int currentXMLFileNum = MusicPlayer.getXMLFileNum();
+		int currentXMLFileNum = MusicPlayerApp.getXMLFileNum();
 
         try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -405,7 +405,7 @@ public class XMLEditor {
                 Node lastId = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
                 
                 // Updates the lastId in MusicPlayer and in the xml file.
-            	MusicPlayer.setLastIdAssigned(newLastIdAssigned);
+            	MusicPlayerApp.setLastIdAssigned(newLastIdAssigned);
                 lastId.setTextContent(Integer.toString(newLastIdAssigned));
             }
             
@@ -414,7 +414,7 @@ public class XMLEditor {
             Node fileNum = ((NodeList) fileNumExpr.evaluate(doc, XPathConstants.NODESET)).item(0);
             
             // Updates the fileNum in MusicPlayer and in the xml file.
-            MusicPlayer.setXMLFileNum(currentXMLFileNum);
+            MusicPlayerApp.setXMLFileNum(currentXMLFileNum);
             fileNum.setTextContent(Integer.toString(currentXMLFileNum));
                     
             TransformerFactory transformerFactory = TransformerFactory.newInstance();

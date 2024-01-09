@@ -1,6 +1,6 @@
 package app.musicplayer.view;
 
-import app.musicplayer.MusicPlayer;
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.*;
 import app.musicplayer.util.*;
 import javafx.animation.Animation;
@@ -171,11 +171,11 @@ public class PlaylistsController implements Initializable, SubView {
                 if (tableView.getSelectionModel().getSelectedIndices().size() > 1) {
                     content.putString("List");
                     db.setContent(content);
-                    MusicPlayer.setDraggedItem(tableView.getSelectionModel().getSelectedItems());
+                    MusicPlayerApp.setDraggedItem(tableView.getSelectionModel().getSelectedItems());
                 } else {
                     content.putString("Song");
                     db.setContent(content);
-                    MusicPlayer.setDraggedItem(row.getItem());
+                    MusicPlayerApp.setDraggedItem(row.getItem());
                 }
                 ImageView image = new ImageView(row.snapshot(null, null));
                 Rectangle2D rectangle = new Rectangle2D(0, 0, 250, 50);
@@ -204,7 +204,7 @@ public class PlaylistsController implements Initializable, SubView {
             }
         });
 
-        ObservableList<Node> playlistBoxChildren = MusicPlayer.getMainController().getPlaylistBox().getChildren();
+        ObservableList<Node> playlistBoxChildren = MusicPlayerApp.getMainController().getPlaylistBox().getChildren();
 
         deletePlaylistAnimation.setOnFinished(event -> {
             playlistBoxChildren.remove(cell);
@@ -215,14 +215,14 @@ public class PlaylistsController implements Initializable, SubView {
     public void play() {
         Song song = selectedSong;
         ObservableList<Song> songs = selectedPlaylist.getSongs();
-        if (MusicPlayer.isShuffleActive()) {
+        if (MusicPlayerApp.isShuffleActive()) {
             Collections.shuffle(songs);
             songs.remove(song);
             songs.add(0, song);
         }
-        MusicPlayer.setNowPlayingList(songs);
-        MusicPlayer.setNowPlaying(song);
-        MusicPlayer.play();
+        MusicPlayerApp.setNowPlayingList(songs);
+        MusicPlayerApp.setNowPlaying(song);
+        MusicPlayerApp.play();
     }
 
     void selectPlaylist(Playlist playlist) {
@@ -287,9 +287,9 @@ public class PlaylistsController implements Initializable, SubView {
     @FXML
     private void playPlaylist() {
         ObservableList<Song> songs = selectedPlaylist.getSongs();
-        MusicPlayer.setNowPlayingList(songs);
-        MusicPlayer.setNowPlaying(songs.get(0));
-        MusicPlayer.play();
+        MusicPlayerApp.setNowPlayingList(songs);
+        MusicPlayerApp.setNowPlaying(songs.get(0));
+        MusicPlayerApp.play();
     }
     
     @FXML
@@ -299,7 +299,7 @@ public class PlaylistsController implements Initializable, SubView {
             String selectedPlaylistTitle = selectedPlaylist.getTitle();
 
             // Gets the playlist box children to loop through each to find the correct child to remove.
-            ObservableList<Node> playlistBoxChildren = MusicPlayer.getMainController().getPlaylistBox().getChildren();
+            ObservableList<Node> playlistBoxChildren = MusicPlayerApp.getMainController().getPlaylistBox().getChildren();
 
             // Initialize i at 1 to ignore the new playlist cell.
             for (int i = 1; i <= playlistBoxChildren.size(); i++) {
@@ -319,7 +319,7 @@ public class PlaylistsController implements Initializable, SubView {
             XMLEditor.deletePlaylistFromXML(selectedPlaylist.getId());
 
             // Loads the artists view.
-            MusicPlayer.getMainController().loadView("artists");
+            MusicPlayerApp.getMainController().loadView("artists");
 
             // Removes the selected playlist from the library so that it is not reloaded.
             Library.removePlaylist(selectedPlaylist);
