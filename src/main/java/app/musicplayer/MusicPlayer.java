@@ -32,6 +32,7 @@ import com.almasb.fxgl.logging.LoggerLevel;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
@@ -90,27 +91,32 @@ public class MusicPlayer extends Application {
         MusicPlayer.stage.getIcons().add(new Image(this.getClass().getResource(Resources.IMG + "Icon.png").toString()));
         MusicPlayer.stage.setOnCloseRequest(event -> {
             Platform.exit();
+
+            // TODO: find alive threads
             System.exit(0);
         });
 
         try {
             // Load main layout from fxml file.
             FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Resources.FXML + "SplashScreen.fxml"));
-            VBox view = loader.load();
+            Parent view = loader.load();
 
             // Shows the scene containing the layout.
             Scene scene = new Scene(view);
             stage.setScene(scene);
-            stage.setMaximized(true);
             stage.show();
 
-            // Calls the function to check in the library.xml file exists. If it does not, the file is created.
+            // Calls the function to check if the library.xml file exists. If it does not, the file is created.
             checkLibraryXML();
         } catch (Exception ex) {
             ex.printStackTrace();
             System.exit(0);
         }
 
+        initInBackground();
+    }
+
+    private void initInBackground() {
         Thread thread = new Thread(() -> {
             // Retrieves song, album, artist, and playlist data from library.
             Library.getSongs();
@@ -334,7 +340,7 @@ public class MusicPlayer extends Application {
     private static void createLibraryXML() {
         try {
             FXMLLoader loader = new FXMLLoader(MusicPlayer.class.getResource(Resources.FXML + "ImportMusicDialog.fxml"));
-            BorderPane importView = loader.load();
+            Parent importView = loader.load();
 
             // Create the dialog Stage.
             Stage dialogStage = new Stage();
