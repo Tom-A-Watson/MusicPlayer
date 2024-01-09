@@ -70,9 +70,8 @@ public class ArtistsController implements Initializable, SubView {
     private VBox createCell(Artist artist) {
 
         VBox cell = new VBox();
-        Label title = new Label(artist.getTitle());
-        ImageView image = new ImageView(artist.getArtistImage());
-        image.imageProperty().bind(artist.artistImageProperty());
+        Label title = new Label(artist.title());
+        ImageView image = new ImageView(artist.image());
         VBox imageBox = new VBox();
 
         title.setTextOverrun(OverrunStyle.CLIP);

@@ -378,7 +378,7 @@ public class MainController implements Initializable {
 						switch (dragString) {
 			            case "Artist":
 			            	Artist artist = (Artist) MusicPlayerApp.getDraggedItem();
-				            for (Album album : artist.getAlbums()) {
+				            for (Album album : artist.albums()) {
 				            	for (Song song : album.songs()) {
 				            		if (!playlist.getSongs().contains(song)) {
 						            	playlist.addSong(song);
@@ -565,7 +565,7 @@ public class MainController implements Initializable {
 						switch (dragString) {
 			            case "Artist":
 			            	Artist artist = (Artist) MusicPlayerApp.getDraggedItem();
-				            for (Album album : artist.getAlbums()) {
+				            for (Album album : artist.albums()) {
 				            	for (Song song : album.songs()) {
 				            		if (!playlist.getSongs().contains(song)) {
 						            	playlist.addSong(song);
@@ -778,7 +778,7 @@ public class MainController implements Initializable {
         ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
         Song song = MusicPlayerApp.getNowPlaying();
         Artist artist = Library.getArtist(song.getArtist());
-        Album album = artist.getAlbums().stream().filter(x -> x.title().equals(song.getAlbum())).findFirst().get();
+        Album album = artist.albums().stream().filter(x -> x.title().equals(song.getAlbum())).findFirst().get();
         artistsMainController.selectArtist(artist);
         artistsMainController.selectAlbum(album);
         artistsMainController.selectSong(song);
@@ -872,8 +872,8 @@ public class MainController implements Initializable {
                 ImageView image = new ImageView();
                 image.setFitHeight(40);
                 image.setFitWidth(40);
-                image.setImage(artist.getArtistImage());
-                Label label = new Label(artist.getTitle());
+                image.setImage(artist.image());
+                Label label = new Label(artist.title());
                 label.setTextOverrun(OverrunStyle.CLIP);
                 label.getStyleClass().setAll("searchLabel");
                 cell.getChildren().addAll(image, label);
@@ -916,7 +916,7 @@ public class MainController implements Initializable {
                 cell.getStyleClass().add("searchResult");
                 cell.setOnMouseClicked(event -> {
                     loadView("ArtistsMain");
-                    Artist artist = Library.getArtist(album.artistName());
+                    Artist artist = Library.getArtist(album.artistTitle());
                     ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
                     artistsMainController.selectArtist(artist);
                     artistsMainController.selectAlbum(album);
@@ -948,7 +948,7 @@ public class MainController implements Initializable {
                 cell.setOnMouseClicked(event -> {
                     loadView("ArtistsMain");
                     Artist artist = Library.getArtist(song.getArtist());
-                    Album album = artist.getAlbums().stream().filter(x -> x.title().equals(song.getAlbum())).findFirst().get();
+                    Album album = artist.albums().stream().filter(x -> x.title().equals(song.getAlbum())).findFirst().get();
                     ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
                     artistsMainController.selectArtist(artist);
                     artistsMainController.selectAlbum(album);

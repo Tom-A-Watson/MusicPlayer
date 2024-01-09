@@ -9,6 +9,7 @@ package app.musicplayer.model;
 
 import javafx.scene.image.Image;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,10 +18,15 @@ import java.util.List;
 public record Album (
         int id,
         String title,
-        String artistName,
+        String artistTitle,
         Image artwork,
         List<Song> songs
 ) implements Comparable<Album> {
+
+    @Override
+    public List<Song> songs() {
+        return new ArrayList<>(songs);
+    }
 
     @Override
     public int compareTo(Album other) {

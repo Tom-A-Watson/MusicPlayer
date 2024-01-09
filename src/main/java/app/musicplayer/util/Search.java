@@ -85,22 +85,22 @@ public class Search {
                 if (searchThread.isInterrupted()) { throw new InterruptedException(); }
 
                 List<Artist> artistResults = Library.getArtists().stream()
-                        .filter(artist -> artist.getTitle().toUpperCase().contains(text))
+                        .filter(artist -> artist.title().toUpperCase().contains(text))
                         .sorted((x, y) -> {
-                            boolean xMatch = x.getTitle().toUpperCase().equals(text);
-                            boolean yMatch = y.getTitle().toUpperCase().equals(text);
+                            boolean xMatch = x.title().toUpperCase().equals(text);
+                            boolean yMatch = y.title().toUpperCase().equals(text);
                             if (xMatch && yMatch) return 0;
                             if (xMatch) return -1;
                             if (yMatch) return 1;
 
-                            boolean xStartWith = x.getTitle().toUpperCase().startsWith(text);
-                            boolean yStartWith = y.getTitle().toUpperCase().startsWith(text);
+                            boolean xStartWith = x.title().toUpperCase().startsWith(text);
+                            boolean yStartWith = y.title().toUpperCase().startsWith(text);
                             if (xStartWith && yStartWith) return 0;
                             if (xStartWith) return -1;
                             if (yStartWith) return 1;
 
-                            boolean xContains = x.getTitle().toUpperCase().contains(" " + text);
-                            boolean yContains = y.getTitle().toUpperCase().contains(" " + text);
+                            boolean xContains = x.title().toUpperCase().contains(" " + text);
+                            boolean yContains = y.title().toUpperCase().contains(" " + text);
                             if (xContains && yContains) return 0;
                             if (xContains) return -1;
                             if (yContains) return 1;

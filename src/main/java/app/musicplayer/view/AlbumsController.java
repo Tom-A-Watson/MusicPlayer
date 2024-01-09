@@ -293,7 +293,7 @@ public class AlbumsController implements Initializable, SubView {
         		expandAlbumDetail();
         		expandAnimation.play();
         		
-        		artistLabel.setText(album.artistName());
+        		artistLabel.setText(album.artistTitle());
         		albumLabel.setText(album.title());
         		populateSongTable(cell, album);
         		
@@ -319,7 +319,7 @@ public class AlbumsController implements Initializable, SubView {
             	
             	// Plays load animation and populates song table with songs of newly selected album.
             	tableCollapseAnimation.setOnFinished(x -> {
-            		artistLabel.setText(album.artistName());
+            		artistLabel.setText(album.artistTitle());
             		albumLabel.setText(album.title());
             		populateSongTable(cell, album);
             		expandAlbumDetail();
@@ -346,7 +346,7 @@ public class AlbumsController implements Initializable, SubView {
         		expandAlbumDetail();
         		// Plays load animation and populates song table with songs of newly selected album.
         		tableCollapseAnimation.setOnFinished(x -> {
-        			artistLabel.setText(album.artistName());
+        			artistLabel.setText(album.artistTitle());
             		albumLabel.setText(album.title());
             		populateSongTable(cell, album);
             		expandAlbumDetail();

@@ -452,7 +452,7 @@ public final class Library {
         if (artists == null) {
             getArtists();
         }
-        return artists.stream().filter(artist -> title.equals(artist.getTitle())).findFirst().get();
+        return artists.stream().filter(artist -> title.equals(artist.title())).findFirst().get();
     }
 
     private static void updateArtistsList() {
@@ -460,8 +460,8 @@ public final class Library {
 
         TreeMap<String, List<Album>> artistMap = new TreeMap<>(
                 albums.stream()
-                        .filter(album -> album.artistName() != null)
-                        .collect(Collectors.groupingBy(Album::artistName))
+                        .filter(album -> album.artistTitle() != null)
+                        .collect(Collectors.groupingBy(Album::artistTitle))
         );
 
         for (Map.Entry<String, List<Album>> entry : artistMap.entrySet()) {
@@ -470,7 +470,7 @@ public final class Library {
 
             albums.addAll(entry.getValue());
 
-            artists.add(new Artist(entry.getKey(), albums));
+            artists.add(new Artist(entry.getKey(), new Image(Resources.IMG + "artistsIcon.png"), albums));
         }
     }
 
