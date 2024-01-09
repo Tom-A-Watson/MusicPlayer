@@ -78,18 +78,8 @@ public class MusicPlayer extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Logger.addOutput(new ConsoleOutput(), LoggerLevel.INFO);
-        Logger.get(MusicPlayer.class).info("Loading");
-
-        // Suppresses warning caused by converting music library data into xml file.
-        //LogManager.getLogManager().reset();
-        PrintStream dummyStream = new PrintStream(new OutputStream() {
-            public void write(int b) {
-                //do nothing
-            }
-        });
-        System.setOut(dummyStream);
-        System.setErr(dummyStream);
+        Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
+        Logger.get(MusicPlayer.class).info("start(Stage)");
 
         timer = new Timer();
         timerCounter = 0;

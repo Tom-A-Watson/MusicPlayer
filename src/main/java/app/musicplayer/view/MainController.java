@@ -692,7 +692,8 @@ public class MainController implements Initializable {
 	        final boolean unloadLettersFinal = unloadLetters;
         	
             String fileName = viewName.substring(0, 1).toUpperCase() + viewName.substring(1) + ".fxml";
-            
+			fileName = "/assets/ui/" + fileName;
+
             FXMLLoader loader = new FXMLLoader(this.getClass().getResource(fileName));
             Node view = loader.load();
             
