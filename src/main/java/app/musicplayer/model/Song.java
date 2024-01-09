@@ -1,24 +1,8 @@
 package app.musicplayer.model;
 
-import app.musicplayer.util.Resources;
 import javafx.beans.property.*;
 import javafx.scene.image.Image;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -35,25 +19,13 @@ public final class Song implements Comparable<Song> {
     private int trackNumber;
     private int discNumber;
     private SimpleIntegerProperty playCount;
-    private LocalDateTime playDate;
+
+    // TODO:
+    public LocalDateTime playDate;
     private String location;
     private SimpleBooleanProperty playing;
     private SimpleBooleanProperty selected;
 
-    /**
-     * Constructor for the song class.
-     *
-     * @param id
-     * @param title
-     * @param artist
-     * @param album
-     * @param length
-     * @param trackNumber
-     * @param discNumber
-     * @param playCount
-     * @param playDate
-     * @param location
-     */
     public Song(int id, String title, String artist, String album, Duration length,
                 int trackNumber, int discNumber, int playCount, LocalDateTime playDate, String location) {
 
@@ -177,49 +149,6 @@ public final class Song implements Comparable<Song> {
 
     public void setSelected(boolean selected) {
         this.selected.set(selected);
-    }
-
-    public void played() {
-        this.playCount.set(this.playCount.get() + 1);
-        this.playDate = LocalDateTime.now();
-
-        Thread thread = new Thread(() -> {
-
-            try {
-
-                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-                Document doc = docBuilder.parse(Resources.JAR + "library.xml");
-
-                XPathFactory xPathfactory = XPathFactory.newInstance();
-                XPath xpath = xPathfactory.newXPath();
-
-                XPathExpression expr = xpath.compile("/library/songs/song/playCount[../id/text() = \"" + this.id + "\"]");
-                Node playCount = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
-
-                expr = xpath.compile("/library/songs/song/playDate[../id/text() = \"" + this.id + "\"]");
-                Node playDate = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
-
-                playCount.setTextContent(Integer.toString(this.playCount.get()));
-                playDate.setTextContent(this.playDate.toString());
-
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                DOMSource source = new DOMSource(doc);
-                File xmlFile = new File(Resources.JAR + "library.xml");
-                StreamResult result = new StreamResult(xmlFile);
-                transformer.transform(source, result);
-
-            } catch (Exception ex) {
-
-                ex.printStackTrace();
-            }
-
-        });
-
-        thread.start();
     }
 
     @Override

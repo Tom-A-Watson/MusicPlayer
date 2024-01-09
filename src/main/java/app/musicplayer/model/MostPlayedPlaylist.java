@@ -1,31 +1,28 @@
+/*
+ * JavaFX Music Player. The MIT License (MIT).
+ * Copyright (c) Almas Baim.
+ * Copyright (c) Gerardo Prada, Michael Martin.
+ * See LICENSE for details.
+ */
+
 package app.musicplayer.model;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MostPlayedPlaylist extends Playlist {
+public final class MostPlayedPlaylist extends Playlist {
 
     MostPlayedPlaylist(int id) {
-        super(id, "Most Played", "You have not played any songs yet");
+        super(id, "Most Played");
     }
 
     @Override
-    public ObservableList<Song> getSongs() {
-
-        List<Song> songs = new ArrayList<>(Library.getSongs());
-        songs = songs.stream()
-                .filter(x -> x.getPlayCount() > 0)
-                .sorted((x, y) -> Integer.compare(y.getPlayCount(), x.getPlayCount()))
+    public List<Song> getSongs() {
+        return Library.getSongs()
+                .stream()
+                .filter(song -> song.getPlayCount() > 0)
+                .sorted((s1, s2) -> Integer.compare(s2.getPlayCount(), s1.getPlayCount()))
+                .limit(100)
                 .collect(Collectors.toList());
-
-        if (songs.size() > 100) {
-            songs = songs.subList(0, 100);
-        }
-
-        return FXCollections.observableArrayList(songs);
     }
 }

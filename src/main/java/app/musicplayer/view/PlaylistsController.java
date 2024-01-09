@@ -8,6 +8,7 @@ import javafx.animation.Animation.Status;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
@@ -31,6 +32,7 @@ import javafx.util.Duration;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class PlaylistsController implements Initializable, SubView {
@@ -214,7 +216,7 @@ public class PlaylistsController implements Initializable, SubView {
     @Override
     public void play() {
         Song song = selectedSong;
-        ObservableList<Song> songs = selectedPlaylist.getSongs();
+        List<Song> songs = selectedPlaylist.getSongs();
         if (MusicPlayerApp.isShuffleActive()) {
             Collections.shuffle(songs);
             songs.remove(song);
@@ -226,9 +228,14 @@ public class PlaylistsController implements Initializable, SubView {
     }
 
     void selectPlaylist(Playlist playlist) {
+        var placeholderMessage =
+                "Add songs to this playlist by dragging items to the sidebar\n" +
+                "or by clicking the Add to Playlist button";
+
         // Displays the delete button only if the user has not selected one of the default playlists.
         if (playlist instanceof MostPlayedPlaylist || playlist instanceof RecentlyPlayedPlaylist) {
             deleteButton.setVisible(false);
+            placeholderMessage = "You have not played any songs yet";
         }
 
         // Sets the text on the play list title label.
@@ -238,15 +245,15 @@ public class PlaylistsController implements Initializable, SubView {
         selectedPlaylist = playlist;
 
         // Retrieves the songs in the selected play list.
-        ObservableList<Song> songs = playlist.getSongs();
+        List<Song> songs = playlist.getSongs();
         
         // Clears the song table.
         tableView.getSelectionModel().clearSelection();
         
         // Populates the song table with the playlist's songs.
-        tableView.setItems(songs);
+        tableView.setItems(FXCollections.observableList(songs));
 
-        Label message = new Label(selectedPlaylist.getPlaceholder());
+        Label message = new Label(placeholderMessage);
         message.setTextAlignment(TextAlignment.CENTER);
 
         ImageView image = new ImageView();
@@ -286,7 +293,7 @@ public class PlaylistsController implements Initializable, SubView {
     
     @FXML
     private void playPlaylist() {
-        ObservableList<Song> songs = selectedPlaylist.getSongs();
+        List<Song> songs = selectedPlaylist.getSongs();
         MusicPlayerApp.setNowPlayingList(songs);
         MusicPlayerApp.setNowPlaying(songs.get(0));
         MusicPlayerApp.play();

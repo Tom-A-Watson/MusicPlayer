@@ -479,7 +479,7 @@ public final class Library {
         Thread thread = new Thread(() -> {
 
             int i = playlists.size() - 2;
-            playlists.add(new Playlist(i, text, new ArrayList<>()));
+            playlists.add(new Playlist(i, text));
 
             try {
                 DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -557,7 +557,10 @@ public final class Library {
                     } else if (reader.isEndElement() && reader.getName().getLocalPart().equals("playlist")) {
                         // If the play list id, title, and songs have been retrieved, a new play list is created
                         // and the values reset.
-                        playlists.add(new Playlist(id, title, songs));
+                        var p = new Playlist(id, title);
+                        p.addSongsNoXML(songs);
+
+                        playlists.add(p);
                         id = -1;
                         title = null;
                         songs = new ArrayList<>();

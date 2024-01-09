@@ -25,15 +25,30 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class MusicPlayerApp extends Application {
@@ -610,9 +625,52 @@ public class MusicPlayerApp extends Application {
         if (nowPlaying != null) {
             int length = (int) nowPlaying.getLengthInSeconds();
             if ((100 * secondsPlayed / length) > 50) {
-                nowPlaying.played();
+                songPlayed(nowPlaying);
             }
         }
+    }
+
+    private static void songPlayed(Song song) {
+        song.playCountProperty().set(song.playCountProperty().get() + 1);
+        song.playDate = LocalDateTime.now();
+
+        Thread thread = new Thread(() -> {
+
+            try {
+
+                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                Document doc = docBuilder.parse(Resources.JAR + "library.xml");
+
+                XPathFactory xPathfactory = XPathFactory.newInstance();
+                XPath xpath = xPathfactory.newXPath();
+
+                XPathExpression expr = xpath.compile("/library/songs/song/playCount[../id/text() = \"" + song.getId() + "\"]");
+                Node playCount = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
+
+                expr = xpath.compile("/library/songs/song/playDate[../id/text() = \"" + song.getId() + "\"]");
+                Node playDate = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
+
+                playCount.setTextContent(Integer.toString(song.getPlayCount()));
+                playDate.setTextContent(song.getPlayDate().toString());
+
+                TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                Transformer transformer = transformerFactory.newTransformer();
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                DOMSource source = new DOMSource(doc);
+                File xmlFile = new File(Resources.JAR + "library.xml");
+                StreamResult result = new StreamResult(xmlFile);
+                transformer.transform(source, result);
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+            }
+
+        });
+
+        thread.start();
     }
 
     public static Song getNowPlaying() {

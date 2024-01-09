@@ -123,4 +123,10 @@ public class Search {
         });
         searchThread.start();
     }
+
+    public record SearchResult(
+            List<Song> songResults,
+            List<Album> albumResults,
+            List<Artist> artistResults) {
+    }
 }

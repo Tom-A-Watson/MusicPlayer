@@ -15,51 +15,51 @@ import java.util.ResourceBundle;
 
 public class VolumePopupController implements Initializable {
 
-	@FXML private Slider volumeSlider;
-	@FXML private Region frontVolumeTrack;
-	@FXML private Label volumeLabel;
-	@FXML private Pane muteButton;
-	@FXML private Pane mutedButton;
+    @FXML private Slider volumeSlider;
+    @FXML private Region frontVolumeTrack;
+    @FXML private Label volumeLabel;
+    @FXML private Pane muteButton;
+    @FXML private Pane mutedButton;
 
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
-		try {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        try {
 
-			CustomSliderSkin sliderSkin = new CustomSliderSkin(volumeSlider);
-			volumeSlider.setSkin(sliderSkin);
-			frontVolumeTrack.prefWidthProperty().bind(volumeSlider.widthProperty().subtract(30).multiply(volumeSlider.valueProperty().divide(volumeSlider.maxProperty())));
-			volumeSlider.valueProperty().addListener((x, y, z) -> {
-				volumeLabel.setText(Integer.toString(z.intValue()));
-			});
-			volumeSlider.setOnMousePressed(x -> {
-				if (mutedButton.isVisible()) {
-					muteClick();
-				}
-			});
+            CustomSliderSkin sliderSkin = new CustomSliderSkin(volumeSlider);
+            volumeSlider.setSkin(sliderSkin);
+            frontVolumeTrack.prefWidthProperty().bind(volumeSlider.widthProperty().subtract(30).multiply(volumeSlider.valueProperty().divide(volumeSlider.maxProperty())));
+            volumeSlider.valueProperty().addListener((x, y, z) -> {
+                volumeLabel.setText(Integer.toString(z.intValue()));
+            });
+            volumeSlider.setOnMousePressed(x -> {
+                if (mutedButton.isVisible()) {
+                    muteClick();
+                }
+            });
 
-		} catch (Exception ex) {
+        } catch (Exception ex) {
 
-			ex.printStackTrace();
-		}
-	}
+            ex.printStackTrace();
+        }
+    }
 
-	Slider getSlider() {
-		return volumeSlider;
-	}
+    Slider getSlider() {
+        return volumeSlider;
+    }
 
-	@FXML private void volumeClick() {
-		MusicPlayerApp.getMainController().volumeClick();
-	}
+    @FXML private void volumeClick() {
+        MusicPlayerApp.getMainController().volumeClick();
+    }
 
-	@FXML private void muteClick() {
+    @FXML private void muteClick() {
 
-		PseudoClass muted = PseudoClass.getPseudoClass("muted");
-		boolean isMuted = mutedButton.isVisible();
-		muteButton.setVisible(isMuted);
-		mutedButton.setVisible(!isMuted);
-		volumeSlider.pseudoClassStateChanged(muted, !isMuted);
-		frontVolumeTrack.pseudoClassStateChanged(muted, !isMuted);
-		volumeLabel.pseudoClassStateChanged(muted, !isMuted);
-		MusicPlayerApp.mute(isMuted);
-	}
+        PseudoClass muted = PseudoClass.getPseudoClass("muted");
+        boolean isMuted = mutedButton.isVisible();
+        muteButton.setVisible(isMuted);
+        mutedButton.setVisible(!isMuted);
+        volumeSlider.pseudoClassStateChanged(muted, !isMuted);
+        frontVolumeTrack.pseudoClassStateChanged(muted, !isMuted);
+        volumeLabel.pseudoClassStateChanged(muted, !isMuted);
+        MusicPlayerApp.mute(isMuted);
+    }
 }
