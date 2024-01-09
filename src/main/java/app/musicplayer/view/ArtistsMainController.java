@@ -35,6 +35,7 @@ import javafx.util.Duration;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.CountDownLatch;
 
@@ -133,7 +134,7 @@ public class ArtistsMainController implements Initializable, SubView {
 
             } else {
 
-                albumArtwork.setImage(album.getArtwork());
+                albumArtwork.setImage(album.artwork());
                 setGraphic(albumArtwork);
             }
         }
@@ -210,7 +211,7 @@ public class ArtistsMainController implements Initializable, SubView {
                 ObservableList<Album> albums = FXCollections.observableArrayList();
                 for (Album album : selectedArtist.getAlbums()) {
                     albums.add(album);
-                    songs.addAll(album.getSongs());
+                    songs.addAll(album.songs());
                 }
                 
                 if (MusicPlayerApp.isShuffleActive()) {
@@ -218,8 +219,8 @@ public class ArtistsMainController implements Initializable, SubView {
                 } else {
                     Collections.sort(songs, (first, second) -> {
 
-                        Album firstAlbum = albums.stream().filter(x -> x.getTitle().equals(first.getAlbum())).findFirst().get();
-                        Album secondAlbum = albums.stream().filter(x -> x.getTitle().equals(second.getAlbum())).findFirst().get();
+                        Album firstAlbum = albums.stream().filter(x -> x.title().equals(first.getAlbum())).findFirst().get();
+                        Album secondAlbum = albums.stream().filter(x -> x.title().equals(second.getAlbum())).findFirst().get();
                         if (firstAlbum.compareTo(secondAlbum) != 0) {
                             return firstAlbum.compareTo(secondAlbum);
                         } else {
@@ -273,7 +274,7 @@ public class ArtistsMainController implements Initializable, SubView {
                     selectAlbum(album);
                 }
 
-                ArrayList<Song> songs = selectedAlbum.getSongs();
+                List<Song> songs = selectedAlbum.songs();
 
                 if (MusicPlayerApp.isShuffleActive()) {
                 	Collections.shuffle(songs);
@@ -451,12 +452,12 @@ public class ArtistsMainController implements Initializable, SubView {
             selectedAlbum = album;
             albumList.getSelectionModel().select(selectedAlbum);
             ObservableList<Song> songs = FXCollections.observableArrayList();
-            songs.addAll(album.getSongs());
+            songs.addAll(album.songs());
             Collections.sort(songs);
             songTable.getSelectionModel().clearSelection();
             songTable.setItems(songs);
             scrollPane.setVvalue(0);
-            albumLabel.setText(album.getTitle());
+            albumLabel.setText(album.title());
             songTable.setMinHeight(0);
             songTable.setPrefHeight(0);
             songTable.setVisible(true);
@@ -540,13 +541,13 @@ public class ArtistsMainController implements Initializable, SubView {
 
             albums.add(album);
 
-            songs.addAll(album.getSongs());
+            songs.addAll(album.songs());
         }
 
         Collections.sort(songs, (first, second) -> {
 
-            Album firstAlbum = albums.stream().filter(x -> x.getTitle().equals(first.getAlbum())).findFirst().get();
-            Album secondAlbum = albums.stream().filter(x -> x.getTitle().equals(second.getAlbum())).findFirst().get();
+            Album firstAlbum = albums.stream().filter(x -> x.title().equals(first.getAlbum())).findFirst().get();
+            Album secondAlbum = albums.stream().filter(x -> x.title().equals(second.getAlbum())).findFirst().get();
             if (firstAlbum.compareTo(secondAlbum) != 0) {
                 return firstAlbum.compareTo(secondAlbum);
             } else {
@@ -608,10 +609,10 @@ public class ArtistsMainController implements Initializable, SubView {
         ArrayList<Song> songs = new ArrayList<>();
 
         if (selectedAlbum != null) {
-            songs.addAll(selectedAlbum.getSongs());
+            songs.addAll(selectedAlbum.songs());
         } else {
             for (Album album : selectedArtist.getAlbums()) {
-                songs.addAll(album.getSongs());
+                songs.addAll(album.songs());
             }
         }
         

@@ -252,9 +252,8 @@ public class AlbumsController implements Initializable, SubView {
     private VBox createCell(Album album, int index) {
 
         VBox cell = new VBox();
-        Label title = new Label(album.getTitle());
-        ImageView image = new ImageView(album.getArtwork());
-        image.imageProperty().bind(album.artworkProperty());
+        Label title = new Label(album.title());
+        ImageView image = new ImageView(album.artwork());
         VBox imageBox = new VBox();
 
         title.setTextOverrun(OverrunStyle.CLIP);
@@ -294,8 +293,8 @@ public class AlbumsController implements Initializable, SubView {
         		expandAlbumDetail();
         		expandAnimation.play();
         		
-        		artistLabel.setText(album.getArtist());
-        		albumLabel.setText(album.getTitle());
+        		artistLabel.setText(album.artistName());
+        		albumLabel.setText(album.title());
         		populateSongTable(cell, album);
         		
         		// Else if album detail is expanded and opened album is reselected.
@@ -320,8 +319,8 @@ public class AlbumsController implements Initializable, SubView {
             	
             	// Plays load animation and populates song table with songs of newly selected album.
             	tableCollapseAnimation.setOnFinished(x -> {
-            		artistLabel.setText(album.getArtist());
-            		albumLabel.setText(album.getTitle());
+            		artistLabel.setText(album.artistName());
+            		albumLabel.setText(album.title());
             		populateSongTable(cell, album);
             		expandAlbumDetail();
             		tableExpandAnimation.play();
@@ -347,8 +346,8 @@ public class AlbumsController implements Initializable, SubView {
         		expandAlbumDetail();
         		// Plays load animation and populates song table with songs of newly selected album.
         		tableCollapseAnimation.setOnFinished(x -> {
-        			artistLabel.setText(album.getArtist());
-            		albumLabel.setText(album.getTitle());
+        			artistLabel.setText(album.artistName());
+            		albumLabel.setText(album.title());
             		populateSongTable(cell, album);
             		expandAlbumDetail();
             		tableExpandAnimation.play();
@@ -398,7 +397,7 @@ public class AlbumsController implements Initializable, SubView {
     
     private void populateSongTable(VBox cell, Album selectedAlbum) { 	
     	// Retrieves albums songs and stores them as an observable list.
-    	ObservableList<Song> albumSongs = FXCollections.observableArrayList(selectedAlbum.getSongs());
+    	ObservableList<Song> albumSongs = FXCollections.observableArrayList(selectedAlbum.songs());
     	
         playingColumn.setCellFactory(x -> new PlayingTableCell<Song, Boolean>());
         titleColumn.setCellFactory(x -> new ControlPanelTableCell<Song, String>());

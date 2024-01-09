@@ -5,6 +5,7 @@ import app.musicplayer.util.ImportMusicTask;
 import app.musicplayer.util.Resources;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.image.Image;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
@@ -28,6 +29,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.file.Paths;
@@ -370,7 +372,7 @@ public final class Library {
         if (albums == null) {
             getAlbums();
         }
-        return albums.stream().filter(album -> title.equals(album.getTitle())).findFirst().get();
+        return albums.stream().filter(album -> title.equals(album.title())).findFirst().get();
     }
 
     private static void updateAlbumsList() {
@@ -401,9 +403,33 @@ public final class Library {
 
                 albumSongs.addAll(e.getValue());
 
-                albums.add(new Album(id++, entry.getKey(), artist, albumSongs));
+                albums.add(new Album(id++, entry.getKey(), artist, getArtwork(songs), albumSongs));
             }
         }
+    }
+
+    private static Image getArtwork(List<Song> songs) {
+        Image artwork = null;
+
+        if (artwork == null) {
+
+            try {
+                String location = songs.get(0).getLocation();
+                AudioFile audioFile = AudioFileIO.read(new File(location));
+                Tag tag = audioFile.getTag();
+                byte[] bytes = tag.getFirstArtwork().getBinaryData();
+                ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+                artwork = new Image(in, 300, 300, true, true);
+
+                if (artwork.isError()) {
+                    artwork = new Image(Resources.IMG + "albumsIcon.png");
+                }
+
+            } catch (Exception ex) {
+                artwork = new Image(Resources.IMG + "albumsIcon.png");
+            }
+        }
+        return artwork;
     }
 
     /**
@@ -434,8 +460,8 @@ public final class Library {
 
         TreeMap<String, List<Album>> artistMap = new TreeMap<>(
                 albums.stream()
-                        .filter(album -> album.getArtist() != null)
-                        .collect(Collectors.groupingBy(Album::getArtist))
+                        .filter(album -> album.artistName() != null)
+                        .collect(Collectors.groupingBy(Album::artistName))
         );
 
         for (Map.Entry<String, List<Album>> entry : artistMap.entrySet()) {

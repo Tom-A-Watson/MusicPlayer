@@ -59,22 +59,22 @@ public class Search {
                 if (searchThread.isInterrupted()) { throw new InterruptedException(); }
 
                 List<Album> albumResults = Library.getAlbums().stream()
-                        .filter(album -> album.getTitle().toUpperCase().contains(text))
+                        .filter(album -> album.title().toUpperCase().contains(text))
                         .sorted((x, y) -> {
-                            boolean xEqual = x.getTitle().toUpperCase().equals(text);
-                            boolean yEqual = y.getTitle().toUpperCase().equals(text);
+                            boolean xEqual = x.title().toUpperCase().equals(text);
+                            boolean yEqual = y.title().toUpperCase().equals(text);
                             if (xEqual && yEqual) return 0;
                             if (xEqual) return -1;
                             if (yEqual) return 1;
 
-                            boolean xStartWith = x.getTitle().toUpperCase().startsWith(text);
-                            boolean yStartWith = y.getTitle().toUpperCase().startsWith(text);
+                            boolean xStartWith = x.title().toUpperCase().startsWith(text);
+                            boolean yStartWith = y.title().toUpperCase().startsWith(text);
                             if (xStartWith && yStartWith) return 0;
                             if (xStartWith) return -1;
                             if (yStartWith) return 1;
 
-                            boolean xContains = x.getTitle().toUpperCase().contains(" " + text);
-                            boolean yContains = y.getTitle().toUpperCase().contains(" " + text);
+                            boolean xContains = x.title().toUpperCase().contains(" " + text);
+                            boolean yContains = y.title().toUpperCase().contains(" " + text);
                             if (xContains && yContains) return 0;
                             if (xContains) return -1;
                             if (yContains) return 1;

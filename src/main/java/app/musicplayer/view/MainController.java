@@ -379,7 +379,7 @@ public class MainController implements Initializable {
 			            case "Artist":
 			            	Artist artist = (Artist) MusicPlayerApp.getDraggedItem();
 				            for (Album album : artist.getAlbums()) {
-				            	for (Song song : album.getSongs()) {
+				            	for (Song song : album.songs()) {
 				            		if (!playlist.getSongs().contains(song)) {
 						            	playlist.addSong(song);
 				            		}
@@ -388,7 +388,7 @@ public class MainController implements Initializable {
 				            break;
 			            case "Album":
 			            	Album album = (Album) MusicPlayerApp.getDraggedItem();
-				            for (Song song : album.getSongs()) {
+				            for (Song song : album.songs()) {
 				            	if (!playlist.getSongs().contains(song)) {
 					            	playlist.addSong(song);
 			            		}
@@ -566,7 +566,7 @@ public class MainController implements Initializable {
 			            case "Artist":
 			            	Artist artist = (Artist) MusicPlayerApp.getDraggedItem();
 				            for (Album album : artist.getAlbums()) {
-				            	for (Song song : album.getSongs()) {
+				            	for (Song song : album.songs()) {
 				            		if (!playlist.getSongs().contains(song)) {
 						            	playlist.addSong(song);
 				            		}
@@ -575,7 +575,7 @@ public class MainController implements Initializable {
 				            break;
 			            case "Album":
 			            	Album album = (Album) MusicPlayerApp.getDraggedItem();
-				            for (Song song : album.getSongs()) {
+				            for (Song song : album.songs()) {
 				            	if (!playlist.getSongs().contains(song)) {
 					            	playlist.addSong(song);
 			            		}
@@ -778,7 +778,7 @@ public class MainController implements Initializable {
         ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
         Song song = MusicPlayerApp.getNowPlaying();
         Artist artist = Library.getArtist(song.getArtist());
-        Album album = artist.getAlbums().stream().filter(x -> x.getTitle().equals(song.getAlbum())).findFirst().get();
+        Album album = artist.getAlbums().stream().filter(x -> x.title().equals(song.getAlbum())).findFirst().get();
         artistsMainController.selectArtist(artist);
         artistsMainController.selectAlbum(album);
         artistsMainController.selectSong(song);
@@ -906,8 +906,8 @@ public class MainController implements Initializable {
                 ImageView image = new ImageView();
                 image.setFitHeight(40);
                 image.setFitWidth(40);
-                image.setImage(album.getArtwork());
-                Label label = new Label(album.getTitle());
+                image.setImage(album.artwork());
+                Label label = new Label(album.title());
                 label.setTextOverrun(OverrunStyle.CLIP);
                 label.getStyleClass().setAll("searchLabel");
                 cell.getChildren().addAll(image, label);
@@ -916,7 +916,7 @@ public class MainController implements Initializable {
                 cell.getStyleClass().add("searchResult");
                 cell.setOnMouseClicked(event -> {
                     loadView("ArtistsMain");
-                    Artist artist = Library.getArtist(album.getArtist());
+                    Artist artist = Library.getArtist(album.artistName());
                     ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
                     artistsMainController.selectArtist(artist);
                     artistsMainController.selectAlbum(album);
@@ -948,7 +948,7 @@ public class MainController implements Initializable {
                 cell.setOnMouseClicked(event -> {
                     loadView("ArtistsMain");
                     Artist artist = Library.getArtist(song.getArtist());
-                    Album album = artist.getAlbums().stream().filter(x -> x.getTitle().equals(song.getAlbum())).findFirst().get();
+                    Album album = artist.getAlbums().stream().filter(x -> x.title().equals(song.getAlbum())).findFirst().get();
                     ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
                     artistsMainController.selectArtist(artist);
                     artistsMainController.selectAlbum(album);

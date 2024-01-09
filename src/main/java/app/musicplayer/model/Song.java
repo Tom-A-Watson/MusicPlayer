@@ -112,7 +112,7 @@ public final class Song implements Comparable<Song> {
     }
 
     public Image getArtwork() {
-        return Library.getAlbum(this.album.get()).getArtwork();
+        return Library.getAlbum(this.album.get()).artwork();
     }
 
     public StringProperty albumProperty() {

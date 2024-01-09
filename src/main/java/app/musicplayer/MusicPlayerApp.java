@@ -123,7 +123,7 @@ public class MusicPlayerApp extends Application {
                 Artist artist = Library.getArtists().get(0);
 
                 for (Album album : artist.getAlbums()) {
-                    nowPlayingList.addAll(album.getSongs());
+                    nowPlayingList.addAll(album.songs());
                 }
 
                 Collections.sort(nowPlayingList, (first, second) -> {
