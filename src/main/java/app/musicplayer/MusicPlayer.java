@@ -155,11 +155,11 @@ public class MusicPlayer extends Application {
             if (!imgFolder.exists()) {
 
                 Thread thread1 = new Thread(() -> {
-                    Library.getArtists().forEach(Artist::downloadArtistImage);
+                    //Library.getArtists().forEach(Artist::downloadArtistImage);
                 });
 
                 Thread thread2 = new Thread(() -> {
-                    Library.getAlbums().forEach(Album::downloadArtwork);
+                    //Library.getAlbums().forEach(Album::downloadArtwork);
                 });
 
                 thread1.start();
@@ -169,7 +169,7 @@ public class MusicPlayer extends Application {
             new Thread(() -> {
                 XMLEditor.getNewSongs().forEach(song -> {
                     try {
-                        Library.getArtist(song.getArtist()).downloadArtistImage();
+                        //Library.getArtist(song.getArtist()).downloadArtistImage();
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
