@@ -7,3 +7,6 @@ bin/
 out/
 *.MF
 MusicPlayer.iml
+system/
+logs/
+target/

@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.LogManager;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
@@ -27,6 +26,9 @@ import app.musicplayer.util.XMLEditor;
 import app.musicplayer.view.ImportMusicDialogController;
 import app.musicplayer.view.MainController;
 import app.musicplayer.view.NowPlayingController;
+import com.almasb.fxgl.logging.ConsoleOutput;
+import com.almasb.fxgl.logging.Logger;
+import com.almasb.fxgl.logging.LoggerLevel;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -68,15 +70,23 @@ public class MusicPlayer extends Application {
     // may not necessarily be equal to the number of songs in the xml file if songs have been deleted.
     private static int lastIdAssigned;
 
-    public static void main(String[] args) {
-        Application.launch(MusicPlayer.class);
+    public static class Launcher {
+        public static void main(String[] args) {
+            System.out.println("Start Launch");
+
+            Application.launch(MusicPlayer.class);
+        }
     }
 
     @Override
     public void start(Stage stage) throws Exception {
+        System.out.println("Hello");
+
+        Logger.addOutput(new ConsoleOutput(), LoggerLevel.INFO);
+        Logger.get(MusicPlayer.class).info("Loading");
 
         // Suppresses warning caused by converting music library data into xml file.
-        LogManager.getLogManager().reset();
+        //LogManager.getLogManager().reset();
         PrintStream dummyStream = new PrintStream(new OutputStream() {
             public void write(int b) {
                 //do nothing

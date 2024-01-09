@@ -1,7 +1,5 @@
 package app.musicplayer.util;
 
-import com.sun.javafx.scene.control.behavior.SliderBehavior;
-import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
 import javafx.geometry.Orientation;
@@ -9,6 +7,7 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Side;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Slider;
+import javafx.scene.control.skin.SliderSkin;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
@@ -18,7 +17,7 @@ import javafx.util.StringConverter;
  *
  */
 @SuppressWarnings("restriction")
-public class CustomSliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
+public class CustomSliderSkin extends SliderSkin {
 
     // Track if slider is vertical/horizontal and cause re layout.
     private NumberAxis tickLine = null;
@@ -39,19 +38,19 @@ public class CustomSliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
     private boolean trackClicked = false;
 
     public CustomSliderSkin(Slider slider) {
-        super(slider, new SliderBehavior(slider));
+        super(slider);
 
         initialize();
         slider.requestLayout();
-        registerChangeListener(slider.minProperty(), "MIN");
-        registerChangeListener(slider.maxProperty(), "MAX");
-        registerChangeListener(slider.valueProperty(), "VALUE");
-        registerChangeListener(slider.orientationProperty(), "ORIENTATION");
-        registerChangeListener(slider.showTickMarksProperty(), "SHOW_TICK_MARKS");
-        registerChangeListener(slider.showTickLabelsProperty(), "SHOW_TICK_LABELS");
-        registerChangeListener(slider.majorTickUnitProperty(), "MAJOR_TICK_UNIT");
-        registerChangeListener(slider.minorTickCountProperty(), "MINOR_TICK_COUNT");
-        registerChangeListener(slider.labelFormatterProperty(), "TICK_LABEL_FORMATTER");
+//        registerChangeListener(slider.minProperty(), "MIN");
+//        registerChangeListener(slider.maxProperty(), "MAX");
+//        registerChangeListener(slider.valueProperty(), "VALUE");
+//        registerChangeListener(slider.orientationProperty(), "ORIENTATION");
+//        registerChangeListener(slider.showTickMarksProperty(), "SHOW_TICK_MARKS");
+//        registerChangeListener(slider.showTickLabelsProperty(), "SHOW_TICK_LABELS");
+//        registerChangeListener(slider.majorTickUnitProperty(), "MAJOR_TICK_UNIT");
+//        registerChangeListener(slider.minorTickCountProperty(), "MINOR_TICK_COUNT");
+//        registerChangeListener(slider.labelFormatterProperty(), "TICK_LABEL_FORMATTER");
     }
 
     private void initialize() {
@@ -65,15 +64,15 @@ public class CustomSliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
         setShowTickMarks(getSkinnable().isShowTickMarks(), getSkinnable().isShowTickLabels());
         track.setOnMousePressed(me -> {
             trackClicked = true;
-            getBehavior().trackPress(me, (me.getX() / trackLength));
-            getBehavior().thumbPressed(me, 0.0f);
+            //getBehavior().trackPress(me, (me.getX() / trackLength));
+            //getBehavior().thumbPressed(me, 0.0f);
             dragStart = track.localToParent(me.getX(), me.getY());
             preDragThumbPos = (me.getX() / trackLength);
             thumbPressAnimation.play();
         });
 
         track.setOnMouseReleased(me -> {
-            getBehavior().thumbReleased(me);
+            //getBehavior().thumbReleased(me);
             trackClicked = false;
             thumbReleaseAnimation.play();
         });
@@ -82,11 +81,11 @@ public class CustomSliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
             Point2D cur = track.localToParent(me.getX(), me.getY());
             double dragPos = (getSkinnable().getOrientation() == Orientation.HORIZONTAL)?
                 cur.getX() - dragStart.getX() : -(cur.getY() - dragStart.getY());
-            getBehavior().thumbDragged(me, preDragThumbPos + dragPos / trackLength);
+            //getBehavior().thumbDragged(me, preDragThumbPos + dragPos / trackLength);
         });
 
         thumb.setOnMousePressed(me -> {
-            getBehavior().thumbPressed(me, 0.0f);
+            //getBehavior().thumbPressed(me, 0.0f);
             dragStart = thumb.localToParent(me.getX(), me.getY());
             preDragThumbPos = (getSkinnable().getValue() - getSkinnable().getMin()) /
                     (getSkinnable().getMax() - getSkinnable().getMin());
@@ -94,7 +93,7 @@ public class CustomSliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
         });
 
         thumb.setOnMouseReleased(me -> {
-            getBehavior().thumbReleased(me);
+            //getBehavior().thumbReleased(me);
             thumbReleaseAnimation.play();
         });
 
@@ -102,7 +101,7 @@ public class CustomSliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
             Point2D cur = thumb.localToParent(me.getX(), me.getY());
             double dragPos = (getSkinnable().getOrientation() == Orientation.HORIZONTAL)?
                 cur.getX() - dragStart.getX() : -(cur.getY() - dragStart.getY());
-            getBehavior().thumbDragged(me, preDragThumbPos + dragPos / trackLength);
+            //getBehavior().thumbDragged(me, preDragThumbPos + dragPos / trackLength);
         });
     }
     
@@ -159,51 +158,51 @@ public class CustomSliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
             return slider.getLabelFormatter().fromString(string);
         }
     };
-
-    @Override protected void handleControlPropertyChanged(String p) {
-        super.handleControlPropertyChanged(p);
-        Slider slider = getSkinnable();
-        if ("ORIENTATION".equals(p)) {
-            if (showTickMarks && tickLine != null) {
-                tickLine.setSide(slider.getOrientation() == Orientation.VERTICAL ? Side.RIGHT : (slider.getOrientation() == null) ? Side.RIGHT: Side.BOTTOM);
-            }
-            getSkinnable().requestLayout();
-        } else if ("VALUE".equals(p)) {
-            // Only animate thumb if the track was clicked, not if the thumb is dragged
-            positionThumb(trackClicked);
-        } else if ("MIN".equals(p) ) {
-            if (showTickMarks && tickLine != null) {
-                tickLine.setLowerBound(slider.getMin());
-            }
-            getSkinnable().requestLayout();
-        } else if ("MAX".equals(p)) {
-            if (showTickMarks && tickLine != null) {
-                tickLine.setUpperBound(slider.getMax());
-            }
-            getSkinnable().requestLayout();
-        } else if ("SHOW_TICK_MARKS".equals(p) || "SHOW_TICK_LABELS".equals(p)) {
-            setShowTickMarks(slider.isShowTickMarks(), slider.isShowTickLabels());
-        }  else if ("MAJOR_TICK_UNIT".equals(p)) {
-            if (tickLine != null) {
-                tickLine.setTickUnit(slider.getMajorTickUnit());
-                getSkinnable().requestLayout();
-            }
-        } else if ("MINOR_TICK_COUNT".equals(p)) {
-            if (tickLine != null) {
-                tickLine.setMinorTickCount(Math.max(slider.getMinorTickCount(),0) + 1);
-                getSkinnable().requestLayout();
-            }
-        } else if ("TICK_LABEL_FORMATTER".equals(p)) {
-            if (tickLine != null) {
-                if (slider.getLabelFormatter() == null) {
-                    tickLine.setTickLabelFormatter(null);
-                } else {
-                    tickLine.setTickLabelFormatter(stringConverterWrapper);
-                    tickLine.requestAxisLayout();
-                }
-            }
-        }
-    }
+//
+//    @Override protected void handleControlPropertyChanged(String p) {
+//        super.handleControlPropertyChanged(p);
+//        Slider slider = getSkinnable();
+//        if ("ORIENTATION".equals(p)) {
+//            if (showTickMarks && tickLine != null) {
+//                tickLine.setSide(slider.getOrientation() == Orientation.VERTICAL ? Side.RIGHT : (slider.getOrientation() == null) ? Side.RIGHT: Side.BOTTOM);
+//            }
+//            getSkinnable().requestLayout();
+//        } else if ("VALUE".equals(p)) {
+//            // Only animate thumb if the track was clicked, not if the thumb is dragged
+//            positionThumb(trackClicked);
+//        } else if ("MIN".equals(p) ) {
+//            if (showTickMarks && tickLine != null) {
+//                tickLine.setLowerBound(slider.getMin());
+//            }
+//            getSkinnable().requestLayout();
+//        } else if ("MAX".equals(p)) {
+//            if (showTickMarks && tickLine != null) {
+//                tickLine.setUpperBound(slider.getMax());
+//            }
+//            getSkinnable().requestLayout();
+//        } else if ("SHOW_TICK_MARKS".equals(p) || "SHOW_TICK_LABELS".equals(p)) {
+//            setShowTickMarks(slider.isShowTickMarks(), slider.isShowTickLabels());
+//        }  else if ("MAJOR_TICK_UNIT".equals(p)) {
+//            if (tickLine != null) {
+//                tickLine.setTickUnit(slider.getMajorTickUnit());
+//                getSkinnable().requestLayout();
+//            }
+//        } else if ("MINOR_TICK_COUNT".equals(p)) {
+//            if (tickLine != null) {
+//                tickLine.setMinorTickCount(Math.max(slider.getMinorTickCount(),0) + 1);
+//                getSkinnable().requestLayout();
+//            }
+//        } else if ("TICK_LABEL_FORMATTER".equals(p)) {
+//            if (tickLine != null) {
+//                if (slider.getLabelFormatter() == null) {
+//                    tickLine.setTickLabelFormatter(null);
+//                } else {
+//                    tickLine.setTickLabelFormatter(stringConverterWrapper);
+//                    tickLine.requestAxisLayout();
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Called when ever either min, max or value changes, so thumb's layoutX, Y is recomputed.
