@@ -7,9 +7,6 @@ import java.util.concurrent.CountDownLatch;
 
 import app.musicplayer.model.*;
 import app.musicplayer.util.Search;
-import com.melloware.jintellitype.IntellitypeListener;
-import com.melloware.jintellitype.JIntellitype;
-
 import app.musicplayer.MusicPlayer;
 import app.musicplayer.util.CustomSliderSkin;
 import app.musicplayer.util.Resources;
@@ -46,7 +43,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
-public class MainController implements Initializable, IntellitypeListener {
+public class MainController implements Initializable {
 
 	private boolean isSideBarExpanded = true;
     private double expandedWidth = 250;
@@ -196,31 +193,8 @@ public class MainController implements Initializable, IntellitypeListener {
         initializeTimeLabels();
         initializePlaylists();
         
-        // Register media keys on Windows
-        if (System.getProperty("os.name").toUpperCase().contains("WINDOWS")) {
-        	JIntellitype.getInstance().addIntellitypeListener(this);
-        }
-        
         // Loads the default view: artists.
         loadView("artists");
-    }
-    
-    @Override
-    public void onIntellitype(int key) {
-    	// Skip/play/pause/back using Windows media keys
-    	Platform.runLater(() -> {
-    		switch (key) {
-        	case JIntellitype.APPCOMMAND_MEDIA_NEXTTRACK:
-        		skip();
-        		break;
-        	case JIntellitype.APPCOMMAND_MEDIA_PLAY_PAUSE:
-        		playPause();
-        		break;
-        	case JIntellitype.APPCOMMAND_MEDIA_PREVIOUSTRACK:
-        		back();
-        		break;
-        	}
-    	});
     }
     
     void resetLatch() {

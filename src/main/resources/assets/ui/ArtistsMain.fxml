@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane stylesheets="@/app/musicplayer/util/css/ArtistsStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.view.ArtistsMainController">
+<BorderPane stylesheets="@/assets/ui/css/ArtistsStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.view.ArtistsMainController">
    <center>
       <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefViewportHeight="600.0" prefViewportWidth="248.0" styleClass="sub-view" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
          <content>

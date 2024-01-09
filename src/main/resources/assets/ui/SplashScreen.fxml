@@ -6,11 +6,11 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" styleClass="vbox" stylesheets="@/app/musicplayer/util/css/SplashScreen.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" styleClass="vbox" stylesheets="@/assets/ui/css/SplashScreen.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <ImageView fitHeight="300.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@/app/musicplayer/util/img/Logo.png" />
+            <Image url="@/assets/textures/Logo.png" />
          </image>
       </ImageView>
       <Label text="M   U   S   I   C      P   L   A   Y   E   R" />

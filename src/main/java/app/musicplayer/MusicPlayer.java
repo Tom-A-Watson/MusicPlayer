@@ -72,16 +72,12 @@ public class MusicPlayer extends Application {
 
     public static class Launcher {
         public static void main(String[] args) {
-            System.out.println("Start Launch");
-
             Application.launch(MusicPlayer.class);
         }
     }
 
     @Override
     public void start(Stage stage) throws Exception {
-        System.out.println("Hello");
-
         Logger.addOutput(new ConsoleOutput(), LoggerLevel.INFO);
         Logger.get(MusicPlayer.class).info("Loading");
 
