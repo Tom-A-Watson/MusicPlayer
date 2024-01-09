@@ -1,27 +1,16 @@
 package app.musicplayer.model;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
-
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.images.Artwork;
-import org.jaudiotagger.tag.images.ArtworkFactory;
-
 import app.musicplayer.util.Resources;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.image.Image;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.Tag;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.util.ArrayList;
 
 public final class Album implements Comparable<Album> {
 
@@ -99,69 +88,6 @@ public final class Album implements Comparable<Album> {
             }
         }
         return this.artwork;
-    }
-
-    public void downloadArtwork() {
-        try {
-            XMLInputFactory factory = XMLInputFactory.newInstance();
-            URL xmlData = new URL(Resources.APIBASE
-                    + "method=album.getinfo"
-                    + "&artist=" + URLEncoder.encode(this.artist, "UTF-8")
-                    + "&album=" + URLEncoder.encode(this.title, "UTF-8")
-                    + "&api_key=" + Resources.APIKEY);
-
-            XMLStreamReader reader = factory.createXMLStreamReader(xmlData.openStream(), "UTF-8");
-
-            while (reader.hasNext()) {
-
-                reader.next();
-
-                if (reader.isStartElement()
-                        && reader.getName().getLocalPart().equals("image")
-                        && reader.getAttributeValue(0).equals("extralarge")) {
-
-                    reader.next();
-
-                    if (reader.hasText()) {
-                        BufferedImage bufferedImage = ImageIO.read(new URL(reader.getText()));
-                        BufferedImage newBufferedImage = new BufferedImage(bufferedImage.getWidth(),
-                                bufferedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-                        newBufferedImage.createGraphics().drawImage(bufferedImage, 0, 0, Color.WHITE, null);
-                        File file = File.createTempFile("temp", "temp");
-                        ImageIO.write(newBufferedImage, "jpg", file);
-
-                        for (Song song : this.songs) {
-
-                            AudioFile audioFile = AudioFileIO.read(new File(song.getLocation()));
-                            Tag tag = audioFile.getTag();
-                            tag.deleteArtworkField();
-
-                            Artwork artwork = ArtworkFactory.createArtworkFromFile(file);
-                            tag.setField(artwork);
-                            AudioFileIO.write(audioFile);
-                        }
-
-                        file.delete();
-                    }
-                }
-            }
-            String location = this.songs.get(0).getLocation();
-            AudioFile audioFile = AudioFileIO.read(new File(location));
-            Tag tag = audioFile.getTag();
-            byte[] bytes = tag.getFirstArtwork().getBinaryData();
-            ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            this.artwork = new Image(in, 300, 300, true, true);
-
-            if (this.artwork.isError()) {
-
-                this.artwork = new Image(Resources.IMG + "albumsIcon.png");
-            }
-
-            this.artworkProperty.setValue(artwork);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     @Override

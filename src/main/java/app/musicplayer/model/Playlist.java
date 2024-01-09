@@ -1,8 +1,12 @@
 package app.musicplayer.model;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
+import app.musicplayer.util.Resources;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,15 +19,9 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import app.musicplayer.util.Resources;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Playlist {
 

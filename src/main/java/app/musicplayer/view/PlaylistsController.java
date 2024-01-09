@@ -1,22 +1,8 @@
 package app.musicplayer.view;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.ResourceBundle;
-
 import app.musicplayer.MusicPlayer;
-import app.musicplayer.model.Library;
-import app.musicplayer.model.MostPlayedPlaylist;
-import app.musicplayer.model.Playlist;
-import app.musicplayer.model.RecentlyPlayedPlaylist;
-import app.musicplayer.model.Song;
-import app.musicplayer.util.ClippedTableCell;
-import app.musicplayer.util.ControlPanelTableCell;
-import app.musicplayer.util.PlayingTableCell;
-import app.musicplayer.util.Resources;
-import app.musicplayer.util.SubView;
-import app.musicplayer.util.XMLEditor;
+import app.musicplayer.model.*;
+import app.musicplayer.util.*;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
 import javafx.animation.Interpolator;
@@ -30,25 +16,22 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.ResourceBundle;
 
 public class PlaylistsController implements Initializable, SubView {
 

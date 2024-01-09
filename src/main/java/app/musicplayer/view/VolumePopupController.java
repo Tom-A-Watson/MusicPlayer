@@ -1,8 +1,5 @@
 package app.musicplayer.view;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import app.musicplayer.MusicPlayer;
 import app.musicplayer.util.CustomSliderSkin;
 import javafx.css.PseudoClass;
@@ -12,6 +9,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class VolumePopupController implements Initializable {
 

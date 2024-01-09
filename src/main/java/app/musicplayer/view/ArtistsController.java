@@ -1,9 +1,5 @@
 package app.musicplayer.view;
 
-import java.net.URL;
-import java.util.Collections;
-import java.util.ResourceBundle;
-
 import app.musicplayer.MusicPlayer;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
@@ -29,6 +25,10 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+
+import java.net.URL;
+import java.util.Collections;
+import java.util.ResourceBundle;
 
 public class ArtistsController implements Initializable, SubView {
 

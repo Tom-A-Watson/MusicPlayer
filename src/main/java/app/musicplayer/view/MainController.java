@@ -1,15 +1,10 @@
 package app.musicplayer.view;
 
-import java.net.URL;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.concurrent.CountDownLatch;
-
-import app.musicplayer.model.*;
-import app.musicplayer.util.Search;
 import app.musicplayer.MusicPlayer;
+import app.musicplayer.model.*;
 import app.musicplayer.util.CustomSliderSkin;
 import app.musicplayer.util.Resources;
+import app.musicplayer.util.Search;
 import app.musicplayer.util.SubView;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -42,6 +37,11 @@ import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+
+import java.net.URL;
+import java.util.Optional;
+import java.util.ResourceBundle;
+import java.util.concurrent.CountDownLatch;
 
 public class MainController implements Initializable {
 

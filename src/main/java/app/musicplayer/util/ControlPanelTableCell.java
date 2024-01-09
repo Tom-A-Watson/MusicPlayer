@@ -4,7 +4,6 @@ import app.musicplayer.MusicPlayer;
 import app.musicplayer.model.Song;
 import app.musicplayer.view.PlaylistsController;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;

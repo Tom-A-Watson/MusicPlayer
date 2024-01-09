@@ -1,8 +1,5 @@
 package app.musicplayer.view;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import app.musicplayer.MusicPlayer;
 import app.musicplayer.model.Library;
 import app.musicplayer.util.SubView;
@@ -11,6 +8,9 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.Pane;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class ControlPanelPlaylistsController implements Initializable {
 	

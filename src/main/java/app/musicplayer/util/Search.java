@@ -1,15 +1,11 @@
 package app.musicplayer.util;
 
-import app.musicplayer.model.Library;
-import app.musicplayer.model.Song;
-import app.musicplayer.model.Album;
-import app.musicplayer.model.Artist;
-import app.musicplayer.model.SearchResult;
+import app.musicplayer.model.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 
 public class Search {
 

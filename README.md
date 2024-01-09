@@ -1,5 +1,9 @@
 # MusicPlayer
 
+```
+// TODO: the README below is outdated
+```
+
 MusicPlayer is an open source music player for Mac and Windows.
 
 ![MusicPlayer](https://cloud.githubusercontent.com/assets/9737241/16364455/56527484-3ba4-11e6-97de-d8b9869f36a4.PNG)
