@@ -1,13 +1,13 @@
 package app.musicplayer;
 
+import app.musicplayer.controllers.ImportMusicController;
+import app.musicplayer.controllers.MainController;
+import app.musicplayer.controllers.NowPlayingController;
 import app.musicplayer.model.Album;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import app.musicplayer.util.Config;
-import app.musicplayer.controllers.ImportMusicController;
-import app.musicplayer.controllers.MainController;
-import app.musicplayer.controllers.NowPlayingController;
 import com.almasb.fxgl.logging.ConsoleOutput;
 import com.almasb.fxgl.logging.Logger;
 import com.almasb.fxgl.logging.LoggerLevel;
@@ -24,19 +24,15 @@ import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.logging.LogManager;
 
 public class MusicPlayerApp extends Application {
+
+    private static final Logger log = Logger.get(MusicPlayerApp.class);
 
     private static MainController mainController;
     private static MediaPlayer mediaPlayer;
@@ -72,8 +68,11 @@ public class MusicPlayerApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         try {
+            // disable java.util.logging.Logger from jaudiotagger lib
+            LogManager.getLogManager().reset();
+
             Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
-            Logger.get(MusicPlayerApp.class).info("start(Stage)");
+            log.info("start(Stage)");
 
             timer = new Timer();
             timerCounter = 0;
@@ -108,8 +107,8 @@ public class MusicPlayerApp extends Application {
                 showImportMusicView();
             }
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            log.fatal("Cannot start MusicPlayer", e);
             System.exit(0);
         }
     }
@@ -162,22 +161,18 @@ public class MusicPlayerApp extends Application {
         thread.start();
     }
 
-    private void showImportMusicView() {
-        try {
-            FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(Config.FXML + "ImportMusicDialog.fxml"));
-            Parent view = loader.load();
+    private void showImportMusicView() throws Exception {
+        FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(Config.FXML + "ImportMusicDialog.fxml"));
+        Parent view = loader.load();
 
-            ImportMusicController controller = loader.getController();
-            controller.setOwnerStage(stage);
-            controller.setOnFinished(() -> {
-                initInBackground();
-            });
+        ImportMusicController controller = loader.getController();
+        controller.setOwnerStage(stage);
+        controller.setOnFinished(() -> {
+            initInBackground();
+        });
 
-            VBox root = (VBox) stage.getScene().getRoot();
-            root.getChildren().add(view);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        VBox root = (VBox) stage.getScene().getRoot();
+        root.getChildren().add(view);
     }
 
     /**
@@ -381,13 +376,13 @@ public class MusicPlayerApp extends Application {
     public static void addSongToNowPlayingList(Song song) {
         if (!nowPlayingList.contains(song)) {
             nowPlayingList.add(song);
-            Library.savePlayingList();
+            //Library.savePlayingList();
         }
     }
 
     public static void setNowPlayingList(List<Song> list) {
         nowPlayingList = new ArrayList<>(list);
-        Library.savePlayingList();
+        //Library.savePlayingList();
     }
 
     public static void setNowPlaying(Song song) {

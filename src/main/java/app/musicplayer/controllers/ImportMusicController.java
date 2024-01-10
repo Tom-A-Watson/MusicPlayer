@@ -56,7 +56,7 @@ public final class ImportMusicController {
         importMusicButton.setVisible(false);
         progressBar.setVisible(true);
 
-        var task = Library.newImportMusicTask(selectedDir.getPath());
+        var task = Library.newImportMusicTask(selectedDir.toPath());
         task.setOnSucceeded(e -> {
             onFinished.run();
         });
