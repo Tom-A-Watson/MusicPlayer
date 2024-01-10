@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox stylesheets="@css/PlaylistsStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.view.PlaylistsController">
+<VBox stylesheets="@css/PlaylistsStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.controllers.PlaylistsController">
    <children>
       <HBox maxHeight="-Infinity" minHeight="-Infinity" prefHeight="50.0">
          <children>

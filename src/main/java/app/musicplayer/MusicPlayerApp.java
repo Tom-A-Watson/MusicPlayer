@@ -6,9 +6,9 @@ import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import app.musicplayer.util.Resources;
 import app.musicplayer.util.XMLEditor;
-import app.musicplayer.view.ImportMusicDialogController;
-import app.musicplayer.view.MainController;
-import app.musicplayer.view.NowPlayingController;
+import app.musicplayer.controllers.ImportMusicController;
+import app.musicplayer.controllers.MainController;
+import app.musicplayer.controllers.NowPlayingController;
 import com.almasb.fxgl.logging.ConsoleOutput;
 import com.almasb.fxgl.logging.Logger;
 import com.almasb.fxgl.logging.LoggerLevel;
@@ -22,9 +22,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -224,14 +222,14 @@ public class MusicPlayerApp extends Application {
                 // NullPointerException thrown by musicDirFileNumFinder().
                 // It occurs if the music directory has been renamed
             } catch (NullPointerException npe) {
-                createLibraryXML();
+                showImportMusicView();
 
                 return false;
             }
 
             // If the library.xml file does not exist, the file is created from the user specified music library location.
         } else {
-            createLibraryXML();
+            showImportMusicView();
             return false;
         }
     }
@@ -327,24 +325,22 @@ public class MusicPlayerApp extends Application {
         XMLEditor.addDeleteChecker();
     }
 
-    // TODO: rename, e.g. show import dialog
-    private void createLibraryXML() {
+    private void showImportMusicView() {
         try {
             FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(Resources.FXML + "ImportMusicDialog.fxml"));
             Parent view = loader.load();
 
-            VBox root = (VBox) stage.getScene().getRoot();
-            root.getChildren().add(view);
-
-            // Set the dialog into the controller.
-            ImportMusicDialogController controller = loader.getController();
-            controller.setDialogStage(stage);
+            ImportMusicController controller = loader.getController();
+            controller.setOwnerStage(stage);
             controller.setOnFinished(() -> {
                 // Gets the number of files saved in the xml file.
                 xmlFileNum = xmlMusicDirFileNumFinder();
 
                 initInBackground();
             });
+
+            VBox root = (VBox) stage.getScene().getRoot();
+            root.getChildren().add(view);
         } catch (IOException e) {
             e.printStackTrace();
         }

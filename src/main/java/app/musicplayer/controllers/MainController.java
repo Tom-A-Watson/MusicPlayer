@@ -1,4 +1,4 @@
-package app.musicplayer.view;
+package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.*;

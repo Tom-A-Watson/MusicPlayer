@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<FlowPane fx:id="grid" stylesheets="@/assets/ui/css/ArtistsStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.view.ArtistsController">
+<FlowPane fx:id="grid" stylesheets="@/assets/ui/css/ArtistsStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.controllers.ArtistsController">
    <opaqueInsets>
       <Insets />
    </opaqueInsets>

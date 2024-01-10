@@ -1,10 +1,10 @@
 package app.musicplayer.model;
 
 import app.musicplayer.MusicPlayerApp;
-import app.musicplayer.util.ImportMusicTask;
 import app.musicplayer.util.Resources;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -59,70 +59,74 @@ public final class Library {
     private static ArrayList<Album> albums;
     private static ArrayList<Playlist> playlists;
     private static int maxProgress;
-    private static ImportMusicTask<Boolean> task;
 
-    public static void importMusic(String path, ImportMusicTask<Boolean> task) throws Exception {
+    public static Task<Boolean> newImportMusicTask(String path) {
+        return new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                Library.maxProgress = 0;
 
-        Library.maxProgress = 0;
-        Library.task = task;
+                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+                Document doc = docBuilder.newDocument();
+                Element library = doc.createElement("library");
+                Element musicLibrary = doc.createElement("musicLibrary");
+                Element songs = doc.createElement("songs");
+                Element playlists = doc.createElement("playlists");
+                Element nowPlayingList = doc.createElement("nowPlayingList");
 
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        Document doc = docBuilder.newDocument();
-        Element library = doc.createElement("library");
-        Element musicLibrary = doc.createElement("musicLibrary");
-        Element songs = doc.createElement("songs");
-        Element playlists = doc.createElement("playlists");
-        Element nowPlayingList = doc.createElement("nowPlayingList");
+                // Adds elements to library section.
+                doc.appendChild(library);
+                library.appendChild(musicLibrary);
+                library.appendChild(songs);
+                library.appendChild(playlists);
+                library.appendChild(nowPlayingList);
 
-        // Adds elements to library section.
-        doc.appendChild(library);
-        library.appendChild(musicLibrary);
-        library.appendChild(songs);
-        library.appendChild(playlists);
-        library.appendChild(nowPlayingList);
+                // Creates sub sections for music library path, number of files, and last song id assigned.
+                Element musicLibraryPath = doc.createElement("path");
+                Element musicLibraryFileNum = doc.createElement("fileNum");
+                Element lastIdAssigned = doc.createElement("lastId");
 
-        // Creates sub sections for music library path, number of files, and last song id assigned.
-        Element musicLibraryPath = doc.createElement("path");
-        Element musicLibraryFileNum = doc.createElement("fileNum");
-        Element lastIdAssigned = doc.createElement("lastId");
+                // Adds music library path to xml file.
+                musicLibraryPath.setTextContent(path);
+                musicLibrary.appendChild(musicLibraryPath);
 
-        // Adds music library path to xml file.
-        musicLibraryPath.setTextContent(path);
-        musicLibrary.appendChild(musicLibraryPath);
+                int id = 0;
+                File directory = new File(Paths.get(path).toUri());
 
-        int id = 0;
-        File directory = new File(Paths.get(path).toUri());
+                getMaxProgress(directory);
 
-        getMaxProgress(directory);
-        Library.task.updateProgress(id, Library.maxProgress);
+                updateProgress(id, Library.maxProgress);
 
-        // Writes xml file and returns the number of files in the music directory.
-        int i = writeXML(directory, doc, songs, id);
-        String fileNumber = Integer.toString(i);
+                // Writes xml file and returns the number of files in the music directory.
+                int i = writeXML(directory, doc, songs, id);
+                String fileNumber = Integer.toString(i);
 
-        // Adds the number of files in the music directory to the appropriate section in the xml file.
-        musicLibraryFileNum.setTextContent(fileNumber);
-        musicLibrary.appendChild(musicLibraryFileNum);
+                // Adds the number of files in the music directory to the appropriate section in the xml file.
+                musicLibraryFileNum.setTextContent(fileNumber);
+                musicLibrary.appendChild(musicLibraryFileNum);
 
-        // Finds the last id that was assigned to a song and adds it to the xml file.
-        int j = i - 1;
-        lastIdAssigned.setTextContent(Integer.toString(j));
-        musicLibrary.appendChild(lastIdAssigned);
+                // Finds the last id that was assigned to a song and adds it to the xml file.
+                int j = i - 1;
+                lastIdAssigned.setTextContent(Integer.toString(j));
+                musicLibrary.appendChild(lastIdAssigned);
 
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        DOMSource source = new DOMSource(doc);
+                TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                Transformer transformer = transformerFactory.newTransformer();
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                DOMSource source = new DOMSource(doc);
 
-        File xmlFile = new File(Resources.JAR + "library.xml");
+                File xmlFile = new File(Resources.JAR + "library.xml");
 
-        StreamResult result = new StreamResult(xmlFile);
-        transformer.transform(source, result);
+                StreamResult result = new StreamResult(xmlFile);
+                transformer.transform(source, result);
 
-        Library.maxProgress = 0;
-        Library.task = null;
+                Library.maxProgress = 0;
+
+                return true;
+            }
+        };
     }
 
     private static void getMaxProgress(File directory) {
@@ -196,7 +200,7 @@ public final class Library {
                     song.appendChild(playDate);
                     song.appendChild(location);
 
-                    task.updateProgress(i, Library.maxProgress);
+                    //task.updateProgress(i, Library.maxProgress);
 
                 } catch (Exception ex) {
 

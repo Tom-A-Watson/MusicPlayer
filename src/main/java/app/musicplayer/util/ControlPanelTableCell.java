@@ -2,7 +2,7 @@ package app.musicplayer.util;
 
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Song;
-import app.musicplayer.view.PlaylistsController;
+import app.musicplayer.controllers.PlaylistsController;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
