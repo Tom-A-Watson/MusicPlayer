@@ -102,7 +102,7 @@ public class SongsController implements Initializable, SubView {
             	}
             	if (currentSong != null) {
                     currentSong.playingProperty().addListener(changeListener);
-                    row.pseudoClassStateChanged(playing, currentSong.getPlaying());
+                    row.pseudoClassStateChanged(playing, currentSong.isPlaying());
                 } else {
                     row.pseudoClassStateChanged(playing, false);
                 }
@@ -292,7 +292,7 @@ public class SongsController implements Initializable, SubView {
             case "artistColumn":
                 for (Song song : songTableItems) {
                     // Removes article from song artist and compares it to selected letter.
-                    String songArtist = song.getArtist();
+                    String songArtist = song.getArtistTitle();
                     try {
                         char firstLetter = removeArticle(songArtist).charAt(0);
                         if (firstLetter < letter) {
@@ -308,7 +308,7 @@ public class SongsController implements Initializable, SubView {
             case "albumColumn":
                 for (Song song : songTableItems) {
                     // Removes article from song album and compares it to selected letter.
-                    String songAlbum = song.getAlbum();
+                    String songAlbum = song.getAlbumTitle();
                     try {
                         char firstLetter = removeArticle(songAlbum).charAt(0);
                         if (firstLetter < letter) {

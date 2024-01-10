@@ -1,164 +1,218 @@
+/*
+ * JavaFX Music Player. The MIT License (MIT).
+ * Copyright (c) Almas Baim.
+ * Copyright (c) Gerardo Prada, Michael Martin.
+ * See LICENSE for details.
+ */
+
 package app.musicplayer.model;
 
 import javafx.beans.property.*;
-import javafx.scene.image.Image;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 public final class Song implements Comparable<Song> {
 
-    private int id;
-    private SimpleStringProperty title;
-    private SimpleStringProperty artist;
-    private SimpleStringProperty album;
-    private SimpleStringProperty length;
-    private long lengthInSeconds;
-    private int trackNumber;
-    private int discNumber;
-    private SimpleIntegerProperty playCount;
+    private IntegerProperty id;
+    private StringProperty title;
+    private StringProperty artistTitle;
+    private StringProperty albumTitle;
+    private IntegerProperty lengthInSeconds;
+    private IntegerProperty trackNumber;
+    private IntegerProperty discNumber;
+    private IntegerProperty playCount;
+    private ObjectProperty<LocalDateTime> playDate;
+    private ObjectProperty<Path> file;
 
-    // TODO:
-    public LocalDateTime playDate;
-    private String location;
-    private SimpleBooleanProperty playing;
-    private SimpleBooleanProperty selected;
+    private BooleanProperty isPlaying;
+    private BooleanProperty isSelected;
 
-    public Song(int id, String title, String artist, String album, Duration length,
-                int trackNumber, int discNumber, int playCount, LocalDateTime playDate, String location) {
-
-        if (title == null) {
-            Path path = Paths.get(location);
-            String fileName = path.getFileName().toString();
-            title = fileName.substring(0, fileName.lastIndexOf('.'));
-        }
-
-        if (album == null) {
-            album = "Unknown Album";
-        }
-
-        if (artist == null) {
-            artist = "Unknown Artist";
-        }
-
-        this.id = id;
+    public Song(
+            int id,
+            String title,
+            String artistTitle,
+            String albumTitle,
+            int lengthInSeconds,
+            int trackNumber,
+            int discNumber,
+            int playCount,
+            LocalDateTime playDate,
+            Path file
+    ) {
+        this.id = new SimpleIntegerProperty(id);
         this.title = new SimpleStringProperty(title);
-        this.artist = new SimpleStringProperty(artist);
-        this.album = new SimpleStringProperty(album);
-        this.lengthInSeconds = length.getSeconds();
-        long seconds = length.getSeconds() % 60;
-        this.length = new SimpleStringProperty(length.toMinutes() + ":" + (seconds < 10 ? "0" + seconds : seconds));
-        this.trackNumber = trackNumber;
-        this.discNumber = discNumber;
+        this.artistTitle = new SimpleStringProperty(artistTitle);
+        this.albumTitle = new SimpleStringProperty(albumTitle);
+        this.lengthInSeconds = new SimpleIntegerProperty(lengthInSeconds);
+        this.trackNumber = new SimpleIntegerProperty(trackNumber);
+        this.discNumber = new SimpleIntegerProperty(discNumber);
         this.playCount = new SimpleIntegerProperty(playCount);
-        this.playDate = playDate;
-        this.location = location;
-        this.playing = new SimpleBooleanProperty(false);
-        this.selected = new SimpleBooleanProperty(false);
+        this.playDate = new SimpleObjectProperty<>(playDate);
+        this.file = new SimpleObjectProperty<>(file);
+
+        this.isPlaying = new SimpleBooleanProperty(false);
+        this.isSelected = new SimpleBooleanProperty(false);
     }
 
     public int getId() {
-        return this.id;
+        return id.get();
+    }
+
+    public IntegerProperty idProperty() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id.set(id);
     }
 
     public String getTitle() {
-        return this.title.get();
+        return title.get();
     }
 
     public StringProperty titleProperty() {
-        return this.title;
+        return title;
     }
 
-    public String getArtist() {
-        return this.artist.get();
+    public void setTitle(String title) {
+        this.title.set(title);
     }
 
-    public StringProperty artistProperty() {
-        return this.artist;
+    public String getArtistTitle() {
+        return artistTitle.get();
     }
 
-    public String getAlbum() {
-        return this.album.get();
+    public StringProperty artistTitleProperty() {
+        return artistTitle;
     }
 
-    public Image getArtwork() {
-        return Library.getAlbum(this.album.get()).artwork();
+    public void setArtistTitle(String artistTitle) {
+        this.artistTitle.set(artistTitle);
     }
 
-    public StringProperty albumProperty() {
-        return this.album;
+    public String getAlbumTitle() {
+        return albumTitle.get();
     }
 
-    public String getLength() {
-        return this.length.get();
+    public StringProperty albumTitleProperty() {
+        return albumTitle;
     }
 
-    public StringProperty lengthProperty() {
-        return this.length;
+    public void setAlbumTitle(String albumTitle) {
+        this.albumTitle.set(albumTitle);
     }
 
-    public long getLengthInSeconds() {
-        return this.lengthInSeconds;
+    public int getLengthInSeconds() {
+        return lengthInSeconds.get();
+    }
+
+    public IntegerProperty lengthInSecondsProperty() {
+        return lengthInSeconds;
+    }
+
+    public void setLengthInSeconds(int lengthInSeconds) {
+        this.lengthInSeconds.set(lengthInSeconds);
     }
 
     public int getTrackNumber() {
-        return this.trackNumber;
+        return trackNumber.get();
+    }
+
+    public IntegerProperty trackNumberProperty() {
+        return trackNumber;
+    }
+
+    public void setTrackNumber(int trackNumber) {
+        this.trackNumber.set(trackNumber);
     }
 
     public int getDiscNumber() {
-        return this.discNumber;
+        return discNumber.get();
+    }
+
+    public IntegerProperty discNumberProperty() {
+        return discNumber;
+    }
+
+    public void setDiscNumber(int discNumber) {
+        this.discNumber.set(discNumber);
     }
 
     public int getPlayCount() {
-        return this.playCount.get();
+        return playCount.get();
     }
 
     public IntegerProperty playCountProperty() {
-        return this.playCount;
+        return playCount;
+    }
+
+    public void setPlayCount(int playCount) {
+        this.playCount.set(playCount);
     }
 
     public LocalDateTime getPlayDate() {
-        return this.playDate;
+        return playDate.get();
     }
 
-    public String getLocation() {
-        return this.location;
+    public ObjectProperty<LocalDateTime> playDateProperty() {
+        return playDate;
+    }
+
+    public void setPlayDate(LocalDateTime playDate) {
+        this.playDate.set(playDate);
+    }
+
+    public Path getFile() {
+        return file.get();
+    }
+
+    public ObjectProperty<Path> fileProperty() {
+        return file;
+    }
+
+    public void setFile(Path file) {
+        this.file.set(file);
+    }
+
+    public boolean isPlaying() {
+        return isPlaying.get();
     }
 
     public BooleanProperty playingProperty() {
-        return this.playing;
+        return isPlaying;
     }
 
-    public boolean getPlaying() {
-        return this.playing.get();
+    public void setPlaying(boolean isPlaying) {
+        this.isPlaying.set(isPlaying);
     }
 
-    public void setPlaying(boolean playing) {
-        this.playing.set(playing);
+    public boolean isSelected() {
+        return isSelected.get();
     }
 
     public BooleanProperty selectedProperty() {
-        return this.selected;
+        return isSelected;
     }
 
-    public boolean getSelected() {
-        return this.selected.get();
+    public void setSelected(boolean isSelected) {
+        this.isSelected.set(isSelected);
     }
 
-    public void setSelected(boolean selected) {
-        this.selected.set(selected);
-    }
+//        long seconds = length.getSeconds() % 60;
+//        this.length = new SimpleStringProperty(length.toMinutes() + ":" + (seconds < 10 ? "0" + seconds : seconds));
+//    public Image getArtwork() {
+//        return Library.getAlbum(this.album.get()).artwork();
+//    }
 
     @Override
-    public int compareTo(Song other) throws NullPointerException {
-        int discComparison = Integer.compare(this.discNumber, other.discNumber);
+    public int compareTo(Song other) {
+        int discComparison = Integer.compare(this.getDiscNumber(), other.getDiscNumber());
 
         if (discComparison != 0) {
             return discComparison;
-        } else {
-            return Integer.compare(this.trackNumber, other.trackNumber);
         }
+
+        return Integer.compare(this.getTrackNumber(), other.getTrackNumber());
     }
 }

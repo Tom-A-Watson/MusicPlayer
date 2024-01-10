@@ -27,7 +27,7 @@ public class ControlPanelTableCell<S, T> extends TableCell<S, T> {
         if (empty || item == null || song == null) {
             setText(null);
             setGraphic(null);
-        } else if (!song.getSelected()) {
+        } else if (!song.isSelected()) {
             setText(item.toString());
             setGraphic(null);
             song.selectedProperty().removeListener(listener);

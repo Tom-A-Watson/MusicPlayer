@@ -219,8 +219,8 @@ public class ArtistsMainController implements Initializable, SubView {
                 } else {
                     Collections.sort(songs, (first, second) -> {
 
-                        Album firstAlbum = albums.stream().filter(x -> x.title().equals(first.getAlbum())).findFirst().get();
-                        Album secondAlbum = albums.stream().filter(x -> x.title().equals(second.getAlbum())).findFirst().get();
+                        Album firstAlbum = albums.stream().filter(x -> x.title().equals(first.getAlbumTitle())).findFirst().get();
+                        Album secondAlbum = albums.stream().filter(x -> x.title().equals(second.getAlbumTitle())).findFirst().get();
                         if (firstAlbum.compareTo(secondAlbum) != 0) {
                             return firstAlbum.compareTo(secondAlbum);
                         } else {
@@ -327,7 +327,7 @@ public class ArtistsMainController implements Initializable, SubView {
             	}
                 if (currentSong != null) {
                     currentSong.playingProperty().addListener(changeListener);
-                    row.pseudoClassStateChanged(playing, currentSong.getPlaying());
+                    row.pseudoClassStateChanged(playing, currentSong.isPlaying());
                 } else {
                     row.pseudoClassStateChanged(playing, false);
                 }
@@ -546,8 +546,8 @@ public class ArtistsMainController implements Initializable, SubView {
 
         Collections.sort(songs, (first, second) -> {
 
-            Album firstAlbum = albums.stream().filter(x -> x.title().equals(first.getAlbum())).findFirst().get();
-            Album secondAlbum = albums.stream().filter(x -> x.title().equals(second.getAlbum())).findFirst().get();
+            Album firstAlbum = albums.stream().filter(x -> x.title().equals(first.getAlbumTitle())).findFirst().get();
+            Album secondAlbum = albums.stream().filter(x -> x.title().equals(second.getAlbumTitle())).findFirst().get();
             if (firstAlbum.compareTo(secondAlbum) != 0) {
                 return firstAlbum.compareTo(secondAlbum);
             } else {
@@ -623,8 +623,8 @@ public class ArtistsMainController implements Initializable, SubView {
         } else {
         	Collections.sort(songs, (first, second) -> {
 
-                Album firstAlbum = Library.getAlbum(first.getAlbum());
-                Album secondAlbum = Library.getAlbum(second.getAlbum());
+                Album firstAlbum = Library.getAlbum(first.getAlbumTitle());
+                Album secondAlbum = Library.getAlbum(second.getAlbumTitle());
                 if (firstAlbum.compareTo(secondAlbum) != 0) {
                     return firstAlbum.compareTo(secondAlbum);
                 } else {

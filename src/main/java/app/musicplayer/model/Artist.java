@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * An artist has a collection of albums.
+ *
  * @author Almas Baim (https://github.com/AlmasB)
  */
 public record Artist(

@@ -16,6 +16,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 
 /**
@@ -33,14 +34,14 @@ public final class Serializer {
         return new SerializableSong(
                 song.getId(),
                 song.getTitle(),
-                song.getArtist(),
-                song.getAlbum(),
-                (int) song.getLengthInSeconds(),
+                song.getArtistTitle(),
+                song.getAlbumTitle(),
+                song.getLengthInSeconds(),
                 song.getTrackNumber(),
                 song.getDiscNumber(),
                 song.getPlayCount(),
                 song.getPlayDate(),
-                song.getLocation()
+                song.getFile().toAbsolutePath().toString()
         );
     }
 
@@ -50,12 +51,12 @@ public final class Serializer {
                 song.title(),
                 song.artistTitle(),
                 song.albumTitle(),
-                Duration.ofSeconds(song.lengthInSeconds()),
+                song.lengthInSeconds(),
                 song.trackNumber(),
                 song.discNumber(),
                 song.playCount(),
                 song.playDate(),
-                song.filePath()
+                Paths.get(song.filePath())
         );
     }
 

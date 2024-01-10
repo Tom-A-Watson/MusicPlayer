@@ -88,7 +88,7 @@ public class NowPlayingController implements Initializable, SubView {
             	}
             	if (currentSong != null) {
                     currentSong.playingProperty().addListener(changeListener);
-                    row.pseudoClassStateChanged(playing, currentSong.getPlaying());
+                    row.pseudoClassStateChanged(playing, currentSong.isPlaying());
                 } else {
                     row.pseudoClassStateChanged(playing, false);
                 }

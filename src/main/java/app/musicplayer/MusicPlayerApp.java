@@ -8,12 +8,9 @@ import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import app.musicplayer.model.serializable.Serializer;
-import app.musicplayer.util.Config;
 import com.almasb.fxgl.logging.ConsoleOutput;
 import com.almasb.fxgl.logging.Logger;
 import com.almasb.fxgl.logging.LoggerLevel;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -35,13 +32,16 @@ import java.util.logging.LogManager;
 
 import static app.musicplayer.util.Config.*;
 
+// TODO: adding new songs after app closed
+// TODO: adding new songs when app is running (add rescan button?)
+// TODO: serialization version for future updates
 public class MusicPlayerApp extends Application {
 
     private static final Logger log = Logger.get(MusicPlayerApp.class);
 
     private static MainController mainController;
     private static MediaPlayer mediaPlayer;
-    private static ArrayList<Song> nowPlayingList;
+    private static List<Song> nowPlayingList;
     private static int nowPlayingIndex;
     private static Song nowPlaying;
     private static Timer timer;
@@ -53,16 +53,6 @@ public class MusicPlayerApp extends Application {
     private static Object draggedItem;
 
     private static Stage stage;
-
-    // Stores the number of files in library
-    // This will then be compared to the number of files in the music directory when starting up the application to
-    // determine if the xml file needs to be updated by adding or deleting songs.
-    private static int xmlFileNum;
-
-    // Stores the last id that was assigned to a song.
-    // This is important when adding new songs after others have been deleted because the last id assigned
-    // may not necessarily be equal to the number of songs in the xml file if songs have been deleted.
-    private static int lastIdAssigned;
 
     public static class Launcher {
         public static void main(String[] args) {
@@ -136,8 +126,8 @@ public class MusicPlayerApp extends Application {
                 }
 
                 Collections.sort(nowPlayingList, (first, second) -> {
-                    Album firstAlbum = Library.getAlbum(first.getAlbum());
-                    Album secondAlbum = Library.getAlbum(second.getAlbum());
+                    Album firstAlbum = Library.getAlbum(first.getAlbumTitle());
+                    Album secondAlbum = Library.getAlbum(second.getAlbumTitle());
                     if (firstAlbum.compareTo(secondAlbum) != 0) {
                         return firstAlbum.compareTo(secondAlbum);
                     } else {
@@ -152,8 +142,7 @@ public class MusicPlayerApp extends Application {
             timer = new Timer();
             timerCounter = 0;
             secondsPlayed = 0;
-            String path = nowPlaying.getLocation();
-            Media media = new Media(Paths.get(path).toUri().toString());
+            Media media = new Media(nowPlaying.getFile().toUri().toString());
             mediaPlayer = new MediaPlayer(media);
             mediaPlayer.setVolume(0.5);
             mediaPlayer.setOnEndOfMedia(new SongSkipper());
@@ -326,24 +315,16 @@ public class MusicPlayerApp extends Application {
     }
 
     public static void toggleShuffle() {
-
         isShuffleActive = !isShuffleActive;
 
         if (isShuffleActive) {
             Collections.shuffle(nowPlayingList);
         } else {
-            Collections.sort(nowPlayingList, (first, second) -> {
-                int result = Library.getAlbum(first.getAlbum()).compareTo(Library.getAlbum(second.getAlbum()));
-                if (result != 0) {
-                    return result;
-                }
-                result = Library.getAlbum(first.getAlbum()).compareTo(Library.getAlbum(second.getAlbum()));
-                if (result != 0) {
-                    return result;
-                }
-                result = first.compareTo(second);
-                return result;
-            });
+            Collections.sort(nowPlayingList,
+                    Comparator
+                            .comparing((Song song) -> Library.getAlbum(song.getAlbumTitle()))
+                            .thenComparing(song -> song)
+            );
         }
 
         nowPlayingIndex = nowPlayingList.indexOf(nowPlaying);
@@ -406,8 +387,7 @@ public class MusicPlayerApp extends Application {
             timer = new Timer();
             timerCounter = 0;
             secondsPlayed = 0;
-            String path = song.getLocation();
-            Media media = new Media(Paths.get(path).toUri().toString());
+            Media media = new Media(song.getFile().toUri().toString());
             mediaPlayer = new MediaPlayer(media);
             mediaPlayer.volumeProperty().bind(mainController.getVolumeSlider().valueProperty().divide(200));
             mediaPlayer.setOnEndOfMedia(new SongSkipper());
@@ -429,7 +409,7 @@ public class MusicPlayerApp extends Application {
 
     private static void songPlayed(Song song) {
         song.playCountProperty().set(song.playCountProperty().get() + 1);
-        song.playDate = LocalDateTime.now();
+        song.setPlayDate(LocalDateTime.now());
     }
 
     public static Song getNowPlaying() {
@@ -458,21 +438,5 @@ public class MusicPlayerApp extends Application {
 
     public static Object getDraggedItem() {
         return draggedItem;
-    }
-
-    public static int getXMLFileNum() {
-        return xmlFileNum;
-    }
-
-    public static void setXMLFileNum(int i) {
-        xmlFileNum = i;
-    }
-
-    public static int getLastIdAssigned() {
-        return lastIdAssigned;
-    }
-
-    public static void setLastIdAssigned(int i) {
-        lastIdAssigned = i;
     }
 }

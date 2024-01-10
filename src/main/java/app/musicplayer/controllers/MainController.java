@@ -263,8 +263,9 @@ public class MainController implements Initializable {
         Song song = MusicPlayerApp.getNowPlaying();
         if (song != null) {
             nowPlayingTitle.setText(song.getTitle());
-            nowPlayingArtist.setText(song.getArtist());
-            nowPlayingArtwork.setImage(song.getArtwork());
+            nowPlayingArtist.setText(song.getArtistTitle());
+            // TODO:
+            //nowPlayingArtwork.setImage(song.getArtwork());
         } else {
             nowPlayingTitle.setText("");
             nowPlayingArtist.setText("");
@@ -298,7 +299,11 @@ public class MainController implements Initializable {
         Song song = MusicPlayerApp.getNowPlaying();
         if (song != null) {
             timePassed.setText("0:00");
-            timeRemaining.setText(song.getLength());
+
+            timeRemaining.setText("TODO");
+
+            // TODO:
+            // timeRemaining.setText(song.getLengthInSeconds());
         } else {
             timePassed.setText("");
             timeRemaining.setText("");
@@ -702,7 +707,7 @@ public class MainController implements Initializable {
             Task<Void> task = new Task<Void>() {
                 @Override protected Void call() throws Exception {
                     Platform.runLater(() -> {
-                        Library.getSongs().stream().filter(x -> x.getSelected()).forEach(x -> x.setSelected(false));
+                        Library.getSongs().stream().filter(x -> x.isSelected()).forEach(x -> x.setSelected(false));
                         subViewRoot.setVisible(false);
                         subViewRoot.setContent(view);
                         subViewRoot.getContent().setOpacity(0);
@@ -777,8 +782,8 @@ public class MainController implements Initializable {
 
         ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
         Song song = MusicPlayerApp.getNowPlaying();
-        Artist artist = Library.getArtist(song.getArtist());
-        Album album = artist.albums().stream().filter(x -> x.title().equals(song.getAlbum())).findFirst().get();
+        Artist artist = Library.getArtist(song.getArtistTitle());
+        Album album = artist.albums().stream().filter(x -> x.title().equals(song.getAlbumTitle())).findFirst().get();
         artistsMainController.selectArtist(artist);
         artistsMainController.selectAlbum(album);
         artistsMainController.selectSong(song);
@@ -947,8 +952,8 @@ public class MainController implements Initializable {
                 cell.getStyleClass().add("searchResult");
                 cell.setOnMouseClicked(event -> {
                     loadView("ArtistsMain");
-                    Artist artist = Library.getArtist(song.getArtist());
-                    Album album = artist.albums().stream().filter(x -> x.title().equals(song.getAlbum())).findFirst().get();
+                    Artist artist = Library.getArtist(song.getArtistTitle());
+                    Album album = artist.albums().stream().filter(x -> x.title().equals(song.getAlbumTitle())).findFirst().get();
                     ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
                     artistsMainController.selectArtist(artist);
                     artistsMainController.selectAlbum(album);

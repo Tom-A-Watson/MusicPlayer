@@ -78,30 +78,33 @@ public final class Library {
                     Tag tag = audioFile.getTag();
                     AudioHeader header = audioFile.getAudioHeader();
 
+                    String title = tag.getFirst(FieldKey.TITLE);
                     String artistTitle = tag.getFirst(FieldKey.ALBUM_ARTIST);
-                    if (artistTitle == null || artistTitle.equals("") || artistTitle.equals("null")) {
+
+                    if (isEmpty(artistTitle)) {
                         artistTitle = tag.getFirst(FieldKey.ARTIST);
                     }
 
                     String albumTitle = tag.getFirst(FieldKey.ALBUM);
+
                     int lengthSeconds = header.getTrackLength();
                     String track = tag.getFirst(FieldKey.TRACK);
-                    int trackNumber = (track == null || track.equals("") || track.equals("null")) ? 0 : Integer.parseInt(track);
+                    int trackNumber = isEmpty(track) ? 0 : Integer.parseInt(track);
 
                     String disc = tag.getFirst(FieldKey.DISC_NO);
-                    int discNumber = (disc == null || disc.equals("") || disc.equals("null")) ? 0 : Integer.parseInt(disc);
+                    int discNumber = isEmpty(disc) ? 0 : Integer.parseInt(disc);
 
                     songs.add(new Song(
                             id++,
-                            tag.getFirst(FieldKey.TITLE),
-                            artistTitle,
-                            albumTitle,
-                            Duration.ofSeconds(lengthSeconds),
+                            makeSafe(title),
+                            makeSafe(artistTitle),
+                            makeSafe(albumTitle),
+                            lengthSeconds,
                             trackNumber,
                             discNumber,
                             0,
                             LocalDateTime.now(),
-                            file.getAbsolutePath()
+                            file.toPath()
                     ));
 
                 } catch (Exception ex) {
@@ -114,6 +117,17 @@ public final class Library {
                 loadSongs(file);
             }
         }
+    }
+
+    private static String makeSafe(String s) {
+        if (isEmpty(s))
+            return "Unknown";
+
+        return s;
+    }
+
+    private static boolean isEmpty(String s) {
+        return s == null || s.isEmpty() || s.equals("null");
     }
 
     public static boolean isSupportedFileType(String fileName) {
@@ -171,51 +185,37 @@ public final class Library {
 
 
     private static Song getSong(int id) {
-        if (songs == null) {
-            getSongs();
-        }
         return songs.get(id);
     }
 
     public static Song getSong(String title) {
-        if (songs == null) {
-            getSongs();
-        }
         return songs.stream().filter(song -> title.equals(song.getTitle())).findFirst().get();
     }
 
     public static Album getAlbum(String title) {
-        if (albums == null) {
-            getAlbums();
-        }
         return albums.stream().filter(album -> title.equals(album.title())).findFirst().get();
     }
 
     private static void updateAlbumsList() {
         TreeMap<String, List<Song>> albumMap = new TreeMap<>(
-                songs.stream()
-                        .filter(song -> song.getAlbum() != null)
-                        .collect(Collectors.groupingBy(Song::getAlbum))
+                songs.stream().collect(Collectors.groupingBy(Song::getAlbumTitle))
         );
 
         int id = 0;
 
         for (Map.Entry<String, List<Song>> entry : albumMap.entrySet()) {
-            ArrayList<Song> songs = new ArrayList<>();
 
-            songs.addAll(entry.getValue());
+            ArrayList<Song> songs = new ArrayList<>(entry.getValue());
 
             TreeMap<String, List<Song>> artistMap = new TreeMap<>(
                     songs.stream()
-                            .filter(song -> song.getArtist() != null)
-                            .collect(Collectors.groupingBy(Song::getArtist))
+                            .collect(Collectors.groupingBy(Song::getArtistTitle))
             );
 
             for (Map.Entry<String, List<Song>> e : artistMap.entrySet()) {
-                ArrayList<Song> albumSongs = new ArrayList<>();
-                String artist = e.getValue().get(0).getArtist();
+                String artist = e.getValue().get(0).getArtistTitle();
 
-                albumSongs.addAll(e.getValue());
+                ArrayList<Song> albumSongs = new ArrayList<>(e.getValue());
 
                 albums.add(new Album(id++, entry.getKey(), artist, getArtwork(songs), albumSongs));
             }
@@ -226,8 +226,7 @@ public final class Library {
         Image artwork = null;
 
         try {
-            String location = songs.get(0).getLocation();
-            AudioFile audioFile = AudioFileIO.read(new File(location));
+            AudioFile audioFile = AudioFileIO.read(songs.get(0).getFile().toFile());
             Tag tag = audioFile.getTag();
             byte[] bytes = tag.getFirstArtwork().getBinaryData();
             ByteArrayInputStream in = new ByteArrayInputStream(bytes);
@@ -245,9 +244,6 @@ public final class Library {
     }
 
     public static Artist getArtist(String title) {
-        if (artists == null) {
-            getArtists();
-        }
         return artists.stream().filter(artist -> title.equals(artist.title())).findFirst().get();
     }
 
@@ -280,9 +276,6 @@ public final class Library {
     }
 
     public static Playlist getPlaylist(int id) {
-        if (playlists == null) {
-            getPlaylists();
-        }
         // Gets the play list size.
         int playListSize = Library.getPlaylists().size();
         // The +2 takes into account the two default play lists.
@@ -291,9 +284,6 @@ public final class Library {
     }
 
     public static Playlist getPlaylist(String title) {
-        if (playlists == null) {
-            getPlaylists();
-        }
         return playlists.stream().filter(playlist -> title.equals(playlist.getTitle())).findFirst().get();
     }
 
