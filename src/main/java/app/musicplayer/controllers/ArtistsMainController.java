@@ -198,10 +198,10 @@ public class ArtistsMainController implements Initializable, SubView {
         	event.consume();
         });
 
-        ObservableList<Artist> artists = Library.getArtists();
+        List<Artist> artists = Library.getArtists();
         Collections.sort(artists);
         
-        artistList.setItems(artists);
+        artistList.setItems(FXCollections.observableArrayList(artists));
 
         artistList.setOnMouseClicked(event -> {
 

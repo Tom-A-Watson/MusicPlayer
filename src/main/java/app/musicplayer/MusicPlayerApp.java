@@ -7,10 +7,13 @@ import app.musicplayer.model.Album;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
+import app.musicplayer.model.serializable.Serializer;
 import app.musicplayer.util.Config;
 import com.almasb.fxgl.logging.ConsoleOutput;
 import com.almasb.fxgl.logging.Logger;
 import com.almasb.fxgl.logging.LoggerLevel;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -29,6 +32,8 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.LogManager;
+
+import static app.musicplayer.util.Config.*;
 
 public class MusicPlayerApp extends Application {
 
@@ -82,26 +87,31 @@ public class MusicPlayerApp extends Application {
             MusicPlayerApp.stage.setMinWidth(650);
             MusicPlayerApp.stage.setMinHeight(480);
             MusicPlayerApp.stage.setTitle("Music Player");
-            MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(Config.IMG + "Icon.png").toString()));
+            MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(IMG + "Icon.png").toString()));
             MusicPlayerApp.stage.setOnCloseRequest(event -> {
-                Platform.exit();
 
-                // TODO: find alive threads
-                System.exit(0);
+                try {
+                    Serializer.writeToFile(LIBRARY_FILE);
+
+                    if (timer != null) {
+                        timer.cancel();
+                    }
+                } catch (Exception e) {
+                    log.warning("Error during exit", e);
+                }
             });
 
             // TODO: splash screen animation while loading?
 
-            // Load main layout from fxml file.
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "SplashScreen.fxml"));
+            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "SplashScreen.fxml"));
             Parent view = loader.load();
 
-            // Shows the scene containing the layout.
             Scene scene = new Scene(view);
             stage.setScene(scene);
             stage.show();
 
-            if (Files.exists(Config.LIBRARY_FILE)) {
+            if (Files.exists(LIBRARY_FILE)) {
+                Serializer.readFromFile(LIBRARY_FILE);
                 initInBackground();
             } else {
                 showImportMusicView();
@@ -115,16 +125,10 @@ public class MusicPlayerApp extends Application {
 
     private void initInBackground() {
         Thread thread = new Thread(() -> {
-            // Retrieves song, album, artist, and playlist data from library.
-            Library.getSongs();
-            Library.getAlbums();
-            Library.getArtists();
-            Library.getPlaylists();
-
             nowPlayingList = Library.loadPlayingList();
 
+            // TODO: check logic
             if (nowPlayingList.isEmpty()) {
-
                 Artist artist = Library.getArtists().get(0);
 
                 for (Album album : artist.albums()) {
@@ -162,7 +166,7 @@ public class MusicPlayerApp extends Application {
     }
 
     private void showImportMusicView() throws Exception {
-        FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(Config.FXML + "ImportMusicDialog.fxml"));
+        FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(FXML + "ImportMusicDialog.fxml"));
         Parent view = loader.load();
 
         ImportMusicController controller = loader.getController();
@@ -181,7 +185,7 @@ public class MusicPlayerApp extends Application {
     private void initMain() {
         try {
             // Load main layout from fxml file.
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "Main.fxml"));
+            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "Main.fxml"));
             BorderPane view = loader.load();
 
             // Shows the scene containing the layout.
@@ -376,13 +380,11 @@ public class MusicPlayerApp extends Application {
     public static void addSongToNowPlayingList(Song song) {
         if (!nowPlayingList.contains(song)) {
             nowPlayingList.add(song);
-            //Library.savePlayingList();
         }
     }
 
     public static void setNowPlayingList(List<Song> list) {
         nowPlayingList = new ArrayList<>(list);
-        //Library.savePlayingList();
     }
 
     public static void setNowPlaying(Song song) {
@@ -428,46 +430,6 @@ public class MusicPlayerApp extends Application {
     private static void songPlayed(Song song) {
         song.playCountProperty().set(song.playCountProperty().get() + 1);
         song.playDate = LocalDateTime.now();
-
-        // TODO:
-//
-//        Thread thread = new Thread(() -> {
-//
-//            try {
-//
-//                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-//                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-//                Document doc = docBuilder.parse(Resources.JAR + "library.xml");
-//
-//                XPathFactory xPathfactory = XPathFactory.newInstance();
-//                XPath xpath = xPathfactory.newXPath();
-//
-//                XPathExpression expr = xpath.compile("/library/songs/song/playCount[../id/text() = \"" + song.getId() + "\"]");
-//                Node playCount = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
-//
-//                expr = xpath.compile("/library/songs/song/playDate[../id/text() = \"" + song.getId() + "\"]");
-//                Node playDate = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
-//
-//                playCount.setTextContent(Integer.toString(song.getPlayCount()));
-//                playDate.setTextContent(song.getPlayDate().toString());
-//
-//                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-//                Transformer transformer = transformerFactory.newTransformer();
-//                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-//                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-//                DOMSource source = new DOMSource(doc);
-//                File xmlFile = new File(Resources.JAR + "library.xml");
-//                StreamResult result = new StreamResult(xmlFile);
-//                transformer.transform(source, result);
-//
-//            } catch (Exception ex) {
-//
-//                ex.printStackTrace();
-//            }
-//
-//        });
-//
-//        thread.start();
     }
 
     public static Song getNowPlaying() {

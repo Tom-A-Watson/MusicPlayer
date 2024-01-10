@@ -21,6 +21,7 @@ import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class ControlPanelController implements Initializable {
@@ -60,7 +61,7 @@ public class ControlPanelController implements Initializable {
         // Retrieves the selected song to add to the desired playlist.
         Song selectedSong = MusicPlayerApp.getMainController().getSubViewController().getSelectedSong();
 
-        ObservableList<Playlist> playlists = Library.getPlaylists();
+        List<Playlist> playlists = Library.getPlaylists();
 
         // Retrieves all the playlist titles to create menu items.
         ObservableList<String> playlistTitles = FXCollections.observableArrayList();

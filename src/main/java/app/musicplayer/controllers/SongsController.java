@@ -10,6 +10,7 @@ import app.musicplayer.util.SubView;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
@@ -25,6 +26,7 @@ import javafx.util.Duration;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class SongsController implements Initializable, SubView {
@@ -80,11 +82,11 @@ public class SongsController implements Initializable, SubView {
         });
         
         // Retrieves the list of songs in the library, sorts them, and adds them to the table.
-        ObservableList<Song> songs = Library.getSongs();
+        List<Song> songs = Library.getSongs();
 
         Collections.sort(songs, (x, y) -> compareSongs(x, y));
         
-        tableView.setItems(songs);
+        tableView.setItems(FXCollections.observableArrayList(songs));
 
         tableView.setRowFactory(x -> {
             TableRow<Song> row = new TableRow<>();

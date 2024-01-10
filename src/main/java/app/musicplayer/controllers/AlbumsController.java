@@ -35,6 +35,7 @@ import javafx.util.Duration;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class AlbumsController implements Initializable, SubView {
@@ -71,7 +72,7 @@ public class AlbumsController implements Initializable, SubView {
 		
 		songTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		
-		ObservableList<Album> albums = Library.getAlbums();
+		List<Album> albums = Library.getAlbums();
 		Collections.sort(albums);
 
         int limit = (albums.size() < 25) ? albums.size() : 25;

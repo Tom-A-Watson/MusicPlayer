@@ -28,6 +28,7 @@ import javafx.util.Duration;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class ArtistsController implements Initializable, SubView {
@@ -37,7 +38,7 @@ public class ArtistsController implements Initializable, SubView {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        ObservableList<Artist> artists = Library.getArtists();
+        List<Artist> artists = Library.getArtists();
         Collections.sort(artists);
 
         int limit = (artists.size() < 25) ? artists.size() : 25;

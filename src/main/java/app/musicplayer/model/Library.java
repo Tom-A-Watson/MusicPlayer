@@ -43,9 +43,27 @@ public final class Library {
                 musicDirectory = directory;
                 loadSongs(directory.toFile());
 
+                initAll();
+
                 return true;
             }
         };
+    }
+
+    public static void importFromLibraryFile(String musicDirPath, List<Song> parsedSongs) {
+        musicDirectory = Paths.get(musicDirPath);
+        songs.addAll(parsedSongs);
+        initAll();
+    }
+
+    private static void initAll() {
+        updateAlbumsList();
+        updateArtistsList();
+
+        // update playlists
+        playlists.add(new MostPlayedPlaylist(-2));
+        playlists.add(new RecentlyPlayedPlaylist(-1));
+        playlists.sort((p1, p2) -> Integer.compare(p2.getId(), p1.getId()));
     }
 
     private static void loadSongs(File directory) {
@@ -119,19 +137,38 @@ public final class Library {
         }
     }
 
-    /**
-     * Gets a list of songs.
-     * @return observable list of songs
-     */
-    public static ObservableList<Song> getSongs() {
-        // If the observable list of songs has not been initialized.
-        if (songs == null) {
-            songs = new ArrayList<>();
-            // Updates the songs array list.
-            updateSongsList();
-        }
-        return FXCollections.observableArrayList(songs);
+    public static List<Song> getSongs() {
+        return songs;
     }
+
+    public static List<Album> getAlbums() {
+        return albums;
+    }
+
+    public static List<Artist> getArtists() {
+        return artists;
+    }
+
+    public static List<Playlist> getPlaylists() {
+        return playlists;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private static Song getSong(int id) {
         if (songs == null) {
@@ -147,116 +184,6 @@ public final class Library {
         return songs.stream().filter(song -> title.equals(song.getTitle())).findFirst().get();
     }
 
-    private static void updateSongsList() {
-        // TODO:
-        System.out.println("UPDATING SONGS LIST");
-
-//        try {
-//
-//            XMLInputFactory factory = XMLInputFactory.newInstance();
-//            factory.setProperty("javax.xml.stream.isCoalescing", true);
-//            FileInputStream is = new FileInputStream(new File(Resources.JAR + "library.xml"));
-//            XMLStreamReader reader = factory.createXMLStreamReader(is, "UTF-8");
-//
-//            String element = "";
-//            int id = -1;
-//            String title = null;
-//            String artist = null;
-//            String album = null;
-//            Duration length = null;
-//            int trackNumber = -1;
-//            int discNumber = -1;
-//            int playCount = -1;
-//            LocalDateTime playDate = null;
-//            String location = null;
-//
-//            while(reader.hasNext()) {
-//                reader.next();
-//
-//                if (reader.isWhiteSpace()) {
-//                    continue;
-//                } else if (reader.isStartElement()) {
-//                    element = reader.getName().getLocalPart();
-//                } else if (reader.isCharacters()) {
-//                    String value = reader.getText();
-//
-//                    switch (element) {
-//                        case ID:
-//                            id = Integer.parseInt(value);
-//                            break;
-//                        case TITLE:
-//                            title = value;
-//                            break;
-//                        case ARTIST:
-//                            artist = value;
-//                            break;
-//                        case ALBUM:
-//                            album = value;
-//                            break;
-//                        case LENGTH:
-//                            length = Duration.ofSeconds(Long.parseLong(value));
-//                            break;
-//                        case TRACKNUMBER:
-//                            trackNumber = Integer.parseInt(value);
-//                            break;
-//                        case DISCNUMBER:
-//                            discNumber = Integer.parseInt(value);
-//                            break;
-//                        case PLAYCOUNT:
-//                            playCount = Integer.parseInt(value);
-//                            break;
-//                        case PLAYDATE:
-//                            playDate = LocalDateTime.parse(value);
-//                            break;
-//                        case LOCATION:
-//                            location = value;
-//                            break;
-//                    } // End switch
-//                } else if (reader.isEndElement() && reader.getName().getLocalPart().equals("song")) {
-//
-//                    songs.add(new Song(id, title, artist, album, length, trackNumber, discNumber, playCount, playDate, location));
-//                    id = -1;
-//                    title = null;
-//                    artist = null;
-//                    album = null;
-//                    length = null;
-//                    trackNumber = -1;
-//                    discNumber = -1;
-//                    playCount = -1;
-//                    playDate = null;
-//                    location = null;
-//
-//                } else if (reader.isEndElement() && reader.getName().getLocalPart().equals("songs")) {
-//
-//                    reader.close();
-//                    break;
-//                }
-//            } // End while
-//
-//            reader.close();
-//
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
-    }
-
-    /**
-     * Gets a list of albums.
-     *
-     * @return observable list of albums
-     */
-    public static ObservableList<Album> getAlbums() {
-        // If the observable list of albums has not been initialized.
-        if (albums == null) {
-            if (songs == null) {
-                getSongs();
-            }
-            // Updates the albums array list.
-            updateAlbumsList();
-        }
-        return FXCollections.observableArrayList(albums);
-    }
-
     public static Album getAlbum(String title) {
         if (albums == null) {
             getAlbums();
@@ -265,8 +192,6 @@ public final class Library {
     }
 
     private static void updateAlbumsList() {
-        albums = new ArrayList<>();
-
         TreeMap<String, List<Song>> albumMap = new TreeMap<>(
                 songs.stream()
                         .filter(song -> song.getAlbum() != null)
@@ -300,41 +225,23 @@ public final class Library {
     private static Image getArtwork(List<Song> songs) {
         Image artwork = null;
 
-        if (artwork == null) {
+        try {
+            String location = songs.get(0).getLocation();
+            AudioFile audioFile = AudioFileIO.read(new File(location));
+            Tag tag = audioFile.getTag();
+            byte[] bytes = tag.getFirstArtwork().getBinaryData();
+            ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+            artwork = new Image(in, 300, 300, true, true);
 
-            try {
-                String location = songs.get(0).getLocation();
-                AudioFile audioFile = AudioFileIO.read(new File(location));
-                Tag tag = audioFile.getTag();
-                byte[] bytes = tag.getFirstArtwork().getBinaryData();
-                ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-                artwork = new Image(in, 300, 300, true, true);
-
-                if (artwork.isError()) {
-                    artwork = new Image(Config.IMG + "albumsIcon.png");
-                }
-
-            } catch (Exception ex) {
+            if (artwork.isError()) {
                 artwork = new Image(Config.IMG + "albumsIcon.png");
             }
-        }
-        return artwork;
-    }
 
-    /**
-     * Gets a list of artists.
-     *
-     * @return observable list of artists
-     */
-    public static ObservableList<Artist> getArtists() {
-        if (artists == null) {
-            if (albums == null) {
-                getAlbums();
-            }
-            // Updates the artists array list.
-            updateArtistsList();
+        } catch (Exception ex) {
+            artwork = new Image(Config.IMG + "albumsIcon.png");
         }
-        return FXCollections.observableArrayList(artists);
+
+        return artwork;
     }
 
     public static Artist getArtist(String title) {
@@ -345,8 +252,6 @@ public final class Library {
     }
 
     private static void updateArtistsList() {
-        artists = new ArrayList<>();
-
         TreeMap<String, List<Album>> artistMap = new TreeMap<>(
                 albums.stream()
                         .filter(album -> album.artistTitle() != null)
@@ -355,9 +260,7 @@ public final class Library {
 
         for (Map.Entry<String, List<Album>> entry : artistMap.entrySet()) {
 
-            ArrayList<Album> albums = new ArrayList<>();
-
-            albums.addAll(entry.getValue());
+            ArrayList<Album> albums = new ArrayList<>(entry.getValue());
 
             artists.add(new Artist(entry.getKey(), new Image(Config.IMG + "artistsIcon.png"), albums));
         }
@@ -374,92 +277,6 @@ public final class Library {
 
     public static void removePlaylist(Playlist playlist) {
         playlists.remove(playlist);
-    }
-
-    public static ObservableList<Playlist> getPlaylists() {
-        System.out.println("GETTING PLAYLISTS");
-
-        if (playlists == null) {
-
-            playlists = new ArrayList<>();
-
-            // TODO:
-//            int id = 0;
-//
-//            try {
-//                XMLInputFactory factory = XMLInputFactory.newInstance();
-//                factory.setProperty("javax.xml.stream.isCoalescing", true);
-//                FileInputStream is = new FileInputStream(new File(Resources.JAR + "library.xml"));
-//                XMLStreamReader reader = factory.createXMLStreamReader(is, "UTF-8");
-//
-//                String element;
-//                boolean isPlaylist = false;
-//                String title = null;
-//                ArrayList<Song> songs = new ArrayList<>();
-//
-//                while(reader.hasNext()) {
-//                    reader.next();
-//                    if (reader.isWhiteSpace()) {
-//                        continue;
-//                    } else if (reader.isStartElement()) {
-//                        element = reader.getName().getLocalPart();
-//
-//                        // If the element is a play list, reads the element attributes to retrieve
-//                        // the play list id and title.
-//                        if (element.equals("playlist")) {
-//                            isPlaylist = true;
-//
-//                            id = Integer.parseInt(reader.getAttributeValue(0));
-//                            title = reader.getAttributeValue(1);
-//                        }
-//                    } else if (reader.isCharacters() && isPlaylist) {
-//                        // Retrieves the reader value (song ID), gets the song and adds it to the songs list.
-//                        String value = reader.getText();
-//                        songs.add(getSong(Integer.parseInt(value)));
-//                    } else if (reader.isEndElement() && reader.getName().getLocalPart().equals("playlist")) {
-//                        // If the play list id, title, and songs have been retrieved, a new play list is created
-//                        // and the values reset.
-//                        var p = new Playlist(id, title);
-//                        p.addSongsNoXML(songs);
-//
-//                        playlists.add(p);
-//                        id = -1;
-//                        title = null;
-//                        songs = new ArrayList<>();
-//                    } else if (reader.isEndElement() && reader.getName().getLocalPart().equals("playlists")) {
-//                        reader.close();
-//                        break;
-//                    }
-//                }
-//                reader.close();
-//            } catch (Exception ex) {
-//                ex.printStackTrace();
-//            }
-//
-//            playlists.sort((x, y) -> {
-//                if (x.getId() < y.getId()) {
-//                    return 1;
-//                } else if (x.getId() > y.getId()) {
-//                    return -1;
-//                } else {
-//                    return 0;
-//                }
-//            });
-
-            playlists.add(new MostPlayedPlaylist(-2));
-            playlists.add(new RecentlyPlayedPlaylist(-1));
-        } else {
-            playlists.sort((x, y) -> {
-                if (x.getId() < y.getId()) {
-                    return 1;
-                } else if (x.getId() > y.getId()) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            });
-        }
-        return FXCollections.observableArrayList(playlists);
     }
 
     public static Playlist getPlaylist(int id) {
@@ -481,46 +298,7 @@ public final class Library {
     }
 
     public static ArrayList<Song> loadPlayingList() {
-        // TODO:
-        System.out.println("LOADING PLAYING LIST");
-
         ArrayList<Song> nowPlayingList = new ArrayList<>();
-//
-//        try {
-//
-//            XMLInputFactory factory = XMLInputFactory.newInstance();
-//            FileInputStream is = new FileInputStream(new File(Resources.JAR + "library.xml"));
-//            XMLStreamReader reader = factory.createXMLStreamReader(is, "UTF-8");
-//
-//            String element = "";
-//            boolean isNowPlayingList = false;
-//
-//            while(reader.hasNext()) {
-//                reader.next();
-//                if (reader.isWhiteSpace()) {
-//                    continue;
-//                } else if (reader.isCharacters() && isNowPlayingList) {
-//                    String value = reader.getText();
-//                    if (element.equals(ID)) {
-//                        nowPlayingList.add(getSong(Integer.parseInt(value)));
-//                    }
-//                } else if (reader.isStartElement()) {
-//                    element = reader.getName().getLocalPart();
-//                    if (element.equals("nowPlayingList")) {
-//                        isNowPlayingList = true;
-//                    }
-//                } else if (reader.isEndElement() && reader.getName().getLocalPart().equals("nowPlayingList")) {
-//                    reader.close();
-//                    break;
-//                }
-//            }
-//
-//            reader.close();
-//
-//        } catch (Exception ex) {
-//
-//            ex.printStackTrace();
-//        }
 
         return nowPlayingList;
     }
