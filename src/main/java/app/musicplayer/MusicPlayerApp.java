@@ -19,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Modality;
@@ -86,24 +87,28 @@ public class MusicPlayerApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
-        Logger.get(MusicPlayerApp.class).info("start(Stage)");
-
-        timer = new Timer();
-        timerCounter = 0;
-        secondsPlayed = 0;
-
-        MusicPlayerApp.stage = stage;
-        MusicPlayerApp.stage.setTitle("Music Player");
-        MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(Resources.IMG + "Icon.png").toString()));
-        MusicPlayerApp.stage.setOnCloseRequest(event -> {
-            Platform.exit();
-
-            // TODO: find alive threads
-            System.exit(0);
-        });
-
         try {
+            Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
+            Logger.get(MusicPlayerApp.class).info("start(Stage)");
+
+            timer = new Timer();
+            timerCounter = 0;
+            secondsPlayed = 0;
+
+            MusicPlayerApp.stage = stage;
+            MusicPlayerApp.stage.setMinWidth(650);
+            MusicPlayerApp.stage.setMinHeight(480);
+            MusicPlayerApp.stage.setTitle("Music Player");
+            MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(Resources.IMG + "Icon.png").toString()));
+            MusicPlayerApp.stage.setOnCloseRequest(event -> {
+                Platform.exit();
+
+                // TODO: find alive threads
+                System.exit(0);
+            });
+
+            // TODO: splash screen animation while loading?
+
             // Load main layout from fxml file.
             FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Resources.FXML + "SplashScreen.fxml"));
             Parent view = loader.load();
@@ -114,13 +119,17 @@ public class MusicPlayerApp extends Application {
             stage.show();
 
             // Calls the function to check if the library.xml file exists. If it does not, the file is created.
-            checkLibraryXML();
+            var isLibPresent = checkLibraryXML();
+
+            // if lib is present, init now, otherwise wait until the user imports the music dir
+            if (isLibPresent) {
+                initInBackground();
+            }
+
         } catch (Exception ex) {
             ex.printStackTrace();
             System.exit(0);
         }
-
-        initInBackground();
     }
 
     private void initInBackground() {
@@ -164,31 +173,6 @@ public class MusicPlayerApp extends Application {
             mediaPlayer.setVolume(0.5);
             mediaPlayer.setOnEndOfMedia(new SongSkipper());
 
-            File imgFolder = new File(Resources.JAR + "/img");
-            if (!imgFolder.exists()) {
-
-                Thread thread1 = new Thread(() -> {
-                    //Library.getArtists().forEach(Artist::downloadArtistImage);
-                });
-
-                Thread thread2 = new Thread(() -> {
-                    //Library.getAlbums().forEach(Album::downloadArtwork);
-                });
-
-                thread1.start();
-                thread2.start();
-            }
-
-            new Thread(() -> {
-                XMLEditor.getNewSongs().forEach(song -> {
-                    try {
-                        //Library.getArtist(song.getArtist()).downloadArtistImage();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                });
-            }).start();
-
             // Calls the function to initialize the main layout.
             Platform.runLater(this::initMain);
         });
@@ -196,7 +180,10 @@ public class MusicPlayerApp extends Application {
         thread.start();
     }
 
-    private static void checkLibraryXML() {
+    /**
+     * @return true if exists, false otherwise
+     */
+    private boolean checkLibraryXML() {
         // Finds the jar file and the path of its parent folder.
         File musicPlayerJAR = null;
         try {
@@ -213,12 +200,11 @@ public class MusicPlayerApp extends Application {
         File libraryXML = new File(Resources.JAR + "library.xml");
 
         // If the file exists, check if the music directory has changed.
-        Path musicDirectory;
         if (libraryXML.exists()) {
             // Gets music directory path from xml file so that the number of files in the
             // music directory can be counted and compared to the data in the xml file.
             // It is then passed as an argument when creating the directory watch.
-            musicDirectory = xmlMusicDirPathFinder();
+            Path musicDirectory = xmlMusicDirPathFinder();
 
             // Try/catch block to deal with case where music directory has been renamed.
             try {
@@ -233,23 +219,20 @@ public class MusicPlayerApp extends Application {
                     // Updates the xml file from the saved music directory.
                     updateLibraryXML(musicDirectory);
                 }
+
+                return true;
                 // NullPointerException thrown by musicDirFileNumFinder().
                 // It occurs if the music directory has been renamed
             } catch (NullPointerException npe) {
                 createLibraryXML();
-                // Gets the number of files saved in the xml file.
-                xmlFileNum = xmlMusicDirFileNumFinder();
-                // Gets music directory path from xml file so that it can be passed as an argument when creating the directory watch.
-                musicDirectory = xmlMusicDirPathFinder();
+
+                return false;
             }
 
             // If the library.xml file does not exist, the file is created from the user specified music library location.
-        } else if (!libraryXML.exists()) {
+        } else {
             createLibraryXML();
-            // Gets the number of files saved in the xml file.
-            xmlFileNum = xmlMusicDirFileNumFinder();
-            // Gets music directory path from xml file so that it can be passed as an argument when creating the directory watch.
-            musicDirectory = xmlMusicDirPathFinder();
+            return false;
         }
     }
 
@@ -344,37 +327,24 @@ public class MusicPlayerApp extends Application {
         XMLEditor.addDeleteChecker();
     }
 
-    private static void createLibraryXML() {
+    // TODO: rename, e.g. show import dialog
+    private void createLibraryXML() {
         try {
             FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(Resources.FXML + "ImportMusicDialog.fxml"));
-            Parent importView = loader.load();
+            Parent view = loader.load();
 
-            // Create the dialog Stage.
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Music Player Configuration");
-            // Forces user to focus on dialog.
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            // Sets minimal decorations for dialog.
-            dialogStage.initStyle(StageStyle.UTILITY);
-            // Prevents the alert from being re-sizable.
-            dialogStage.setResizable(false);
-            dialogStage.initOwner(stage);
-
-            // Sets the import music dialog scene in the stage.
-            dialogStage.setScene(new Scene(importView));
+            VBox root = (VBox) stage.getScene().getRoot();
+            root.getChildren().add(view);
 
             // Set the dialog into the controller.
             ImportMusicDialogController controller = loader.getController();
-            controller.setDialogStage(dialogStage);
+            controller.setDialogStage(stage);
+            controller.setOnFinished(() -> {
+                // Gets the number of files saved in the xml file.
+                xmlFileNum = xmlMusicDirFileNumFinder();
 
-            // Show the dialog and wait until the user closes it.
-            dialogStage.showAndWait();
-
-            // Checks if the music was imported successfully. Closes the application otherwise.
-            boolean musicImported = controller.isMusicImported();
-            if (!musicImported) {
-                System.exit(0);
-            }
+                initInBackground();
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }

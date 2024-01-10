@@ -19,7 +19,7 @@ public class ImportMusicDialogController {
     @FXML private ProgressBar progressBar;
 
     private Stage dialogStage;
-    private boolean musicImported = false;
+    private Runnable onFinished = () -> {};
 
     /**
      * Sets the stage of this dialog.
@@ -30,13 +30,8 @@ public class ImportMusicDialogController {
         this.dialogStage = dialogStage;
     }
 
-    /**
-     * Returns true if the music library was imported successfully, false otherwise.
-     *
-     * @return
-     */
-    public boolean isMusicImported() {
-        return musicImported;
+    public void setOnFinished(Runnable onFinished) {
+        this.onFinished = onFinished;
     }
 
     @FXML
@@ -44,6 +39,7 @@ public class ImportMusicDialogController {
         try {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             // Show file explorer.
+            // TODO: handle null if nothing is selected
             String musicDirectory = directoryChooser.showDialog(dialogStage).getPath();
 
             // Creates a task that is used to import the music library.
@@ -51,6 +47,7 @@ public class ImportMusicDialogController {
                 @Override protected Boolean call() throws Exception {
                     // Creates library.xml file from user music library.
                     try {
+
                         Library.importMusic(musicDirectory, this);
                         return true;
                     } catch (Exception e) {
@@ -62,9 +59,7 @@ public class ImportMusicDialogController {
 
             // When the task (music importing) ends, the dialog is closed.
             task.setOnSucceeded((x) -> {
-                // Sets the music as imported successfully and closes the dialog.
-                musicImported = true;
-                dialogStage.close();
+                onFinished.run();
             });
 
             task.updateProgress(0, 1);
