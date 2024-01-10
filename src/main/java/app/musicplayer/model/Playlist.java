@@ -7,8 +7,6 @@
 
 package app.musicplayer.model;
 
-import app.musicplayer.util.XMLUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,8 +40,6 @@ public class Playlist {
     public void addSong(Song song) {
     	if (!songs.contains(song)) {
     		songs.add(song);
-
-            XMLUtil.addSongToPlaylist(this, song);
     	}
     }
     

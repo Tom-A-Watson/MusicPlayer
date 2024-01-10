@@ -259,7 +259,7 @@ public class PlaylistsController implements Initializable, SubView {
         ImageView image = new ImageView();
         image.setFitHeight(150);
         image.setFitWidth(150);
-        image.setImage(new Image(Resources.IMG + "playlistsIcon.png"));
+        image.setImage(new Image(Config.IMG + "playlistsIcon.png"));
 
         VBox placeholder = new VBox();
         placeholder.setAlignment(Pos.CENTER);
@@ -322,8 +322,9 @@ public class PlaylistsController implements Initializable, SubView {
 
             deletePlaylistAnimation.play();
 
+            // TODO:
             // Deletes the play list from the xml file.
-            XMLEditor.deletePlaylistFromXML(selectedPlaylist.getId());
+            //XMLEditor.deletePlaylistFromXML(selectedPlaylist.getId());
 
             // Loads the artists view.
             MusicPlayerApp.getMainController().loadView("artists");

@@ -4,8 +4,7 @@ import app.musicplayer.model.Album;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
-import app.musicplayer.util.Resources;
-import app.musicplayer.util.XMLEditor;
+import app.musicplayer.util.Config;
 import app.musicplayer.controllers.ImportMusicController;
 import app.musicplayer.controllers.MainController;
 import app.musicplayer.controllers.NowPlayingController;
@@ -24,27 +23,14 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -67,7 +53,7 @@ public class MusicPlayerApp extends Application {
 
     private static Stage stage;
 
-    // Stores the number of files in library.xml.
+    // Stores the number of files in library
     // This will then be compared to the number of files in the music directory when starting up the application to
     // determine if the xml file needs to be updated by adding or deleting songs.
     private static int xmlFileNum;
@@ -97,7 +83,7 @@ public class MusicPlayerApp extends Application {
             MusicPlayerApp.stage.setMinWidth(650);
             MusicPlayerApp.stage.setMinHeight(480);
             MusicPlayerApp.stage.setTitle("Music Player");
-            MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(Resources.IMG + "Icon.png").toString()));
+            MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(Config.IMG + "Icon.png").toString()));
             MusicPlayerApp.stage.setOnCloseRequest(event -> {
                 Platform.exit();
 
@@ -108,7 +94,7 @@ public class MusicPlayerApp extends Application {
             // TODO: splash screen animation while loading?
 
             // Load main layout from fxml file.
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Resources.FXML + "SplashScreen.fxml"));
+            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "SplashScreen.fxml"));
             Parent view = loader.load();
 
             // Shows the scene containing the layout.
@@ -116,12 +102,10 @@ public class MusicPlayerApp extends Application {
             stage.setScene(scene);
             stage.show();
 
-            // Calls the function to check if the library.xml file exists. If it does not, the file is created.
-            var isLibPresent = checkLibraryXML();
-
-            // if lib is present, init now, otherwise wait until the user imports the music dir
-            if (isLibPresent) {
+            if (Files.exists(Config.LIBRARY_FILE)) {
                 initInBackground();
+            } else {
+                showImportMusicView();
             }
 
         } catch (Exception ex) {
@@ -178,164 +162,14 @@ public class MusicPlayerApp extends Application {
         thread.start();
     }
 
-    /**
-     * @return true if exists, false otherwise
-     */
-    private boolean checkLibraryXML() {
-        // Finds the jar file and the path of its parent folder.
-        File musicPlayerJAR = null;
-        try {
-            musicPlayerJAR = new File(MusicPlayerApp.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        String jarFilePath = musicPlayerJAR.getParentFile().getPath();
-
-        // Assigns the filepath to the XML filepath set in Resources.java
-        Resources.JAR = jarFilePath + "/";
-
-        // Specifies library.xml file and its location.
-        File libraryXML = new File(Resources.JAR + "library.xml");
-
-        // If the file exists, check if the music directory has changed.
-        if (libraryXML.exists()) {
-            // Gets music directory path from xml file so that the number of files in the
-            // music directory can be counted and compared to the data in the xml file.
-            // It is then passed as an argument when creating the directory watch.
-            Path musicDirectory = xmlMusicDirPathFinder();
-
-            // Try/catch block to deal with case where music directory has been renamed.
-            try {
-                // Gets the number of files in the music directory and the number of files saved in the xml file.
-                // These values will be compared to determine if the xml file needs to be updated.
-                int musicDirFileNum = musicDirFileNumFinder(musicDirectory.toFile(), 0);
-                xmlFileNum = xmlMusicDirFileNumFinder();
-
-                // If the number of files stored in the xml file is not the same as the number of files in the music directory.
-                // Music library has changed; update the xml file.
-                if (musicDirFileNum != xmlFileNum) {
-                    // Updates the xml file from the saved music directory.
-                    updateLibraryXML(musicDirectory);
-                }
-
-                return true;
-                // NullPointerException thrown by musicDirFileNumFinder().
-                // It occurs if the music directory has been renamed
-            } catch (NullPointerException npe) {
-                showImportMusicView();
-
-                return false;
-            }
-
-            // If the library.xml file does not exist, the file is created from the user specified music library location.
-        } else {
-            showImportMusicView();
-            return false;
-        }
-    }
-
-    private static Path xmlMusicDirPathFinder() {
-        try {
-            // Creates reader for xml file.
-            XMLInputFactory factory = XMLInputFactory.newInstance();
-            factory.setProperty("javax.xml.stream.isCoalescing", true);
-            FileInputStream is = new FileInputStream(new File(Resources.JAR + "library.xml"));
-            XMLStreamReader reader = factory.createXMLStreamReader(is, "UTF-8");
-
-            String element = null;
-            String path = null;
-
-            // Loops through xml file looking for the music directory file path.
-            while(reader.hasNext()) {
-                reader.next();
-                if (reader.isWhiteSpace()) {
-                    continue;
-                } else if (reader.isStartElement()) {
-                    element = reader.getName().getLocalPart();
-                } else if (reader.isCharacters() && element.equals("path")) {
-                    path = reader.getText();
-                    break;
-                }
-            }
-            // Closes xml reader.
-            reader.close();
-
-            return Paths.get(path);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private static int xmlMusicDirFileNumFinder() {
-        try {
-            // Creates reader for xml file.
-            XMLInputFactory factory = XMLInputFactory.newInstance();
-            factory.setProperty("javax.xml.stream.isCoalescing", true);
-            FileInputStream is = new FileInputStream(new File(Resources.JAR + "library.xml"));
-            XMLStreamReader reader = factory.createXMLStreamReader(is, "UTF-8");
-
-            String element = null;
-            String fileNum = null;
-
-            // Loops through xml file looking for the music directory file path.
-            while(reader.hasNext()) {
-                reader.next();
-                if (reader.isWhiteSpace()) {
-                    continue;
-                } else if (reader.isStartElement()) {
-                    element = reader.getName().getLocalPart();
-                } else if (reader.isCharacters() && element.equals("fileNum")) {
-                    fileNum = reader.getText();
-                    break;
-                }
-            }
-            // Closes xml reader.
-            reader.close();
-
-            // Converts the file number to an int and returns the value.
-            return Integer.parseInt(fileNum);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    private static int musicDirFileNumFinder(File musicDirectory, int i) {
-        // Lists all the files in the music directory and stores them in an array.
-        File[] files = musicDirectory.listFiles();
-
-        // Loops through the files, increments counter if file is found.
-        for (File file : files) {
-            if (file.isFile() && Library.isSupportedFileType(file.getName())) {
-                i++;
-            } else if (file.isDirectory()) {
-                i = musicDirFileNumFinder(file, i);
-            }
-        }
-        return i;
-    }
-
-    private static void updateLibraryXML(Path musicDirectory) {
-        // Sets the music directory for the XMLEditor.
-        XMLEditor.setMusicDirectory(musicDirectory);
-
-        // Checks if songs have to be added, deleted, or both to the xml file and
-        // performs the corresponding operation.
-        XMLEditor.addDeleteChecker();
-    }
-
     private void showImportMusicView() {
         try {
-            FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(Resources.FXML + "ImportMusicDialog.fxml"));
+            FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(Config.FXML + "ImportMusicDialog.fxml"));
             Parent view = loader.load();
 
             ImportMusicController controller = loader.getController();
             controller.setOwnerStage(stage);
             controller.setOnFinished(() -> {
-                // Gets the number of files saved in the xml file.
-                xmlFileNum = xmlMusicDirFileNumFinder();
-
                 initInBackground();
             });
 
@@ -352,7 +186,7 @@ public class MusicPlayerApp extends Application {
     private void initMain() {
         try {
             // Load main layout from fxml file.
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Resources.FXML + "Main.fxml"));
+            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "Main.fxml"));
             BorderPane view = loader.load();
 
             // Shows the scene containing the layout.
@@ -600,43 +434,45 @@ public class MusicPlayerApp extends Application {
         song.playCountProperty().set(song.playCountProperty().get() + 1);
         song.playDate = LocalDateTime.now();
 
-        Thread thread = new Thread(() -> {
-
-            try {
-
-                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-                Document doc = docBuilder.parse(Resources.JAR + "library.xml");
-
-                XPathFactory xPathfactory = XPathFactory.newInstance();
-                XPath xpath = xPathfactory.newXPath();
-
-                XPathExpression expr = xpath.compile("/library/songs/song/playCount[../id/text() = \"" + song.getId() + "\"]");
-                Node playCount = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
-
-                expr = xpath.compile("/library/songs/song/playDate[../id/text() = \"" + song.getId() + "\"]");
-                Node playDate = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
-
-                playCount.setTextContent(Integer.toString(song.getPlayCount()));
-                playDate.setTextContent(song.getPlayDate().toString());
-
-                TransformerFactory transformerFactory = TransformerFactory.newInstance();
-                Transformer transformer = transformerFactory.newTransformer();
-                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                DOMSource source = new DOMSource(doc);
-                File xmlFile = new File(Resources.JAR + "library.xml");
-                StreamResult result = new StreamResult(xmlFile);
-                transformer.transform(source, result);
-
-            } catch (Exception ex) {
-
-                ex.printStackTrace();
-            }
-
-        });
-
-        thread.start();
+        // TODO:
+//
+//        Thread thread = new Thread(() -> {
+//
+//            try {
+//
+//                DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+//                DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+//                Document doc = docBuilder.parse(Resources.JAR + "library.xml");
+//
+//                XPathFactory xPathfactory = XPathFactory.newInstance();
+//                XPath xpath = xPathfactory.newXPath();
+//
+//                XPathExpression expr = xpath.compile("/library/songs/song/playCount[../id/text() = \"" + song.getId() + "\"]");
+//                Node playCount = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
+//
+//                expr = xpath.compile("/library/songs/song/playDate[../id/text() = \"" + song.getId() + "\"]");
+//                Node playDate = ((NodeList) expr.evaluate(doc, XPathConstants.NODESET)).item(0);
+//
+//                playCount.setTextContent(Integer.toString(song.getPlayCount()));
+//                playDate.setTextContent(song.getPlayDate().toString());
+//
+//                TransformerFactory transformerFactory = TransformerFactory.newInstance();
+//                Transformer transformer = transformerFactory.newTransformer();
+//                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+//                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+//                DOMSource source = new DOMSource(doc);
+//                File xmlFile = new File(Resources.JAR + "library.xml");
+//                StreamResult result = new StreamResult(xmlFile);
+//                transformer.transform(source, result);
+//
+//            } catch (Exception ex) {
+//
+//                ex.printStackTrace();
+//            }
+//
+//        });
+//
+//        thread.start();
     }
 
     public static Song getNowPlaying() {

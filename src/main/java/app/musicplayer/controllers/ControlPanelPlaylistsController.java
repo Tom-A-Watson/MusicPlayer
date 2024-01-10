@@ -3,7 +3,6 @@ package app.musicplayer.controllers;
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Library;
 import app.musicplayer.util.SubView;
-import app.musicplayer.util.XMLEditor;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -38,8 +37,9 @@ public class ControlPanelPlaylistsController implements Initializable {
         int selectedPlayListId = controller.getSelectedPlaylist().getId();
         int selectedSongId = controller.getSelectedSong().getId();
 
+        // TODO:
         // Calls methods to delete selected song from play list in XML file.
-        XMLEditor.deleteSongFromPlaylist(selectedPlayListId, selectedSongId);
+        //XMLEditor.deleteSongFromPlaylist(selectedPlayListId, selectedSongId);
 
         // Removes the selected song from the playlist's song list in Library.
         Library.getPlaylist(selectedPlayListId).removeSong(selectedSongId);

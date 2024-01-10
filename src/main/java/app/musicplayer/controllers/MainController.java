@@ -3,7 +3,7 @@ package app.musicplayer.controllers;
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.*;
 import app.musicplayer.util.CustomSliderSkin;
-import app.musicplayer.util.Resources;
+import app.musicplayer.util.Config;
 import app.musicplayer.util.Search;
 import app.musicplayer.util.SubView;
 import javafx.animation.Animation;
@@ -209,7 +209,7 @@ public class MainController implements Initializable {
         try {
 
             Stage stage = MusicPlayerApp.getStage();
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Resources.FXML + "VolumePopup.fxml"));
+            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "VolumePopup.fxml"));
             HBox view = loader.load();
             volumePopupController = loader.getController();
             Stage popup = new Stage();
@@ -240,7 +240,7 @@ public class MainController implements Initializable {
 
             Stage stage = MusicPlayerApp.getStage();
             VBox view = new VBox();
-            view.getStylesheets().add(Resources.CSS + "MainStyle.css");
+            view.getStylesheets().add(Config.CSS + "MainStyle.css");
             view.getStyleClass().add("searchPopup");
             Stage popup = new Stage();
             popup.setScene(new Scene(view));
@@ -315,7 +315,7 @@ public class MainController implements Initializable {
     private void initializePlaylists() {
         for (Playlist playlist : Library.getPlaylists()) {
             try {
-                FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Resources.FXML + "PlaylistCell.fxml"));
+                FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
                 HBox cell = loader.load();
                 Label label = (Label) cell.getChildren().get(1);
                 label.setText(playlist.getTitle());
@@ -471,7 +471,7 @@ public class MainController implements Initializable {
 
             try {
 
-                FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Resources.FXML + "PlaylistCell.fxml"));
+                FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
                 HBox cell = loader.load();
 
                 Label label = (Label) cell.getChildren().get(1);
