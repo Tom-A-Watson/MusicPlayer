@@ -7,6 +7,7 @@
 
 package app.musicplayer.controllers;
 
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Album;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
@@ -65,6 +66,10 @@ public final class ImportLibraryController {
         this.onFinished = onFinished;
     }
 
+    public void loadFromLibrary(SerializableLibrary library) {
+        startLoadingTask(new DeserializeLibraryTask(library));
+    }
+
     @FXML
     private void onClickImport() {
         var dirChooser = new DirectoryChooser();
@@ -75,10 +80,13 @@ public final class ImportLibraryController {
             return;
         }
 
+        startLoadingTask(new ImportLibraryTask(selectedDir.toPath()));
+    }
+
+    private void startLoadingTask(Task<Library> task) {
         importMusicButton.setVisible(false);
         progressBar.setVisible(true);
 
-        var task = new ImportLibraryTask(selectedDir.toPath());
         task.setOnSucceeded(e -> {
             onFinished.accept(task.getValue());
         });
@@ -86,7 +94,7 @@ public final class ImportLibraryController {
         label.textProperty().bind(task.messageProperty());
         progressBar.progressProperty().bind(task.progressProperty());
 
-        new Thread(task).start();
+        MusicPlayerApp.getExecutorService().submit(task);
     }
 
     private static class ImportLibraryTask extends Task<Library> {
@@ -201,16 +209,18 @@ public final class ImportLibraryController {
             try {
                 AudioFile audioFile = AudioFileIO.read(song.getFile().toFile());
                 Tag tag = audioFile.getTag();
-                byte[] bytes = tag.getFirstArtwork().getBinaryData();
-                ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-                artwork = new Image(in, 300, 300, true, true);
 
-                if (artwork.isError()) {
-                    throw new RuntimeException(artwork.getException());
-                } else {
-                    return artwork;
+                if (tag.getFirstArtwork() != null) {
+                    byte[] bytes = tag.getFirstArtwork().getBinaryData();
+                    ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+                    artwork = new Image(in, 300, 300, true, true);
+
+                    if (artwork.isError()) {
+                        throw new RuntimeException(artwork.getException());
+                    } else {
+                        return artwork;
+                    }
                 }
-
             } catch (Exception e) {
                 log.warning("Failed to load artwork for " + song.getTitle(), e);
             }
@@ -261,7 +271,29 @@ public final class ImportLibraryController {
             var albums = loadAlbums(songs);
             var artists = loadArtists(albums);
 
-            return new Library(Paths.get(library.musicDirectoryPath()), songs, albums, artists);
+            var playlists = library.playlists()
+                    .stream()
+                    .map(p -> {
+                        var playlist = Serializer.fromSerializable(p);
+
+                        p.songIDs().forEach(id -> {
+                            songs.stream()
+                                    .filter(s -> s.getId() == id)
+                                    .findAny()
+                                    .ifPresent(playlist::addSong);
+                        });
+
+                        return playlist;
+                    })
+                    .toList();
+
+            return new Library(
+                    Paths.get(library.musicDirectoryPath()),
+                    songs,
+                    albums,
+                    artists,
+                    playlists
+            );
         }
     }
 

@@ -264,8 +264,7 @@ public class MainController implements Initializable {
         if (song != null) {
             nowPlayingTitle.setText(song.getTitle());
             nowPlayingArtist.setText(song.getArtistTitle());
-            // TODO:
-            //nowPlayingArtwork.setImage(song.getArtwork());
+            nowPlayingArtwork.setImage(song.getAlbum().getArtwork());
         } else {
             nowPlayingTitle.setText("");
             nowPlayingArtist.setText("");

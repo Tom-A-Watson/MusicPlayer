@@ -4,16 +4,19 @@ import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Song;
 import app.musicplayer.util.SubView;
+import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
@@ -30,45 +33,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class ArtistsController implements Initializable, SubView {
+public final class ArtistsController implements Initializable, SubView {
 
-    @FXML private FlowPane grid;
+    private static final Logger log = Logger.get(ArtistsController.class);
+
+    @FXML
+    private FlowPane grid;
     
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        log.info("initialize()");
 
         List<Artist> artists = MusicPlayerApp.getLibrary().getArtists();
         Collections.sort(artists);
 
-        int limit = (artists.size() < 25) ? artists.size() : 25;
-
-        for (int i = 0; i < limit; i++) {
-
-            Artist artist = artists.get(i);
-            grid.getChildren().add(createCell(artist));
-        }
-
         int rows = (artists.size() % 5 == 0) ? artists.size() / 5 : artists.size() / 5 + 1;
         grid.prefHeightProperty().bind(grid.widthProperty().divide(5).add(16).multiply(rows));
 
-        new Thread(() -> {
-
-        	try {
-        		Thread.sleep(1000);
-        	} catch (Exception ex) {
-        		ex.printStackTrace();
-        	}
-        	
-            for (int j = 25; j < artists.size(); j++) {
-                Artist artist = artists.get(j);
-                Platform.runLater(() -> grid.getChildren().add(createCell(artist)));
-            }
-
-        }).start();
+        var task = new PopulateArtistCellsTask(grid, artists);
+        MusicPlayerApp.getExecutorService().submit(task);
     }
     
     private VBox createCell(Artist artist) {
-
         VBox cell = new VBox();
         Label title = new Label(artist.title());
         ImageView image = new ImageView(artist.image());
@@ -96,14 +82,9 @@ public class ArtistsController implements Initializable, SubView {
         cell.getStyleClass().add("artist-cell");
         cell.setAlignment(Pos.CENTER);
         cell.setOnMouseClicked(event -> {
-
             MainController mainController = MusicPlayerApp.getMainController();
             ArtistsMainController artistsMainController = (ArtistsMainController) mainController.loadView("ArtistsMain");
-
-            VBox artistCell = (VBox) event.getSource();
-            String artistTitle = ((Label) artistCell.getChildren().get(1)).getText();
-            Artist a = MusicPlayerApp.getLibrary().findArtistByTitle(artistTitle).get();
-            artistsMainController.selectArtist(a);
+            artistsMainController.selectArtist(artist);
         });
         
         cell.setOnDragDetected(event -> {
@@ -120,23 +101,43 @@ public class ArtistsController implements Initializable, SubView {
 
         return cell;
     }
+
+    private class PopulateArtistCellsTask extends Task<Void> {
+        private final Parent parent;
+        private final List<Artist> artists;
+
+        private PopulateArtistCellsTask(Parent parent, List<Artist> artists) {
+            this.parent = parent;
+            this.artists = artists;
+        }
+
+        @Override
+        protected Void call() throws Exception {
+            artists.forEach(artist -> {
+                var cell = createCell(artist);
+
+                Platform.runLater(() -> grid.getChildren().add(cell));
+            });
+
+            return null;
+        }
+    }
     
     @Override
     public void play() {}
     
     @Override
     public void scroll(char letter) {
-    	
+
     	int index = 0;
     	double cellHeight = 0;
     	ObservableList<Node> children = grid.getChildren();
 
         for (Node node : children) {
-
             VBox cell = (VBox) node;
             cellHeight = cell.getHeight();
             Label label = (Label) cell.getChildren().get(1);
-            char firstLetter = removeArticle(label.getText()).charAt(0);
+            char firstLetter = label.getText().charAt(0);
             if (firstLetter < letter) {
                 index++;
             }
@@ -159,28 +160,6 @@ public class ArtistsController implements Initializable, SubView {
         };
         
         scrollAnimation.play();
-    }
-    
-    private String removeArticle(String title) {
-
-        String arr[] = title.split(" ", 2);
-
-        if (arr.length < 2) {
-            return title;
-        } else {
-
-            String firstWord = arr[0];
-            String theRest = arr[1];
-
-            switch (firstWord) {
-                case "A":
-                case "An":
-                case "The":
-                    return theRest;
-                default:
-                    return title;
-            }
-        }
     }
     
     public Song getSelectedSong() {

@@ -69,6 +69,13 @@ public final class Serializer {
         );
     }
 
+    public static Playlist fromSerializable(SerializablePlaylist playlist) {
+        return new Playlist(
+                playlist.id(),
+                playlist.title()
+        );
+    }
+
     public static SerializableLibrary toSerializable(Library library) {
         return new SerializableLibrary(
                 library.getMusicDirectory().toAbsolutePath().toString(),

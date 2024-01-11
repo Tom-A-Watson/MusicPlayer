@@ -13,6 +13,7 @@ import com.almasb.fxgl.logging.Logger;
 import com.almasb.fxgl.logging.LoggerLevel;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -23,8 +24,11 @@ import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.LogManager;
 
 import static app.musicplayer.util.Config.*;
@@ -41,13 +45,13 @@ public class MusicPlayerApp extends Application {
     private static List<Song> nowPlayingList;
     private static int nowPlayingIndex;
     private static Song nowPlaying;
-    private static Timer timer;
     private static int timerCounter;
     private static int secondsPlayed;
     private static boolean isLoopActive = false;
     private static boolean isShuffleActive = false;
     private static boolean isMuted = false;
     private static Object draggedItem;
+    private static ExecutorService executorService;
 
     private static Library library;
 
@@ -68,23 +72,23 @@ public class MusicPlayerApp extends Application {
             Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
             log.info("start(Stage)");
 
-            timer = new Timer();
+            executorService = Executors.newCachedThreadPool();
+
             timerCounter = 0;
             secondsPlayed = 0;
 
             MusicPlayerApp.stage = stage;
-            MusicPlayerApp.stage.setMinWidth(650);
-            MusicPlayerApp.stage.setMinHeight(480);
+            MusicPlayerApp.stage.setMinWidth(800);
+            MusicPlayerApp.stage.setMinHeight(600);
             MusicPlayerApp.stage.setTitle("Music Player");
             MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(IMG + "Icon.png").toString()));
             MusicPlayerApp.stage.setOnCloseRequest(event -> {
 
                 try {
-                    Serializer.writeToFile(library, LIBRARY_FILE);
+                    if (library != null)
+                        Serializer.writeToFile(library, LIBRARY_FILE);
 
-                    if (timer != null) {
-                        timer.cancel();
-                    }
+                    executorService.shutdownNow();
                 } catch (Exception e) {
                     log.warning("Error during exit", e);
                 }
@@ -102,26 +106,29 @@ public class MusicPlayerApp extends Application {
         FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "SplashScreen.fxml"));
         Parent view = loader.load();
 
-
-
-        //            if (Files.exists(LIBRARY_FILE)) {
-//                library = Serializer.readFromFile(LIBRARY_FILE);
-//            }
-
         ImportLibraryController controller = loader.getController();
         controller.setOwnerStage(stage);
         controller.setOnFinished(lib -> {
             library = lib;
-            initInBackground();
+
+            var task = new InitAppTask();
+            executorService.submit(task);
         });
+
+        if (Files.exists(LIBRARY_FILE)) {
+            var lib = Serializer.readFromFile(LIBRARY_FILE);
+            controller.loadFromLibrary(lib);
+        }
 
         Scene scene = new Scene(view);
         stage.setScene(scene);
         stage.show();
     }
 
-    private void initInBackground() {
-        Thread thread = new Thread(() -> {
+    private class InitAppTask extends Task<Void> {
+
+        @Override
+        protected Void call() throws Exception {
             nowPlayingList = new ArrayList<>();
 
             // TODO: check logic
@@ -138,7 +145,7 @@ public class MusicPlayerApp extends Application {
             nowPlaying = nowPlayingList.get(0);
             nowPlayingIndex = 0;
             nowPlaying.setPlaying(true);
-            timer = new Timer();
+
             timerCounter = 0;
             secondsPlayed = 0;
             Media media = new Media(nowPlaying.getFile().toUri().toString());
@@ -146,11 +153,13 @@ public class MusicPlayerApp extends Application {
             mediaPlayer.setVolume(0.5);
             mediaPlayer.setOnEndOfMedia(new SongSkipper());
 
-            // Calls the function to initialize the main layout.
-            Platform.runLater(this::showMain);
-        });
+            return null;
+        }
 
-        thread.start();
+        @Override
+        protected void succeeded() {
+            showMain();
+        }
     }
 
     /**
@@ -213,7 +222,9 @@ public class MusicPlayerApp extends Application {
     public static void play() {
         if (mediaPlayer != null && !isPlaying()) {
             mediaPlayer.play();
-            timer.scheduleAtFixedRate(new TimeUpdater(), 0, 250);
+
+            // TODO:
+            //timer.scheduleAtFixedRate(new TimeUpdater(), 0, 250);
             mainController.updatePlayPauseIcon(true);
         }
     }
@@ -231,8 +242,8 @@ public class MusicPlayerApp extends Application {
     public static void pause() {
         if (isPlaying()) {
             mediaPlayer.pause();
-            timer.cancel();
-            timer = new Timer();
+            // TODO:
+            //timer.cancel();
             mainController.updatePlayPauseIcon(false);
         }
     }
@@ -366,10 +377,11 @@ public class MusicPlayerApp extends Application {
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
             }
-            if (timer != null) {
-                timer.cancel();
-            }
-            timer = new Timer();
+            // TODO:
+//            if (timer != null) {
+//                timer.cancel();
+//            }
+//            timer = new Timer();
             timerCounter = 0;
             secondsPlayed = 0;
             Media media = new Media(song.getFile().toUri().toString());
@@ -427,5 +439,9 @@ public class MusicPlayerApp extends Application {
 
     public static Library getLibrary() {
         return library;
+    }
+
+    public static ExecutorService getExecutorService() {
+        return executorService;
     }
 }
