@@ -33,10 +33,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 public class ArtistsMainController implements Initializable, SubView {
@@ -134,7 +131,7 @@ public class ArtistsMainController implements Initializable, SubView {
 
             } else {
 
-                albumArtwork.setImage(album.artwork());
+                albumArtwork.setImage(album.getArtwork());
                 setGraphic(albumArtwork);
             }
         }
@@ -198,7 +195,7 @@ public class ArtistsMainController implements Initializable, SubView {
         	event.consume();
         });
 
-        List<Artist> artists = Library.getArtists();
+        List<Artist> artists = MusicPlayerApp.getLibrary().getArtists();
         Collections.sort(artists);
         
         artistList.setItems(FXCollections.observableArrayList(artists));
@@ -211,22 +208,13 @@ public class ArtistsMainController implements Initializable, SubView {
                 ObservableList<Album> albums = FXCollections.observableArrayList();
                 for (Album album : selectedArtist.albums()) {
                     albums.add(album);
-                    songs.addAll(album.songs());
+                    songs.addAll(album.getSongs());
                 }
                 
                 if (MusicPlayerApp.isShuffleActive()) {
                 	Collections.shuffle(songs);
                 } else {
-                    Collections.sort(songs, (first, second) -> {
-
-                        Album firstAlbum = albums.stream().filter(x -> x.title().equals(first.getAlbumTitle())).findFirst().get();
-                        Album secondAlbum = albums.stream().filter(x -> x.title().equals(second.getAlbumTitle())).findFirst().get();
-                        if (firstAlbum.compareTo(secondAlbum) != 0) {
-                            return firstAlbum.compareTo(secondAlbum);
-                        } else {
-                            return first.compareTo(second);
-                        }
-                    });
+                    songs.sort(Comparator.comparing(Song::getAlbum).thenComparing(song -> song));
                 }
 
                 Song song = songs.get(0);
@@ -274,7 +262,7 @@ public class ArtistsMainController implements Initializable, SubView {
                     selectAlbum(album);
                 }
 
-                List<Song> songs = selectedAlbum.songs();
+                List<Song> songs = selectedAlbum.getSongs();
 
                 if (MusicPlayerApp.isShuffleActive()) {
                 	Collections.shuffle(songs);
@@ -452,12 +440,12 @@ public class ArtistsMainController implements Initializable, SubView {
             selectedAlbum = album;
             albumList.getSelectionModel().select(selectedAlbum);
             ObservableList<Song> songs = FXCollections.observableArrayList();
-            songs.addAll(album.songs());
+            songs.addAll(album.getSongs());
             Collections.sort(songs);
             songTable.getSelectionModel().clearSelection();
             songTable.setItems(songs);
             scrollPane.setVvalue(0);
-            albumLabel.setText(album.title());
+            albumLabel.setText(album.getTitle());
             songTable.setMinHeight(0);
             songTable.setPrefHeight(0);
             songTable.setVisible(true);
@@ -499,7 +487,7 @@ public class ArtistsMainController implements Initializable, SubView {
             try {
 				latch.await();
 				int selectedCell = artistList.getSelectionModel().getSelectedIndex();
-	            double vValue = (selectedCell * 50) / (Library.getArtists().size() * 50 - artistListScrollPane.getHeight());
+	            double vValue = (selectedCell * 50) / (MusicPlayerApp.getLibrary().getArtists().size() * 50 - artistListScrollPane.getHeight());
 	            artistListScrollPane.setVvalue(vValue);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -541,19 +529,10 @@ public class ArtistsMainController implements Initializable, SubView {
 
             albums.add(album);
 
-            songs.addAll(album.songs());
+            songs.addAll(album.getSongs());
         }
 
-        Collections.sort(songs, (first, second) -> {
-
-            Album firstAlbum = albums.stream().filter(x -> x.title().equals(first.getAlbumTitle())).findFirst().get();
-            Album secondAlbum = albums.stream().filter(x -> x.title().equals(second.getAlbumTitle())).findFirst().get();
-            if (firstAlbum.compareTo(secondAlbum) != 0) {
-                return firstAlbum.compareTo(secondAlbum);
-            } else {
-                return first.compareTo(second);
-            }
-        });
+        songs.sort(Comparator.comparing(Song::getAlbum).thenComparing(song -> song));
 
         Collections.sort(albums);
 
@@ -609,10 +588,10 @@ public class ArtistsMainController implements Initializable, SubView {
         ArrayList<Song> songs = new ArrayList<>();
 
         if (selectedAlbum != null) {
-            songs.addAll(selectedAlbum.songs());
+            songs.addAll(selectedAlbum.getSongs());
         } else {
             for (Album album : selectedArtist.albums()) {
-                songs.addAll(album.songs());
+                songs.addAll(album.getSongs());
             }
         }
         
@@ -623,8 +602,8 @@ public class ArtistsMainController implements Initializable, SubView {
         } else {
         	Collections.sort(songs, (first, second) -> {
 
-                Album firstAlbum = Library.getAlbum(first.getAlbumTitle());
-                Album secondAlbum = Library.getAlbum(second.getAlbumTitle());
+                Album firstAlbum = first.getAlbum();
+                Album secondAlbum = second.getAlbum();
                 if (firstAlbum.compareTo(secondAlbum) != 0) {
                     return firstAlbum.compareTo(secondAlbum);
                 } else {
@@ -655,7 +634,7 @@ public class ArtistsMainController implements Initializable, SubView {
         }
     	
     	double startVvalue = artistListScrollPane.getVvalue();
-    	double finalVvalue = (double) (selectedCell * 50) / (Library.getArtists().size() * 50 - artistListScrollPane.getHeight());
+    	double finalVvalue = (double) (selectedCell * 50) / (MusicPlayerApp.getLibrary().getArtists().size() * 50 - artistListScrollPane.getHeight());
     	
     	Animation scrollAnimation = new Transition() {
             {

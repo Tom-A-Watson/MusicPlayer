@@ -1,6 +1,6 @@
 package app.musicplayer;
 
-import app.musicplayer.controllers.ImportMusicController;
+import app.musicplayer.controllers.ImportLibraryController;
 import app.musicplayer.controllers.MainController;
 import app.musicplayer.controllers.NowPlayingController;
 import app.musicplayer.model.Album;
@@ -18,14 +18,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.LogManager;
@@ -51,6 +48,8 @@ public class MusicPlayerApp extends Application {
     private static boolean isShuffleActive = false;
     private static boolean isMuted = false;
     private static Object draggedItem;
+
+    private static Library library;
 
     private static Stage stage;
 
@@ -81,7 +80,7 @@ public class MusicPlayerApp extends Application {
             MusicPlayerApp.stage.setOnCloseRequest(event -> {
 
                 try {
-                    Serializer.writeToFile(LIBRARY_FILE);
+                    Serializer.writeToFile(library, LIBRARY_FILE);
 
                     if (timer != null) {
                         timer.cancel();
@@ -91,21 +90,7 @@ public class MusicPlayerApp extends Application {
                 }
             });
 
-            // TODO: splash screen animation while loading?
-
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "SplashScreen.fxml"));
-            Parent view = loader.load();
-
-            Scene scene = new Scene(view);
-            stage.setScene(scene);
-            stage.show();
-
-            if (Files.exists(LIBRARY_FILE)) {
-                Serializer.readFromFile(LIBRARY_FILE);
-                initInBackground();
-            } else {
-                showImportMusicView();
-            }
+            showSplashScreen(stage);
 
         } catch (Exception e) {
             log.fatal("Cannot start MusicPlayer", e);
@@ -113,27 +98,41 @@ public class MusicPlayerApp extends Application {
         }
     }
 
+    private void showSplashScreen(Stage stage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "SplashScreen.fxml"));
+        Parent view = loader.load();
+
+
+
+        //            if (Files.exists(LIBRARY_FILE)) {
+//                library = Serializer.readFromFile(LIBRARY_FILE);
+//            }
+
+        ImportLibraryController controller = loader.getController();
+        controller.setOwnerStage(stage);
+        controller.setOnFinished(lib -> {
+            library = lib;
+            initInBackground();
+        });
+
+        Scene scene = new Scene(view);
+        stage.setScene(scene);
+        stage.show();
+    }
+
     private void initInBackground() {
         Thread thread = new Thread(() -> {
-            nowPlayingList = Library.loadPlayingList();
+            nowPlayingList = new ArrayList<>();
 
             // TODO: check logic
             if (nowPlayingList.isEmpty()) {
-                Artist artist = Library.getArtists().get(0);
+                Artist artist = MusicPlayerApp.getLibrary().getArtists().get(0);
 
                 for (Album album : artist.albums()) {
-                    nowPlayingList.addAll(album.songs());
+                    nowPlayingList.addAll(album.getSongs());
                 }
 
-                Collections.sort(nowPlayingList, (first, second) -> {
-                    Album firstAlbum = Library.getAlbum(first.getAlbumTitle());
-                    Album secondAlbum = Library.getAlbum(second.getAlbumTitle());
-                    if (firstAlbum.compareTo(secondAlbum) != 0) {
-                        return firstAlbum.compareTo(secondAlbum);
-                    } else {
-                        return first.compareTo(second);
-                    }
-                });
+                nowPlayingList.sort(Comparator.comparing(Song::getAlbum).thenComparing(song -> song));
             }
 
             nowPlaying = nowPlayingList.get(0);
@@ -148,30 +147,16 @@ public class MusicPlayerApp extends Application {
             mediaPlayer.setOnEndOfMedia(new SongSkipper());
 
             // Calls the function to initialize the main layout.
-            Platform.runLater(this::initMain);
+            Platform.runLater(this::showMain);
         });
 
         thread.start();
     }
 
-    private void showImportMusicView() throws Exception {
-        FXMLLoader loader = new FXMLLoader(MusicPlayerApp.class.getResource(FXML + "ImportMusicDialog.fxml"));
-        Parent view = loader.load();
-
-        ImportMusicController controller = loader.getController();
-        controller.setOwnerStage(stage);
-        controller.setOnFinished(() -> {
-            initInBackground();
-        });
-
-        VBox root = (VBox) stage.getScene().getRoot();
-        root.getChildren().add(view);
-    }
-
     /**
      * Initializes the main layout.
      */
-    private void initMain() {
+    private void showMain() {
         try {
             // Load main layout from fxml file.
             FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "Main.fxml"));
@@ -322,7 +307,7 @@ public class MusicPlayerApp extends Application {
         } else {
             Collections.sort(nowPlayingList,
                     Comparator
-                            .comparing((Song song) -> Library.getAlbum(song.getAlbumTitle()))
+                            .comparing(Song::getAlbum)
                             .thenComparing(song -> song)
             );
         }
@@ -438,5 +423,9 @@ public class MusicPlayerApp extends Application {
 
     public static Object getDraggedItem() {
         return draggedItem;
+    }
+
+    public static Library getLibrary() {
+        return library;
     }
 }

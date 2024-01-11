@@ -1,5 +1,6 @@
 package app.musicplayer.util;
 
+import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -32,7 +33,7 @@ public class Search {
 
                 hasResults.set(false);
 
-                List<Song> songResults = Library.getSongs().stream()
+                List<Song> songResults = MusicPlayerApp.getLibrary().getSongs().stream()
                         .filter(song -> song.getTitle().toUpperCase().contains(text))
                         .sorted((x, y) -> {
                             boolean xMatch = x.getTitle().toUpperCase().equals(text);
@@ -58,23 +59,23 @@ public class Search {
 
                 if (searchThread.isInterrupted()) { throw new InterruptedException(); }
 
-                List<Album> albumResults = Library.getAlbums().stream()
-                        .filter(album -> album.title().toUpperCase().contains(text))
+                List<Album> albumResults = MusicPlayerApp.getLibrary().getAlbums().stream()
+                        .filter(album -> album.getTitle().toUpperCase().contains(text))
                         .sorted((x, y) -> {
-                            boolean xEqual = x.title().toUpperCase().equals(text);
-                            boolean yEqual = y.title().toUpperCase().equals(text);
+                            boolean xEqual = x.getTitle().toUpperCase().equals(text);
+                            boolean yEqual = y.getTitle().toUpperCase().equals(text);
                             if (xEqual && yEqual) return 0;
                             if (xEqual) return -1;
                             if (yEqual) return 1;
 
-                            boolean xStartWith = x.title().toUpperCase().startsWith(text);
-                            boolean yStartWith = y.title().toUpperCase().startsWith(text);
+                            boolean xStartWith = x.getTitle().toUpperCase().startsWith(text);
+                            boolean yStartWith = y.getTitle().toUpperCase().startsWith(text);
                             if (xStartWith && yStartWith) return 0;
                             if (xStartWith) return -1;
                             if (yStartWith) return 1;
 
-                            boolean xContains = x.title().toUpperCase().contains(" " + text);
-                            boolean yContains = y.title().toUpperCase().contains(" " + text);
+                            boolean xContains = x.getTitle().toUpperCase().contains(" " + text);
+                            boolean yContains = y.getTitle().toUpperCase().contains(" " + text);
                             if (xContains && yContains) return 0;
                             if (xContains) return -1;
                             if (yContains) return 1;
@@ -84,23 +85,23 @@ public class Search {
 
                 if (searchThread.isInterrupted()) { throw new InterruptedException(); }
 
-                List<Artist> artistResults = Library.getArtists().stream()
-                        .filter(artist -> artist.title().toUpperCase().contains(text))
+                List<Artist> artistResults = MusicPlayerApp.getLibrary().getArtists().stream()
+                        .filter(artist -> artist.getTitle().toUpperCase().contains(text))
                         .sorted((x, y) -> {
-                            boolean xMatch = x.title().toUpperCase().equals(text);
-                            boolean yMatch = y.title().toUpperCase().equals(text);
+                            boolean xMatch = x.getTitle().toUpperCase().equals(text);
+                            boolean yMatch = y.getTitle().toUpperCase().equals(text);
                             if (xMatch && yMatch) return 0;
                             if (xMatch) return -1;
                             if (yMatch) return 1;
 
-                            boolean xStartWith = x.title().toUpperCase().startsWith(text);
-                            boolean yStartWith = y.title().toUpperCase().startsWith(text);
+                            boolean xStartWith = x.getTitle().toUpperCase().startsWith(text);
+                            boolean yStartWith = y.getTitle().toUpperCase().startsWith(text);
                             if (xStartWith && yStartWith) return 0;
                             if (xStartWith) return -1;
                             if (yStartWith) return 1;
 
-                            boolean xContains = x.title().toUpperCase().contains(" " + text);
-                            boolean yContains = y.title().toUpperCase().contains(" " + text);
+                            boolean xContains = x.getTitle().toUpperCase().contains(" " + text);
+                            boolean yContains = y.getTitle().toUpperCase().contains(" " + text);
                             if (xContains && yContains) return 0;
                             if (xContains) return -1;
                             if (yContains) return 1;

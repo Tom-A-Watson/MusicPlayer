@@ -7,6 +7,8 @@
 
 package app.musicplayer.model;
 
+import app.musicplayer.MusicPlayerApp;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +20,7 @@ public final class MostPlayedPlaylist extends Playlist {
 
     @Override
     public List<Song> getSongs() {
-        return Library.getSongs()
+        return MusicPlayerApp.getLibrary().getSongs()
                 .stream()
                 .filter(song -> song.getPlayCount() > 0)
                 .sorted((s1, s2) -> Integer.compare(s2.getPlayCount(), s1.getPlayCount()))

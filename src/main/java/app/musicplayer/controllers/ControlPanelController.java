@@ -61,7 +61,7 @@ public class ControlPanelController implements Initializable {
         // Retrieves the selected song to add to the desired playlist.
         Song selectedSong = MusicPlayerApp.getMainController().getSubViewController().getSelectedSong();
 
-        List<Playlist> playlists = Library.getPlaylists();
+        List<Playlist> playlists = MusicPlayerApp.getLibrary().getPlaylists();
 
         // Retrieves all the playlist titles to create menu items.
         ObservableList<String> playlistTitles = FXCollections.observableArrayList();

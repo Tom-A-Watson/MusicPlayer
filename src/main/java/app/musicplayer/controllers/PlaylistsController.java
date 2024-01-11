@@ -330,7 +330,7 @@ public class PlaylistsController implements Initializable, SubView {
             MusicPlayerApp.getMainController().loadView("artists");
 
             // Removes the selected playlist from the library so that it is not reloaded.
-            Library.removePlaylist(selectedPlaylist);
+            //Library.removePlaylist(selectedPlaylist);
 
             // Resets the selected playlist to avoid storing the deleted playlist's data.
             selectedPlaylist = null;

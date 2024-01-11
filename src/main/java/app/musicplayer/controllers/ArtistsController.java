@@ -2,7 +2,6 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Artist;
-import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import app.musicplayer.util.SubView;
 import javafx.animation.Animation;
@@ -38,7 +37,7 @@ public class ArtistsController implements Initializable, SubView {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        List<Artist> artists = Library.getArtists();
+        List<Artist> artists = MusicPlayerApp.getLibrary().getArtists();
         Collections.sort(artists);
 
         int limit = (artists.size() < 25) ? artists.size() : 25;
@@ -103,7 +102,7 @@ public class ArtistsController implements Initializable, SubView {
 
             VBox artistCell = (VBox) event.getSource();
             String artistTitle = ((Label) artistCell.getChildren().get(1)).getText();
-            Artist a = Library.getArtist(artistTitle);
+            Artist a = MusicPlayerApp.getLibrary().findArtistByTitle(artistTitle).get();
             artistsMainController.selectArtist(a);
         });
         

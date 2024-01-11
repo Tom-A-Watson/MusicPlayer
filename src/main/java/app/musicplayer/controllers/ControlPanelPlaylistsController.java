@@ -42,7 +42,7 @@ public class ControlPanelPlaylistsController implements Initializable {
         //XMLEditor.deleteSongFromPlaylist(selectedPlayListId, selectedSongId);
 
         // Removes the selected song from the playlist's song list in Library.
-        Library.getPlaylist(selectedPlayListId).removeSong(selectedSongId);
+        //MusicPlayerApp.getLibrary().getPlaylist(selectedPlayListId).removeSong(selectedSongId);
 
         // Deletes the selected row from the table view.
         controller.deleteSelectedRow();

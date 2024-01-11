@@ -318,7 +318,7 @@ public class MainController implements Initializable {
 
     @SuppressWarnings("unchecked")
     private void initializePlaylists() {
-        for (Playlist playlist : Library.getPlaylists()) {
+        for (Playlist playlist : MusicPlayerApp.getLibrary().getPlaylists()) {
             try {
                 FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
                 HBox cell = loader.load();
@@ -384,7 +384,7 @@ public class MainController implements Initializable {
                             case "Artist":
                                 Artist artist = (Artist) MusicPlayerApp.getDraggedItem();
                                 for (Album album : artist.albums()) {
-                                    for (Song song : album.songs()) {
+                                    for (Song song : album.getSongs()) {
                                         if (!playlist.getSongs().contains(song)) {
                                             playlist.addSong(song);
                                         }
@@ -393,7 +393,7 @@ public class MainController implements Initializable {
                                 break;
                             case "Album":
                                 Album album = (Album) MusicPlayerApp.getDraggedItem();
-                                for (Song song : album.songs()) {
+                                for (Song song : album.getSongs()) {
                                     if (!playlist.getSongs().contains(song)) {
                                         playlist.addSong(song);
                                     }
@@ -496,7 +496,8 @@ public class MainController implements Initializable {
                         cell.getChildren().remove(textBox);
                         HBox.setMargin(label, new Insets(10, 10, 10, 10));
                         label.setVisible(true);
-                        Library.addPlaylist(text);
+
+                        MusicPlayerApp.getLibrary().addPlaylist(text);
                     }
                 });
 
@@ -508,14 +509,14 @@ public class MainController implements Initializable {
 
                 cell.setOnMouseClicked(x -> {
                     selectView(x);
-                    Playlist playlist = Library.getPlaylist(label.getText());
+                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
                     ((PlaylistsController) subViewController).selectPlaylist(playlist);
                 });
 
                 cell.setOnDragDetected(event -> {
                     PseudoClass pressed = PseudoClass.getPseudoClass("pressed");
                     cell.pseudoClassStateChanged(pressed, false);
-                    Playlist playlist = Library.getPlaylist(label.getText());
+                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
                     Dragboard db = cell.startDragAndDrop(TransferMode.ANY);
                     ClipboardContent content = new ClipboardContent();
                     content.putString("Playlist");
@@ -530,7 +531,7 @@ public class MainController implements Initializable {
                 PseudoClass hover = PseudoClass.getPseudoClass("hover");
 
                 cell.setOnDragEntered(event -> {
-                    Playlist playlist = Library.getPlaylist(label.getText());
+                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
                     if (!(playlist instanceof MostPlayedPlaylist)
                             && !(playlist instanceof RecentlyPlayedPlaylist)
                             && event.getGestureSource() != cell
@@ -541,7 +542,7 @@ public class MainController implements Initializable {
                 });
 
                 cell.setOnDragExited(event -> {
-                    Playlist playlist = Library.getPlaylist(label.getText());
+                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
                     if (!(playlist instanceof MostPlayedPlaylist)
                             && !(playlist instanceof RecentlyPlayedPlaylist)
                             && event.getGestureSource() != cell
@@ -552,7 +553,7 @@ public class MainController implements Initializable {
                 });
 
                 cell.setOnDragOver(event -> {
-                    Playlist playlist = Library.getPlaylist(label.getText());
+                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
                     if (!(playlist instanceof MostPlayedPlaylist)
                             && !(playlist instanceof RecentlyPlayedPlaylist)
                             && event.getGestureSource() != cell
@@ -564,14 +565,14 @@ public class MainController implements Initializable {
                 });
 
                 cell.setOnDragDropped(event -> {
-                    Playlist playlist = Library.getPlaylist(label.getText());
+                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
                     String dragString = event.getDragboard().getString();
                     new Thread(() -> {
                         switch (dragString) {
                             case "Artist":
                                 Artist artist = (Artist) MusicPlayerApp.getDraggedItem();
                                 for (Album album : artist.albums()) {
-                                    for (Song song : album.songs()) {
+                                    for (Song song : album.getSongs()) {
                                         if (!playlist.getSongs().contains(song)) {
                                             playlist.addSong(song);
                                         }
@@ -580,7 +581,7 @@ public class MainController implements Initializable {
                                 break;
                             case "Album":
                                 Album album = (Album) MusicPlayerApp.getDraggedItem();
-                                for (Song song : album.songs()) {
+                                for (Song song : album.getSongs()) {
                                     if (!playlist.getSongs().contains(song)) {
                                         playlist.addSong(song);
                                     }
@@ -631,7 +632,7 @@ public class MainController implements Initializable {
     }
 
     private String checkDuplicatePlaylist(String text, int i) {
-        for (Playlist playlist : Library.getPlaylists()) {
+        for (Playlist playlist : MusicPlayerApp.getLibrary().getPlaylists()) {
             if (playlist.getTitle().equals(text)) {
 
                 int index = text.lastIndexOf(' ') + 1;
@@ -707,7 +708,7 @@ public class MainController implements Initializable {
             Task<Void> task = new Task<Void>() {
                 @Override protected Void call() throws Exception {
                     Platform.runLater(() -> {
-                        Library.getSongs().stream().filter(x -> x.isSelected()).forEach(x -> x.setSelected(false));
+                        MusicPlayerApp.getLibrary().getSongs().stream().filter(x -> x.isSelected()).forEach(x -> x.setSelected(false));
                         subViewRoot.setVisible(false);
                         subViewRoot.setContent(view);
                         subViewRoot.getContent().setOpacity(0);
@@ -782,8 +783,10 @@ public class MainController implements Initializable {
 
         ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
         Song song = MusicPlayerApp.getNowPlaying();
-        Artist artist = Library.getArtist(song.getArtistTitle());
-        Album album = artist.albums().stream().filter(x -> x.title().equals(song.getAlbumTitle())).findFirst().get();
+
+        Artist artist = song.getArtist();
+        Album album = song.getAlbum();
+
         artistsMainController.selectArtist(artist);
         artistsMainController.selectAlbum(album);
         artistsMainController.selectSong(song);
@@ -911,8 +914,8 @@ public class MainController implements Initializable {
                 ImageView image = new ImageView();
                 image.setFitHeight(40);
                 image.setFitWidth(40);
-                image.setImage(album.artwork());
-                Label label = new Label(album.title());
+                image.setImage(album.getArtwork());
+                Label label = new Label(album.getTitle());
                 label.setTextOverrun(OverrunStyle.CLIP);
                 label.getStyleClass().setAll("searchLabel");
                 cell.getChildren().addAll(image, label);
@@ -921,7 +924,7 @@ public class MainController implements Initializable {
                 cell.getStyleClass().add("searchResult");
                 cell.setOnMouseClicked(event -> {
                     loadView("ArtistsMain");
-                    Artist artist = Library.getArtist(album.artistTitle());
+                    Artist artist = album.getArtist();
                     ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
                     artistsMainController.selectArtist(artist);
                     artistsMainController.selectAlbum(album);
@@ -952,8 +955,9 @@ public class MainController implements Initializable {
                 cell.getStyleClass().add("searchResult");
                 cell.setOnMouseClicked(event -> {
                     loadView("ArtistsMain");
-                    Artist artist = Library.getArtist(song.getArtistTitle());
-                    Album album = artist.albums().stream().filter(x -> x.title().equals(song.getAlbumTitle())).findFirst().get();
+                    Artist artist = song.getArtist();
+                    Album album = song.getAlbum();
+
                     ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
                     artistsMainController.selectArtist(artist);
                     artistsMainController.selectAlbum(album);

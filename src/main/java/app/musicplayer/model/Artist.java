@@ -14,8 +14,6 @@ import java.util.List;
 
 /**
  * An artist has a collection of albums.
- *
- * @author Almas Baim (https://github.com/AlmasB)
  */
 public record Artist(
         String title,
@@ -26,6 +24,10 @@ public record Artist(
     @Override
     public List<Album> albums() {
         return new ArrayList<>(albums);
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     @Override

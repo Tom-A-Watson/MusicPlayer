@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Collections;
 
 /**
  * @author Almas Baim (https://github.com/AlmasB)
@@ -70,24 +71,15 @@ public final class Serializer {
 
     public static SerializableLibrary toSerializable(Library library) {
         return new SerializableLibrary(
-                Library.getMusicDirectory().toAbsolutePath().toString(),
-                Library.getSongs().stream().map(Serializer::toSerializable).toList(),
-                Library.getPlaylists().stream().map(Serializer::toSerializable).toList()
+                library.getMusicDirectory().toAbsolutePath().toString(),
+                library.getSongs().stream().map(Serializer::toSerializable).toList(),
+                library.getPlaylists().stream().map(Serializer::toSerializable).toList()
         );
     }
 
-    public static Library fromSerializable(SerializableLibrary library) {
-        Library.importFromLibraryFile(
-                library.musicDirectoryPath(),
-                library.songs().stream().map(Serializer::fromSerializable).toList()
-        );
-
-        return new Library();
-    }
-
-    public static void writeToFile(Path file) {
+    public static void writeToFile(Library library, Path file) {
         try {
-            var lib = Serializer.toSerializable(new Library());
+            var lib = Serializer.toSerializable(library);
 
             var writer = mapper.writerWithDefaultPrettyPrinter();
 
@@ -99,13 +91,20 @@ public final class Serializer {
         }
     }
 
-    public static void readFromFile(Path file) {
+    public static SerializableLibrary readFromFile(Path file) {
         try {
             var lib = mapper.readValue(file.toFile(), SerializableLibrary.class);
-            fromSerializable(lib);
+            
+            return lib;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        return new SerializableLibrary(
+                Paths.get("./").toString(),
+                Collections.emptyList(),
+                Collections.emptyList()
+        );
     }
 }

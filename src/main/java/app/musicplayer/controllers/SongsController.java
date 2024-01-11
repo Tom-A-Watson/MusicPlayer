@@ -1,7 +1,6 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
-import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import app.musicplayer.util.ClippedTableCell;
 import app.musicplayer.util.ControlPanelTableCell;
@@ -24,10 +23,7 @@ import javafx.scene.input.*;
 import javafx.util.Duration;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class SongsController implements Initializable, SubView {
 
@@ -82,7 +78,7 @@ public class SongsController implements Initializable, SubView {
         });
         
         // Retrieves the list of songs in the library, sorts them, and adds them to the table.
-        List<Song> songs = Library.getSongs();
+        List<Song> songs = MusicPlayerApp.getLibrary().getSongs();
 
         Collections.sort(songs, (x, y) -> compareSongs(x, y));
         
@@ -204,15 +200,15 @@ public class SongsController implements Initializable, SubView {
 				return -1;
 			}
         	
-        	Song first = Library.getSong(x);
-        	Song second = Library.getSong(y);
+        	Song first = MusicPlayerApp.getLibrary().findSongByTitle(x).get();
+        	Song second = MusicPlayerApp.getLibrary().findSongByTitle(y).get();
         	
         	return compareSongs(first, second);
         });
         
-        artistColumn.setComparator((first, second) -> Library.getArtist(first).compareTo(Library.getArtist(second)));
+        artistColumn.setComparator(Comparator.comparing(s -> MusicPlayerApp.getLibrary().findArtistByTitle(s).get()));
         
-        albumColumn.setComparator((first, second) -> Library.getAlbum(first).compareTo(Library.getAlbum(second)));
+        albumColumn.setComparator(Comparator.comparing(s -> MusicPlayerApp.getLibrary().findAlbumByTitle(s).get()));
     }
     
     private int compareSongs(Song x, Song y) {
