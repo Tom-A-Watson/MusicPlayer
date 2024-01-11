@@ -2,10 +2,10 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Song;
-import app.musicplayer.util.ClippedTableCell;
-import app.musicplayer.util.ControlPanelTableCell;
-import app.musicplayer.util.PlayingTableCell;
-import app.musicplayer.util.SubView;
+import app.musicplayer.view.ClippedTableCell;
+import app.musicplayer.view.ControlPanelTableCell;
+import app.musicplayer.view.PlayingTableCell;
+import app.musicplayer.view.SubView;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
 import javafx.beans.value.ChangeListener;
@@ -80,7 +80,7 @@ public class SongsController implements Initializable, SubView {
         // Retrieves the list of songs in the library, sorts them, and adds them to the table.
         List<Song> songs = MusicPlayerApp.getLibrary().getSongs();
 
-        Collections.sort(songs, (x, y) -> compareSongs(x, y));
+        Collections.sort(songs);
         
         tableView.setItems(FXCollections.observableArrayList(songs));
 
@@ -170,13 +170,14 @@ public class SongsController implements Initializable, SubView {
                 event.consume();
             });
 
-            return row ;
+            return row;
         });
         
         tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
         	if (oldSelection != null) {
         		oldSelection.setSelected(false);
         	}
+
         	if (newSelection != null && tableView.getSelectionModel().getSelectedIndices().size() == 1) {
         		newSelection.setSelected(true);
         		selectedSong = newSelection;
@@ -189,53 +190,10 @@ public class SongsController implements Initializable, SubView {
         		play();
         	}
         });
-        
-        titleColumn.setComparator((x, y) -> {
-        	
-        	if (x == null && y == null) {
-				return 0;
-			} else if (x == null) {
-				return 1;
-			} else if (y == null) {
-				return -1;
-			}
-        	
-        	Song first = MusicPlayerApp.getLibrary().findSongByTitle(x).get();
-        	Song second = MusicPlayerApp.getLibrary().findSongByTitle(y).get();
-        	
-        	return compareSongs(first, second);
-        });
-        
-        artistColumn.setComparator(Comparator.comparing(s -> MusicPlayerApp.getLibrary().findArtistByTitle(s).get()));
-        
-        albumColumn.setComparator(Comparator.comparing(s -> MusicPlayerApp.getLibrary().findAlbumByTitle(s).get()));
     }
-    
-    private int compareSongs(Song x, Song y) {
-    	if (x == null && y == null) {
-    		return 0;
-    	} else if (x == null) {
-    		return 1;
-    	} else if (y == null) {
-    		return -1;
-    	}
-    	if (x.getTitle() == null && y.getTitle() == null) {
-    		// Both are equal.
-    		return 0;
-    	} else if (x.getTitle() == null) {
-    		// Null is after other strings.
-    		return 1;
-		} else if (y.getTitle() == null) {
-			// All other strings are before null.
-			return -1;
-		} else  /*(x.getTitle() != null && y.getTitle() != null)*/ {
-			return x.getTitle().compareTo(y.getTitle());
-		}
-	}
     
     @Override
     public void play() {
-    	
     	Song song = selectedSong;
         ObservableList<Song> songList = tableView.getItems();
         if (MusicPlayerApp.isShuffleActive()) {
@@ -250,8 +208,7 @@ public class SongsController implements Initializable, SubView {
     
     @Override
     public void scroll(char letter) {
-    	
-    	if (tableView.getSortOrder().size() > 0) {
+    	if (!tableView.getSortOrder().isEmpty()) {
     		currentSortColumn = tableView.getSortOrder().get(0).getId();
     		currentSortOrder = tableView.getSortOrder().get(0).getSortType().toString().toLowerCase();
     	}
@@ -290,7 +247,7 @@ public class SongsController implements Initializable, SubView {
                     // Removes article from song artist and compares it to selected letter.
                     String songArtist = song.getArtistTitle();
                     try {
-                        char firstLetter = removeArticle(songArtist).charAt(0);
+                        char firstLetter = songArtist.charAt(0);
                         if (firstLetter < letter) {
                             selectedCell++;
                         } else if (firstLetter == letter) {
@@ -306,7 +263,7 @@ public class SongsController implements Initializable, SubView {
                     // Removes article from song album and compares it to selected letter.
                     String songAlbum = song.getAlbumTitle();
                     try {
-                        char firstLetter = removeArticle(songAlbum).charAt(0);
+                        char firstLetter = songAlbum.charAt(0);
                         if (firstLetter < letter) {
                             selectedCell++;
                         } else if (firstLetter == letter) {
@@ -339,28 +296,6 @@ public class SongsController implements Initializable, SubView {
             }
         };
         scrollAnimation.play();
-    }
-    
-    private String removeArticle(String title) {
-
-        String arr[] = title.split(" ", 2);
-
-        if (arr.length < 2) {
-            return title;
-        } else {
-
-            String firstWord = arr[0];
-            String theRest = arr[1];
-
-            switch (firstWord) {
-                case "A":
-                case "An":
-                case "The":
-                    return theRest;
-                default:
-                    return title;
-            }
-        }
     }
     
     public Song getSelectedSong() {

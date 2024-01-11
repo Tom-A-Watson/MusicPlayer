@@ -34,4 +34,9 @@ public record Artist(
     public int compareTo(Artist other) {
         return title.compareTo(other.title);
     }
+
+    @Override
+    public String toString() {
+        return getTitle();
+    }
 }

@@ -1,8 +1,7 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
-import app.musicplayer.model.Library;
-import app.musicplayer.util.SubView;
+import app.musicplayer.view.SubView;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

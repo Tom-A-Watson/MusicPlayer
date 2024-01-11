@@ -1,10 +1,9 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
-import app.musicplayer.model.Library;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
-import app.musicplayer.util.SubView;
+import app.musicplayer.view.SubView;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;

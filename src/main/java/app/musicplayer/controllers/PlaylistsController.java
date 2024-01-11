@@ -3,6 +3,10 @@ package app.musicplayer.controllers;
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.*;
 import app.musicplayer.util.*;
+import app.musicplayer.view.ClippedTableCell;
+import app.musicplayer.view.ControlPanelTableCell;
+import app.musicplayer.view.PlayingTableCell;
+import app.musicplayer.view.SubView;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
 import javafx.animation.Interpolator;
@@ -322,15 +326,11 @@ public class PlaylistsController implements Initializable, SubView {
 
             deletePlaylistAnimation.play();
 
-            // TODO:
-            // Deletes the play list from the xml file.
-            //XMLEditor.deletePlaylistFromXML(selectedPlaylist.getId());
-
             // Loads the artists view.
             MusicPlayerApp.getMainController().loadView("artists");
 
             // Removes the selected playlist from the library so that it is not reloaded.
-            //Library.removePlaylist(selectedPlaylist);
+            MusicPlayerApp.getLibrary().removePlaylist(selectedPlaylist);
 
             // Resets the selected playlist to avoid storing the deleted playlist's data.
             selectedPlaylist = null;

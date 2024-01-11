@@ -2,10 +2,10 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.*;
-import app.musicplayer.util.CustomSliderSkin;
+import app.musicplayer.view.CustomSliderSkin;
 import app.musicplayer.util.Config;
 import app.musicplayer.util.Search;
-import app.musicplayer.util.SubView;
+import app.musicplayer.view.SubView;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
 import javafx.animation.Interpolator;
@@ -237,7 +237,6 @@ public class MainController implements Initializable {
 
     private void createSearchPopup() {
         try {
-
             Stage stage = MusicPlayerApp.getStage();
             VBox view = new VBox();
             view.getStylesheets().add(Config.CSS + "MainStyle.css");
@@ -259,7 +258,6 @@ public class MainController implements Initializable {
     }
 
     public void updateNowPlayingButton() {
-
         Song song = MusicPlayerApp.getNowPlaying();
         if (song != null) {
             nowPlayingTitle.setText(song.getTitle());
@@ -273,7 +271,6 @@ public class MainController implements Initializable {
     }
 
     public void initializeTimeSlider() {
-
         Song song = MusicPlayerApp.getNowPlaying();
         if (song != null) {
             timeSlider.setMin(0);
@@ -289,20 +286,19 @@ public class MainController implements Initializable {
     }
 
     public void updateTimeSlider() {
-
         timeSlider.increment();
     }
 
     public void initializeTimeLabels() {
-
         Song song = MusicPlayerApp.getNowPlaying();
         if (song != null) {
             timePassed.setText("0:00");
 
-            timeRemaining.setText("TODO");
+            int minutes = song.getLengthInSeconds() / 60;
+            int seconds = song.getLengthInSeconds() % 60;
+            var totalTime = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
 
-            // TODO:
-            // timeRemaining.setText(song.getLengthInSeconds());
+            timeRemaining.setText(totalTime);
         } else {
             timePassed.setText("");
             timeRemaining.setText("");
@@ -310,7 +306,6 @@ public class MainController implements Initializable {
     }
 
     public void updateTimeLabels() {
-
         timePassed.setText(MusicPlayerApp.getTimePassed());
         timeRemaining.setText(MusicPlayerApp.getTimeRemaining());
     }
@@ -467,7 +462,10 @@ public class MainController implements Initializable {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    private static Playlist getPlaylist(String title) {
+        return MusicPlayerApp.getLibrary().findPlaylistByTitle(title).get();
+    }
+    
     @FXML
     private void newPlaylist() {
 
@@ -508,14 +506,14 @@ public class MainController implements Initializable {
 
                 cell.setOnMouseClicked(x -> {
                     selectView(x);
-                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
+                    Playlist playlist = getPlaylist(label.getText());
                     ((PlaylistsController) subViewController).selectPlaylist(playlist);
                 });
 
                 cell.setOnDragDetected(event -> {
                     PseudoClass pressed = PseudoClass.getPseudoClass("pressed");
                     cell.pseudoClassStateChanged(pressed, false);
-                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
+                    Playlist playlist = getPlaylist(label.getText());
                     Dragboard db = cell.startDragAndDrop(TransferMode.ANY);
                     ClipboardContent content = new ClipboardContent();
                     content.putString("Playlist");
@@ -530,7 +528,7 @@ public class MainController implements Initializable {
                 PseudoClass hover = PseudoClass.getPseudoClass("hover");
 
                 cell.setOnDragEntered(event -> {
-                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
+                    Playlist playlist = getPlaylist(label.getText());
                     if (!(playlist instanceof MostPlayedPlaylist)
                             && !(playlist instanceof RecentlyPlayedPlaylist)
                             && event.getGestureSource() != cell
@@ -541,7 +539,7 @@ public class MainController implements Initializable {
                 });
 
                 cell.setOnDragExited(event -> {
-                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
+                    Playlist playlist = getPlaylist(label.getText());
                     if (!(playlist instanceof MostPlayedPlaylist)
                             && !(playlist instanceof RecentlyPlayedPlaylist)
                             && event.getGestureSource() != cell
@@ -552,7 +550,7 @@ public class MainController implements Initializable {
                 });
 
                 cell.setOnDragOver(event -> {
-                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
+                    Playlist playlist = getPlaylist(label.getText());
                     if (!(playlist instanceof MostPlayedPlaylist)
                             && !(playlist instanceof RecentlyPlayedPlaylist)
                             && event.getGestureSource() != cell
@@ -564,7 +562,7 @@ public class MainController implements Initializable {
                 });
 
                 cell.setOnDragDropped(event -> {
-                    Playlist playlist = MusicPlayerApp.getLibrary().getPlaylist(label.getText());
+                    Playlist playlist = getPlaylist(label.getText());
                     String dragString = event.getDragboard().getString();
                     new Thread(() -> {
                         switch (dragString) {

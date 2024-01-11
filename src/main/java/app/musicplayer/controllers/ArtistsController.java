@@ -3,7 +3,7 @@ package app.musicplayer.controllers;
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Song;
-import app.musicplayer.util.SubView;
+import app.musicplayer.view.SubView;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Transition;

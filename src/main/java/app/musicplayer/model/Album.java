@@ -112,4 +112,9 @@ public final class Album implements Comparable<Album> {
     public int compareTo(Album other) {
         return getTitle().compareTo(other.getTitle());
     }
+
+    @Override
+    public String toString() {
+        return getTitle();
+    }
 }

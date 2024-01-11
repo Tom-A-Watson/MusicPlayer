@@ -32,10 +32,6 @@ public class Playlist {
     public List<Song> getSongs() {
         return new ArrayList<>(songs);
     }
-
-    public void addSongsNoXML(List<Song> songs) {
-        this.songs.addAll(songs);
-    }
     
     public void addSong(Song song) {
     	if (!songs.contains(song)) {

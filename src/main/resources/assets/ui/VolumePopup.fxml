@@ -26,7 +26,7 @@
             </Pane>
          </children>
       </StackPane>
-      <StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="160.0">
+      <StackPane fx:id="sliderRoot" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="160.0">
          <children>
             <Region fx:id="backVolumeTrack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="2.0" prefWidth="110.0" styleClass="backVolumeTrack" StackPane.alignment="CENTER_LEFT">
                <StackPane.margin>

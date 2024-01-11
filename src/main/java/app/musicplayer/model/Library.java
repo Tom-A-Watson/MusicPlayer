@@ -7,8 +7,6 @@
 
 package app.musicplayer.model;
 
-import com.almasb.fxgl.logging.Logger;
-
 import java.nio.file.Path;
 import java.util.*;
 
@@ -16,8 +14,6 @@ import java.util.*;
  * A library is a collection songs, artists, albums and playlists.
  */
 public final class Library {
-
-    private static final Logger log = Logger.get(Library.class);
 
     private List<Song> songs = new ArrayList<>();
     private List<Album> albums = new ArrayList<>();
@@ -84,36 +80,26 @@ public final class Library {
 
     public Optional<Artist> findArtistByTitle(String title) {
         return artists.stream()
-                .filter(artist -> title.equals(artist.title()))
+                .filter(artist -> title.equals(artist.getTitle()))
                 .findFirst();
     }
 
+    public Optional<Playlist> findPlaylistByTitle(String title) {
+        return playlists.stream()
+                .filter(playlist -> title.equals(playlist.getTitle()))
+                .findFirst();
+    }
 
-
-
-    // TODO: below
     public void addPlaylist(String title) {
-        int id = playlists.stream()
+        int highestID = playlists.stream()
                 .max(Comparator.comparingInt(Playlist::getId))
                 .map(Playlist::getId)
                 .orElse(0);
 
-        playlists.add(new Playlist(id, title));
+        playlists.add(new Playlist(highestID + 1, title));
     }
 
     public void removePlaylist(Playlist playlist) {
         playlists.remove(playlist);
-    }
-
-    public Playlist getPlaylist(int id) {
-        // Gets the play list size.
-        int playListSize = playlists.size();
-        // The +2 takes into account the two default play lists.
-        // The -1 is used because size() starts at 1 but indexes start at 0.
-        return playlists.get(playListSize - (id + 2) - 1);
-    }
-
-    public Playlist getPlaylist(String title) {
-        return playlists.stream().filter(playlist -> title.equals(playlist.getTitle())).findFirst().get();
     }
 }

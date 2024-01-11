@@ -147,6 +147,11 @@ public final class ImportLibraryController {
             AudioHeader header = audioFile.getAudioHeader();
 
             String title = tag.getFirst(FieldKey.TITLE);
+            if (isEmpty(title)) {
+                var fileName = file.getFileName().toString();
+                title = fileName.substring(0, fileName.lastIndexOf('.'));
+            }
+
             String artistTitle = tag.getFirst(FieldKey.ALBUM_ARTIST);
 
             if (isEmpty(artistTitle)) {

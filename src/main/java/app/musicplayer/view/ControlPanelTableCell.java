@@ -1,8 +1,16 @@
-package app.musicplayer.util;
+/*
+ * JavaFX Music Player. The MIT License (MIT).
+ * Copyright (c) Almas Baim.
+ * Copyright (c) Gerardo Prada, Michael Martin.
+ * See LICENSE for details.
+ */
+
+package app.musicplayer.view;
 
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Song;
 import app.musicplayer.controllers.PlaylistsController;
+import app.musicplayer.util.Config;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;

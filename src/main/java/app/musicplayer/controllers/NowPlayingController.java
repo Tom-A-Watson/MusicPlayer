@@ -2,10 +2,10 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.Song;
-import app.musicplayer.util.ClippedTableCell;
-import app.musicplayer.util.ControlPanelTableCell;
-import app.musicplayer.util.PlayingTableCell;
-import app.musicplayer.util.SubView;
+import app.musicplayer.view.ClippedTableCell;
+import app.musicplayer.view.ControlPanelTableCell;
+import app.musicplayer.view.PlayingTableCell;
+import app.musicplayer.view.SubView;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

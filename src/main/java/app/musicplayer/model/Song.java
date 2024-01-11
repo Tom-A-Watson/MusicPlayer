@@ -227,12 +227,6 @@ public final class Song implements Comparable<Song> {
         this.artist.set(artist);
     }
 
-    //        long seconds = length.getSeconds() % 60;
-//        this.length = new SimpleStringProperty(length.toMinutes() + ":" + (seconds < 10 ? "0" + seconds : seconds));
-//    public Image getArtwork() {
-//        return MusicPlayerApp.getLibrary().getAlbum(this.album.get()).artwork();
-//    }
-
     @Override
     public int compareTo(Song other) {
         int discComparison = Integer.compare(this.getDiscNumber(), other.getDiscNumber());
@@ -242,5 +236,10 @@ public final class Song implements Comparable<Song> {
         }
 
         return Integer.compare(this.getTrackNumber(), other.getTrackNumber());
+    }
+
+    @Override
+    public String toString() {
+        return getTitle();
     }
 }
