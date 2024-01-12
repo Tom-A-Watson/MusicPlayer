@@ -38,6 +38,7 @@ import static app.musicplayer.util.Config.*;
 // TODO: serialization version for future updates
 // TODO: most played and recently played are not serialized back as instances of classes
 // TODO: volume is not serialized
+// TODO: light and dark themes
 public class MusicPlayerApp extends Application {
 
     private static final Logger log = Logger.get(MusicPlayerApp.class);
