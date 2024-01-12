@@ -25,6 +25,7 @@ public final class Song implements Comparable<Song> {
     private ObjectProperty<LocalDateTime> playDate;
     private ObjectProperty<Path> file;
 
+    private StringProperty displayLength;
     private BooleanProperty isPlaying;
     private BooleanProperty isSelected;
     private ObjectProperty<Album> album;
@@ -53,6 +54,11 @@ public final class Song implements Comparable<Song> {
         this.playDate = new SimpleObjectProperty<>(playDate);
         this.file = new SimpleObjectProperty<>(file);
 
+        int minutes = lengthInSeconds / 60;
+        int seconds = lengthInSeconds % 60;
+        var displayLength = minutes + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
+
+        this.displayLength = new SimpleStringProperty(displayLength);
         this.isPlaying = new SimpleBooleanProperty(false);
         this.isSelected = new SimpleBooleanProperty(false);
         this.album = new SimpleObjectProperty<>(null);
@@ -177,6 +183,14 @@ public final class Song implements Comparable<Song> {
 
     public void setFile(Path file) {
         this.file.set(file);
+    }
+
+    public String getDisplayLength() {
+        return displayLength.get();
+    }
+
+    public StringProperty displayLengthProperty() {
+        return displayLength;
     }
 
     public boolean isPlaying() {

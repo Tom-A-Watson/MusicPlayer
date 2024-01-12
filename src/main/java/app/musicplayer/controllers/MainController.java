@@ -92,7 +92,8 @@ public class MainController implements Initializable {
 
         resetLatch();
 
-        controlBox.getChildren().remove(2);
+        // remove pause button until needed
+        controlBox.getChildren().remove(3);
 
         frontSliderTrack.prefWidthProperty().bind(timeSlider.widthProperty().multiply(timeSlider.valueProperty().divide(timeSlider.maxProperty())));
 
@@ -741,33 +742,10 @@ public class MainController implements Initializable {
         // TODO:
 
         System.out.println("Clicked on settings");
-
-//        if (isSideBarExpanded) {
-//            collapseSideBar();
-//        } else {
-//            expandSideBar();
-//        }
-    }
-
-    private void collapseSideBar() {
-        if (expandAnimation.statusProperty().get() == Animation.Status.STOPPED
-                && collapseAnimation.statusProperty().get() == Animation.Status.STOPPED) {
-
-            collapseAnimation.play();
-        }
-    }
-
-    private void expandSideBar() {
-        if (expandAnimation.statusProperty().get() == Animation.Status.STOPPED
-                && collapseAnimation.statusProperty().get() == Animation.Status.STOPPED) {
-
-            expandAnimation.play();
-        }
     }
 
     @FXML
     public void playPause() {
-
         sideBar.requestFocus();
 
         if (MusifyApp.isPlaying()) {
@@ -779,25 +757,14 @@ public class MainController implements Initializable {
 
     @FXML
     private void back() {
-
         sideBar.requestFocus();
         MusifyApp.back();
     }
 
     @FXML
     private void skip() {
-
         sideBar.requestFocus();
         MusifyApp.skip();
-    }
-
-    @FXML
-    private void letterClicked(Event e) {
-
-        sideBar.requestFocus();
-        Label eventSource = ((Label)e.getSource());
-        char letter = eventSource.getText().charAt(0);
-        subViewController.scroll(letter);
     }
 
     public void showSearchResults(Search.SearchResult result) {
@@ -871,7 +838,6 @@ public class MainController implements Initializable {
     }
 
     public void updatePlayPauseIcon(boolean isPlaying) {
-
         controlBox.getChildren().remove(2);
         if (isPlaying) {
             controlBox.getChildren().add(2, pauseButton);
@@ -883,27 +849,6 @@ public class MainController implements Initializable {
     private void setSlideDirection() {
         isSideBarExpanded = !isSideBarExpanded;
     }
-
-    private Animation volumeShowAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-        }
-
-        protected void interpolate(double frac) {
-            volumePopup.setOpacity(frac);
-        }
-    };
-
-    private Animation volumeHideAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-        }
-        protected void interpolate(double frac) {
-            volumePopup.setOpacity(1.0 - frac);
-        }
-    };
 
     private Animation searchShowAnimation = new Transition() {
         {
@@ -923,36 +868,6 @@ public class MainController implements Initializable {
         }
         protected void interpolate(double frac) {
             searchPopup.setOpacity(1.0 - frac);
-        }
-    };
-
-    private Animation collapseAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-            setOnFinished(x -> setSlideDirection());
-        }
-        protected void interpolate(double frac) {
-            double curWidth = collapsedWidth + (expandedWidth - collapsedWidth) * (1.0 - frac);
-            double searchWidth = searchCollapsed + (searchExpanded - searchCollapsed) * (1.0 - frac);
-            sideBar.setPrefWidth(curWidth);
-            searchBox.setPrefWidth(searchWidth);
-            searchBox.setOpacity(1.0 - frac);
-        }
-    };
-
-    private Animation expandAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-            setOnFinished(x -> setSlideDirection());
-        }
-        protected void interpolate(double frac) {
-            double curWidth = collapsedWidth + (expandedWidth - collapsedWidth) * (frac);
-            double searchWidth = searchCollapsed + (searchExpanded - searchCollapsed) * (frac);
-            sideBar.setPrefWidth(curWidth);
-            searchBox.setPrefWidth(searchWidth);
-            searchBox.setOpacity(frac);
         }
     };
 

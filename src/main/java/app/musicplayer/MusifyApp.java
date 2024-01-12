@@ -29,6 +29,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.LogManager;
 
 import static app.musicplayer.Config.*;
@@ -53,13 +55,13 @@ public class MusifyApp extends Application {
     private static List<Song> nowPlayingList;
     private static int nowPlayingIndex;
     private static Song nowPlaying;
-    private static int timerCounter;
-    private static int secondsPlayed;
+    private static int timerCounter = 0;
+    private static int secondsPlayed = 0;
     private static boolean isLoopActive = false;
     private static boolean isShuffleActive = false;
     private static boolean isMuted = false;
     private static Object draggedItem;
-    private static ExecutorService executorService;
+    private static ScheduledExecutorService executorService;
 
     private static Library library;
 
@@ -80,10 +82,7 @@ public class MusifyApp extends Application {
             Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
             log.info("start(Stage)");
 
-            executorService = Executors.newCachedThreadPool();
-
-            timerCounter = 0;
-            secondsPlayed = 0;
+            executorService = Executors.newScheduledThreadPool(4);
 
             MusifyApp.stage = stage;
             MusifyApp.stage.setMinWidth(850);
@@ -105,7 +104,7 @@ public class MusifyApp extends Application {
             showSplashScreen(stage);
 
         } catch (Exception e) {
-            log.fatal("Cannot start MusicPlayer", e);
+            log.fatal("Cannot start Musify", e);
             System.exit(0);
         }
     }
@@ -159,7 +158,7 @@ public class MusifyApp extends Application {
             Media media = new Media(nowPlaying.getFile().toUri().toString());
             mediaPlayer = new MediaPlayer(media);
             mediaPlayer.setVolume(0.5);
-            mediaPlayer.setOnEndOfMedia(new SongSkipper());
+            mediaPlayer.setOnEndOfMedia(MusifyApp::skip);
 
             return null;
         }
@@ -167,6 +166,8 @@ public class MusifyApp extends Application {
         @Override
         protected void succeeded() {
             showMain();
+
+            executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -198,25 +199,21 @@ public class MusifyApp extends Application {
         }
     }
 
-    private static class SongSkipper implements Runnable {
-        @Override
-        public void run() {
-            skip();
-        }
-    }
-
-    private static class TimeUpdater extends TimerTask {
-        private int length = (int) getNowPlaying().getLengthInSeconds() * 4;
+    private static class TimeUpdater implements Runnable {
 
         @Override
         public void run() {
+            if (!isPlaying())
+                return;
+
+            int length = getNowPlaying().getLengthInSeconds() * 4;
+
             Platform.runLater(() -> {
                 if (timerCounter < length) {
                     if (++timerCounter % 4 == 0) {
                         mainController.updateTimeLabels();
                         secondsPlayed++;
                     }
-
 
                     // TODO:
 //                    if (!mainController.isTimeSliderPressed()) {
@@ -233,9 +230,6 @@ public class MusifyApp extends Application {
     public static void play() {
         if (mediaPlayer != null && !isPlaying()) {
             mediaPlayer.play();
-
-            // TODO:
-            //timer.scheduleAtFixedRate(new TimeUpdater(), 0, 250);
             mainController.updatePlayPauseIcon(true);
         }
     }
@@ -253,8 +247,6 @@ public class MusifyApp extends Application {
     public static void pause() {
         if (isPlaying()) {
             mediaPlayer.pause();
-            // TODO:
-            //timer.cancel();
             mainController.updatePlayPauseIcon(false);
         }
     }
@@ -327,11 +319,7 @@ public class MusifyApp extends Application {
         if (isShuffleActive) {
             Collections.shuffle(nowPlayingList);
         } else {
-            Collections.sort(nowPlayingList,
-                    Comparator
-                            .comparing(Song::getAlbum)
-                            .thenComparing(song -> song)
-            );
+            Collections.sort(nowPlayingList);
         }
 
         nowPlayingIndex = nowPlayingList.indexOf(nowPlaying);
@@ -349,10 +337,6 @@ public class MusifyApp extends Application {
         return stage;
     }
 
-    /**
-     * Gets main controller object.
-     * @return MainController
-     */
     public static MainController getMainController() {
         return mainController;
     }
@@ -388,17 +372,13 @@ public class MusifyApp extends Application {
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
             }
-            // TODO:
-//            if (timer != null) {
-//                timer.cancel();
-//            }
-//            timer = new Timer();
+
             timerCounter = 0;
             secondsPlayed = 0;
             Media media = new Media(song.getFile().toUri().toString());
             mediaPlayer = new MediaPlayer(media);
             mediaPlayer.volumeProperty().bind(mainController.getVolumeSlider().valueProperty().divide(200));
-            mediaPlayer.setOnEndOfMedia(new SongSkipper());
+            mediaPlayer.setOnEndOfMedia(MusifyApp::skip);
             mediaPlayer.setMute(isMuted);
             mainController.updateNowPlayingButton();
             mainController.initializeTimeSlider();
@@ -408,7 +388,7 @@ public class MusifyApp extends Application {
 
     private static void updatePlayCount() {
         if (nowPlaying != null) {
-            int length = (int) nowPlaying.getLengthInSeconds();
+            int length = nowPlaying.getLengthInSeconds();
             if ((100 * secondsPlayed / length) > 50) {
                 songPlayed(nowPlaying);
             }
@@ -428,16 +408,16 @@ public class MusifyApp extends Application {
         int secondsPassed = timerCounter / 4;
         int minutes = secondsPassed / 60;
         int seconds = secondsPassed % 60;
-        return Integer.toString(minutes) + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
+        return minutes + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
     }
 
     public static String getTimeRemaining() {
-        long secondsPassed = timerCounter / 4;
-        long totalSeconds = getNowPlaying().getLengthInSeconds();
-        long secondsRemaining = totalSeconds - secondsPassed;
-        long minutes = secondsRemaining / 60;
-        long seconds = secondsRemaining % 60;
-        return Long.toString(minutes) + ":" + (seconds < 10 ? "0" + seconds : Long.toString(seconds));
+        int secondsPassed = timerCounter / 4;
+        int totalSeconds = getNowPlaying().getLengthInSeconds();
+        int secondsRemaining = totalSeconds - secondsPassed;
+        int minutes = secondsRemaining / 60;
+        int seconds = secondsRemaining % 60;
+        return minutes + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
     }
 
     public static void setDraggedItem(Object item) {

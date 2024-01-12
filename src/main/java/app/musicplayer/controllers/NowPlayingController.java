@@ -196,9 +196,6 @@ public class NowPlayingController implements Initializable, SubView {
         MusifyApp.play();
     }
     
-    @Override
-    public void scroll(char letter) {}
-    
     public Song getSelectedSong() {
     	return selectedSong;
     }

@@ -26,6 +26,20 @@ public class PlayingTableCell<S, T> extends TableCell<S, T> {
                 FXMLLoader loader = new FXMLLoader(this.getClass().getResource(fileName));
                 Pane pane = loader.load();
                 setGraphic(pane);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

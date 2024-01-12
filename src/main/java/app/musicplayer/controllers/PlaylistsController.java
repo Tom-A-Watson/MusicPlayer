@@ -272,9 +272,6 @@ public class PlaylistsController implements Initializable, SubView {
 
         tableView.setPlaceholder(placeholder);
     }
-    
-    @Override
-    public void scroll(char letter) {}
 
     @Override
     public Song getSelectedSong() {

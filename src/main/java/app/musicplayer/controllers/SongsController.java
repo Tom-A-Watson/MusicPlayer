@@ -30,10 +30,7 @@ public class SongsController implements Initializable, SubView {
 	@FXML private TableView<Song> tableView;
     @FXML private TableColumn<Song, Boolean> playingColumn;
     @FXML private TableColumn<Song, String> titleColumn;
-    @FXML private TableColumn<Song, String> artistColumn;
-    @FXML private TableColumn<Song, String> albumColumn;
     @FXML private TableColumn<Song, String> lengthColumn;
-    @FXML private TableColumn<Song, Integer> playsColumn;
     
     // Initializes table view scroll bar.
     private ScrollBar scrollBar;
@@ -49,28 +46,18 @@ public class SongsController implements Initializable, SubView {
     	
     	tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     	
-    	titleColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.26));
-        artistColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.26));
-        albumColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.26));
-        lengthColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.11));
-        playsColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.11));
+    	titleColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.76));
+        lengthColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.24));
 
         playingColumn.setCellFactory(x -> new PlayingTableCell<>());
         titleColumn.setCellFactory(x -> new ControlPanelTableCell<>());
-        artistColumn.setCellFactory(x -> new ClippedTableCell<>());
-        albumColumn.setCellFactory(x -> new ClippedTableCell<>());
         lengthColumn.setCellFactory(x -> new ClippedTableCell<>());
-        playsColumn.setCellFactory(x -> new ClippedTableCell<>());
 
         playingColumn.setCellValueFactory(new PropertyValueFactory<>("playing"));
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
-        artistColumn.setCellValueFactory(new PropertyValueFactory<>("artist"));
-        albumColumn.setCellValueFactory(new PropertyValueFactory<>("album"));
-        lengthColumn.setCellValueFactory(new PropertyValueFactory<>("length"));
-        playsColumn.setCellValueFactory(new PropertyValueFactory<>("playCount"));
+        lengthColumn.setCellValueFactory(new PropertyValueFactory<>("displayLength"));
         
         lengthColumn.setSortable(false);
-        playsColumn.setSortable(false);
         
         tableView.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
         	tableView.requestFocus();
@@ -205,98 +192,45 @@ public class SongsController implements Initializable, SubView {
         MusifyApp.setNowPlaying(song);
         MusifyApp.play();
     }
-    
-    @Override
-    public void scroll(char letter) {
-    	if (!tableView.getSortOrder().isEmpty()) {
-    		currentSortColumn = tableView.getSortOrder().get(0).getId();
-    		currentSortOrder = tableView.getSortOrder().get(0).getSortType().toString().toLowerCase();
-    	}
-    	
-    	// Retrieves songs from table.
-    	ObservableList<Song> songTableItems = tableView.getItems();
-    	// Initializes counter for cells. Used to determine what cell to scroll to.
-    	int selectedCell = 0;
-    	int selectedLetterCount = 0;
-    	
-    	// Retrieves the table view scroll bar.
-    	if (scrollBar == null) {
-    		scrollBar = (ScrollBar) tableView.lookup(".scroll-bar");
-    	}
 
-        switch (currentSortColumn) {
-            case "titleColumn":
-                for (Song song : songTableItems) {
-                    // Gets song title and compares first letter to selected letter.
-                    String songTitle = song.getTitle();
-                    try {
-                        char firstLetter = songTitle.charAt(0);
-                        if (firstLetter < letter) {
-                            selectedCell++;
-                        } else if (firstLetter == letter) {
-                            selectedLetterCount++;
-                        }
-                    } catch (NullPointerException npe) {
-                        System.out.println("Null Song Title");
-                    }
-
-                }
-                break;
-            case "artistColumn":
-                for (Song song : songTableItems) {
-                    // Removes article from song artist and compares it to selected letter.
-                    String songArtist = song.getArtistTitle();
-                    try {
-                        char firstLetter = songArtist.charAt(0);
-                        if (firstLetter < letter) {
-                            selectedCell++;
-                        } else if (firstLetter == letter) {
-                            selectedLetterCount++;
-                        }
-                    } catch (NullPointerException npe) {
-                        System.out.println("Null Song Artist");
-                    }
-                }
-                break;
-            case "albumColumn":
-                for (Song song : songTableItems) {
-                    // Removes article from song album and compares it to selected letter.
-                    String songAlbum = song.getAlbumTitle();
-                    try {
-                        char firstLetter = songAlbum.charAt(0);
-                        if (firstLetter < letter) {
-                            selectedCell++;
-                        } else if (firstLetter == letter) {
-                            selectedLetterCount++;
-                        }
-                    } catch (NullPointerException npe) {
-                        System.out.println("Null Song Album");
-                    }
-                }
-                break;
-        }
-    	
-    	double startVvalue = scrollBar.getValue();
-    	double finalVvalue;
-    	
-    	if ("descending".equals(currentSortOrder)) {
-    		finalVvalue = 1 - (((selectedCell + selectedLetterCount) * 50 - scrollBar.getHeight()) /
-    				(songTableItems.size() * 50 - scrollBar.getHeight()));
-    	} else {
-    		finalVvalue = (double) (selectedCell * 50) / (songTableItems.size() * 50 - scrollBar.getHeight());
-    	}
-    	
-    	Animation scrollAnimation = new Transition() {
-            {
-                setCycleDuration(Duration.millis(500));
-            }
-            protected void interpolate(double frac) {
-                double vValue = startVvalue + ((finalVvalue - startVvalue) * frac);
-                scrollBar.setValue(vValue);
-            }
-        };
-        scrollAnimation.play();
-    }
+//    public void scroll(char letter) {
+//    	if (!tableView.getSortOrder().isEmpty()) {
+//    		currentSortColumn = tableView.getSortOrder().get(0).getId();
+//    		currentSortOrder = tableView.getSortOrder().get(0).getSortType().toString().toLowerCase();
+//    	}
+//
+//    	// Retrieves songs from table.
+//    	ObservableList<Song> songTableItems = tableView.getItems();
+//    	// Initializes counter for cells. Used to determine what cell to scroll to.
+//    	int selectedCell = 0;
+//    	int selectedLetterCount = 0;
+//
+//    	// Retrieves the table view scroll bar.
+//    	if (scrollBar == null) {
+//    		scrollBar = (ScrollBar) tableView.lookup(".scroll-bar");
+//    	}
+//
+//    	double startVvalue = scrollBar.getValue();
+//    	double finalVvalue;
+//
+//    	if ("descending".equals(currentSortOrder)) {
+//    		finalVvalue = 1 - (((selectedCell + selectedLetterCount) * 50 - scrollBar.getHeight()) /
+//    				(songTableItems.size() * 50 - scrollBar.getHeight()));
+//    	} else {
+//    		finalVvalue = (double) (selectedCell * 50) / (songTableItems.size() * 50 - scrollBar.getHeight());
+//    	}
+//
+//    	Animation scrollAnimation = new Transition() {
+//            {
+//                setCycleDuration(Duration.millis(500));
+//            }
+//            protected void interpolate(double frac) {
+//                double vValue = startVvalue + ((finalVvalue - startVvalue) * frac);
+//                scrollBar.setValue(vValue);
+//            }
+//        };
+//        scrollAnimation.play();
+//    }
     
     public Song getSelectedSong() {
     	return selectedSong;
