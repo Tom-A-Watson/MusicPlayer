@@ -37,6 +37,7 @@ import static app.musicplayer.util.Config.*;
 // TODO: adding new songs when app is running (add rescan button?)
 // TODO: serialization version for future updates
 // TODO: most played and recently played are not serialized back as instances of classes
+// TODO: volume is not serialized
 public class MusicPlayerApp extends Application {
 
     private static final Logger log = Logger.get(MusicPlayerApp.class);
@@ -209,9 +210,12 @@ public class MusicPlayerApp extends Application {
                         mainController.updateTimeLabels();
                         secondsPlayed++;
                     }
-                    if (!mainController.isTimeSliderPressed()) {
-                        mainController.updateTimeSlider();
-                    }
+
+
+                    // TODO:
+//                    if (!mainController.isTimeSliderPressed()) {
+//                        mainController.updateTimeSlider();
+//                    }
                 }
             });
         }

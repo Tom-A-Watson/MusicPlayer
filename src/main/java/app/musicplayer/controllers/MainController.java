@@ -2,7 +2,6 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.*;
-import app.musicplayer.view.CustomSliderSkin;
 import app.musicplayer.util.Config;
 import app.musicplayer.util.Search;
 import app.musicplayer.view.SubView;
@@ -53,7 +52,6 @@ public class MainController implements Initializable {
     private double searchExpanded = 180;
     private double searchCollapsed = 0;
     private SubView subViewController;
-    private CustomSliderSkin sliderSkin;
     private Stage volumePopup;
     private Stage searchPopup;
     private VolumePopupController volumePopupController;
@@ -90,8 +88,8 @@ public class MainController implements Initializable {
 
         frontSliderTrack.prefWidthProperty().bind(timeSlider.widthProperty().multiply(timeSlider.valueProperty().divide(timeSlider.maxProperty())));
 
-        sliderSkin = new CustomSliderSkin(timeSlider);
-        timeSlider.setSkin(sliderSkin);
+//        sliderSkin = new CustomSliderSkin(timeSlider);
+//        timeSlider.setSkin(sliderSkin);
 
         createVolumePopup();
         createSearchPopup();
@@ -127,7 +125,8 @@ public class MainController implements Initializable {
 
                     double previous = oldValue.doubleValue();
                     double current = newValue.doubleValue();
-                    if (!timeSlider.isValueChanging() && current != previous + 1 && !isTimeSliderPressed()) {
+                    // TODO: && !isTimeSliderPressed()
+                    if (!timeSlider.isValueChanging() && current != previous + 1) {
 
                         int seconds = (int) Math.round(current / 4.0);
                         timeSlider.setValue(seconds * 4);
@@ -983,9 +982,9 @@ public class MainController implements Initializable {
         return volumePopupController.getSlider();
     }
 
-    public boolean isTimeSliderPressed() {
-        return sliderSkin.getThumb().isPressed() || sliderSkin.getTrack().isPressed();
-    }
+//    public boolean isTimeSliderPressed() {
+//        return sliderSkin.getThumb().isPressed() || sliderSkin.getTrack().isPressed();
+//    }
 
     public SubView getSubViewController() {
 
