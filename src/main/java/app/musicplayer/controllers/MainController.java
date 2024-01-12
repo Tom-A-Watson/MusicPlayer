@@ -908,11 +908,11 @@ public class MainController implements Initializable {
 
     public void updatePlayPauseIcon(boolean isPlaying) {
 
-        controlBox.getChildren().remove(1);
+        controlBox.getChildren().remove(2);
         if (isPlaying) {
-            controlBox.getChildren().add(1, pauseButton);
+            controlBox.getChildren().add(2, pauseButton);
         } else {
-            controlBox.getChildren().add(1, playButton);
+            controlBox.getChildren().add(2, playButton);
         }
     }
 

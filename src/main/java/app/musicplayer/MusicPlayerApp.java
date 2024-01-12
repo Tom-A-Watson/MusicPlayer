@@ -40,6 +40,9 @@ import static app.musicplayer.Config.*;
 // TODO: volume is not serialized
 // TODO: light and dark themes
 // TODO: on startup "Your Library" is not focused
+// TODO: rename playlist option
+// TODO: remember stage width height
+// TODO: remember last played song
 public class MusicPlayerApp extends Application {
 
     private static final Logger log = Logger.get(MusicPlayerApp.class);
@@ -82,7 +85,7 @@ public class MusicPlayerApp extends Application {
             secondsPlayed = 0;
 
             MusicPlayerApp.stage = stage;
-            MusicPlayerApp.stage.setMinWidth(800);
+            MusicPlayerApp.stage.setMinWidth(850);
             MusicPlayerApp.stage.setMinHeight(600);
             MusicPlayerApp.stage.setTitle("Music Player");
             MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(IMG + "Icon.png").toString()));
