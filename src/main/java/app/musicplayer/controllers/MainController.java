@@ -1,9 +1,10 @@
 package app.musicplayer.controllers;
 
-import app.musicplayer.MusicPlayerApp;
+import app.musicplayer.MusifyApp;
 import app.musicplayer.model.*;
 import app.musicplayer.Config;
 import app.musicplayer.view.SubView;
+import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
 import javafx.animation.Interpolator;
@@ -48,6 +49,8 @@ import java.util.stream.Collectors;
 
 public class MainController implements Initializable {
 
+    private static final Logger log = Logger.get(MainController.class);
+
     private boolean isSideBarExpanded = true;
     private double expandedWidth = 250;
     private double collapsedWidth = 50;
@@ -58,7 +61,6 @@ public class MainController implements Initializable {
     private SubView subViewController;
     private Stage volumePopup;
     private Stage searchPopup;
-    private VolumePopupController volumePopupController;
     private CountDownLatch viewLoadedLatch;
 
     @FXML private ScrollPane subViewRoot;
@@ -71,6 +73,8 @@ public class MainController implements Initializable {
     @FXML private Region frontSliderTrack;
     @FXML private Label timePassed;
     @FXML private Label timeRemaining;
+    @FXML private HBox volumePane;
+    @FXML private VolumeBoxController volumePaneController;
 
     @FXML private Separator letterSeparator;
 
@@ -84,6 +88,7 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        log.info("initialize()");
 
         resetLatch();
 
@@ -91,19 +96,18 @@ public class MainController implements Initializable {
 
         frontSliderTrack.prefWidthProperty().bind(timeSlider.widthProperty().multiply(timeSlider.valueProperty().divide(timeSlider.maxProperty())));
 
-        createVolumePopup();
         createSearchPopup();
 
         PseudoClass active = PseudoClass.getPseudoClass("active");
         loopButton.setOnMouseClicked(x -> {
             sideBar.requestFocus();
-            MusicPlayerApp.toggleLoop();
-            loopButton.pseudoClassStateChanged(active, MusicPlayerApp.isLoopActive());
+            MusifyApp.toggleLoop();
+            loopButton.pseudoClassStateChanged(active, MusifyApp.isLoopActive());
         });
         shuffleButton.setOnMouseClicked(x -> {
             sideBar.requestFocus();
-            MusicPlayerApp.toggleShuffle();
-            shuffleButton.pseudoClassStateChanged(active, MusicPlayerApp.isShuffleActive());
+            MusifyApp.toggleShuffle();
+            shuffleButton.pseudoClassStateChanged(active, MusifyApp.isShuffleActive());
         });
 
         timeSlider.setFocusTraversable(false);
@@ -112,7 +116,7 @@ public class MainController implements Initializable {
             if (wasChanging) {
                 int seconds = (int) Math.round(timeSlider.getValue() / 4.0);
                 timeSlider.setValue(seconds * 4);
-                MusicPlayerApp.seek(seconds);
+                MusifyApp.seek(seconds);
             }
         });
 
@@ -125,7 +129,7 @@ public class MainController implements Initializable {
 
                 int seconds = (int) Math.round(current / 4.0);
                 timeSlider.setValue(seconds * 4);
-                MusicPlayerApp.seek(seconds);
+                MusifyApp.seek(seconds);
             }
         });
 
@@ -149,7 +153,7 @@ public class MainController implements Initializable {
                 Search.SearchResult result = Search.getResult();
                 Platform.runLater(() -> {
                     showSearchResults(result);
-                    MusicPlayerApp.getStage().toFront();
+                    MusifyApp.getStage().toFront();
                 });
                 int height = 0;
                 int songs = result.songResults().size();
@@ -159,13 +163,13 @@ public class MainController implements Initializable {
             }
         });
 
-        MusicPlayerApp.getStage().xProperty().addListener((observable, oldValue, newValue) -> {
+        MusifyApp.getStage().xProperty().addListener((observable, oldValue, newValue) -> {
             if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
                 searchHideAnimation.play();
             }
         });
 
-        MusicPlayerApp.getStage().yProperty().addListener((observable, oldValue, newValue) -> {
+        MusifyApp.getStage().yProperty().addListener((observable, oldValue, newValue) -> {
             if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
                 searchHideAnimation.play();
             }
@@ -187,39 +191,9 @@ public class MainController implements Initializable {
         return viewLoadedLatch;
     }
 
-    private void createVolumePopup() {
-        try {
-
-            Stage stage = MusicPlayerApp.getStage();
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "VolumePopup.fxml"));
-            HBox view = loader.load();
-            volumePopupController = loader.getController();
-            Stage popup = new Stage();
-            popup.setScene(new Scene(view));
-            popup.initStyle(StageStyle.UNDECORATED);
-            popup.initOwner(stage);
-            popup.setX(stage.getWidth() - 270);
-            popup.setY(stage.getHeight() - 120);
-            popup.focusedProperty().addListener((x, wasFocused, isFocused) -> {
-                if (wasFocused && !isFocused) {
-                    volumeHideAnimation.play();
-                }
-            });
-            volumeHideAnimation.setOnFinished(x -> popup.hide());
-
-            popup.show();
-            popup.hide();
-            volumePopup = popup;
-
-        } catch (Exception ex) {
-
-            ex.printStackTrace();
-        }
-    }
-
     private void createSearchPopup() {
         try {
-            Stage stage = MusicPlayerApp.getStage();
+            Stage stage = MusifyApp.getStage();
             VBox view = new VBox();
             view.getStylesheets().add(Config.CSS + "MainStyle.css");
             view.getStyleClass().add("searchPopup");
@@ -240,7 +214,7 @@ public class MainController implements Initializable {
     }
 
     public void updateNowPlayingButton() {
-        Song song = MusicPlayerApp.getNowPlaying();
+        Song song = MusifyApp.getNowPlaying();
         if (song != null) {
             nowPlayingTitle.setText(song.getTitle());
             nowPlayingArtist.setText(song.getArtistTitle());
@@ -253,7 +227,7 @@ public class MainController implements Initializable {
     }
 
     public void initializeTimeSlider() {
-        Song song = MusicPlayerApp.getNowPlaying();
+        Song song = MusifyApp.getNowPlaying();
         if (song != null) {
             timeSlider.setMin(0);
             timeSlider.setMax(song.getLengthInSeconds() * 4);
@@ -272,7 +246,7 @@ public class MainController implements Initializable {
     }
 
     public void initializeTimeLabels() {
-        Song song = MusicPlayerApp.getNowPlaying();
+        Song song = MusifyApp.getNowPlaying();
         if (song != null) {
             timePassed.setText("0:00");
 
@@ -288,13 +262,13 @@ public class MainController implements Initializable {
     }
 
     public void updateTimeLabels() {
-        timePassed.setText(MusicPlayerApp.getTimePassed());
-        timeRemaining.setText(MusicPlayerApp.getTimeRemaining());
+        timePassed.setText(MusifyApp.getTimePassed());
+        timeRemaining.setText(MusifyApp.getTimeRemaining());
     }
 
     @SuppressWarnings("unchecked")
     private void initializePlaylists() {
-        for (Playlist playlist : MusicPlayerApp.getLibrary().getPlaylists()) {
+        for (Playlist playlist : MusifyApp.getLibrary().getPlaylists()) {
             try {
                 FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
                 HBox cell = loader.load();
@@ -313,7 +287,7 @@ public class MainController implements Initializable {
                     ClipboardContent content = new ClipboardContent();
                     content.putString("Playlist");
                     db.setContent(content);
-                    MusicPlayerApp.setDraggedItem(playlist);
+                    MusifyApp.setDraggedItem(playlist);
                     db.setDragView(cell.snapshot(null, null), 125, 25);
                     event.consume();
                 });
@@ -358,7 +332,7 @@ public class MainController implements Initializable {
                     new Thread(() -> {
                         switch (dragString) {
                             case "Artist":
-                                Artist artist = (Artist) MusicPlayerApp.getDraggedItem();
+                                Artist artist = (Artist) MusifyApp.getDraggedItem();
                                 for (Album album : artist.albums()) {
                                     for (Song song : album.getSongs()) {
                                         if (!playlist.getSongs().contains(song)) {
@@ -368,7 +342,7 @@ public class MainController implements Initializable {
                                 }
                                 break;
                             case "Album":
-                                Album album = (Album) MusicPlayerApp.getDraggedItem();
+                                Album album = (Album) MusifyApp.getDraggedItem();
                                 for (Song song : album.getSongs()) {
                                     if (!playlist.getSongs().contains(song)) {
                                         playlist.addSong(song);
@@ -376,7 +350,7 @@ public class MainController implements Initializable {
                                 }
                                 break;
                             case "Playlist":
-                                Playlist list = (Playlist) MusicPlayerApp.getDraggedItem();
+                                Playlist list = (Playlist) MusifyApp.getDraggedItem();
                                 for (Song song : list.getSongs()) {
                                     if (!playlist.getSongs().contains(song)) {
                                         playlist.addSong(song);
@@ -384,13 +358,13 @@ public class MainController implements Initializable {
                                 }
                                 break;
                             case "Song":
-                                Song song = (Song) MusicPlayerApp.getDraggedItem();
+                                Song song = (Song) MusifyApp.getDraggedItem();
                                 if (!playlist.getSongs().contains(song)) {
                                     playlist.addSong(song);
                                 }
                                 break;
                             case "List":
-                                ObservableList<Song> songs = (ObservableList<Song>) MusicPlayerApp.getDraggedItem();
+                                ObservableList<Song> songs = (ObservableList<Song>) MusifyApp.getDraggedItem();
                                 for (Song s : songs) {
                                     if (!playlist.getSongs().contains(s)) {
                                         playlist.addSong(s);
@@ -445,7 +419,7 @@ public class MainController implements Initializable {
     }
 
     private static Playlist getPlaylist(String title) {
-        return MusicPlayerApp.getLibrary().findPlaylistByTitle(title).get();
+        return MusifyApp.getLibrary().findPlaylistByTitle(title).get();
     }
     
     @FXML
@@ -476,7 +450,7 @@ public class MainController implements Initializable {
                         HBox.setMargin(label, new Insets(10, 10, 10, 10));
                         label.setVisible(true);
 
-                        MusicPlayerApp.getLibrary().addPlaylist(text);
+                        MusifyApp.getLibrary().addPlaylist(text);
                     }
                 });
 
@@ -500,7 +474,7 @@ public class MainController implements Initializable {
                     ClipboardContent content = new ClipboardContent();
                     content.putString("Playlist");
                     db.setContent(content);
-                    MusicPlayerApp.setDraggedItem(playlist);
+                    MusifyApp.setDraggedItem(playlist);
                     SnapshotParameters sp = new SnapshotParameters();
                     sp.setTransform(Transform.scale(1.5, 1.5));
                     db.setDragView(cell.snapshot(sp, null));
@@ -549,7 +523,7 @@ public class MainController implements Initializable {
                     new Thread(() -> {
                         switch (dragString) {
                             case "Artist":
-                                Artist artist = (Artist) MusicPlayerApp.getDraggedItem();
+                                Artist artist = (Artist) MusifyApp.getDraggedItem();
                                 for (Album album : artist.albums()) {
                                     for (Song song : album.getSongs()) {
                                         if (!playlist.getSongs().contains(song)) {
@@ -559,7 +533,7 @@ public class MainController implements Initializable {
                                 }
                                 break;
                             case "Album":
-                                Album album = (Album) MusicPlayerApp.getDraggedItem();
+                                Album album = (Album) MusifyApp.getDraggedItem();
                                 for (Song song : album.getSongs()) {
                                     if (!playlist.getSongs().contains(song)) {
                                         playlist.addSong(song);
@@ -567,7 +541,7 @@ public class MainController implements Initializable {
                                 }
                                 break;
                             case "Playlist":
-                                Playlist list = (Playlist) MusicPlayerApp.getDraggedItem();
+                                Playlist list = (Playlist) MusifyApp.getDraggedItem();
                                 for (Song song : list.getSongs()) {
                                     if (!playlist.getSongs().contains(song)) {
                                         playlist.addSong(song);
@@ -575,13 +549,13 @@ public class MainController implements Initializable {
                                 }
                                 break;
                             case "Song":
-                                Song song = (Song) MusicPlayerApp.getDraggedItem();
+                                Song song = (Song) MusifyApp.getDraggedItem();
                                 if (!playlist.getSongs().contains(song)) {
                                     playlist.addSong(song);
                                 }
                                 break;
                             case "List":
-                                ObservableList<Song> songs = (ObservableList<Song>) MusicPlayerApp.getDraggedItem();
+                                ObservableList<Song> songs = (ObservableList<Song>) MusifyApp.getDraggedItem();
                                 for (Song s : songs) {
                                     if (!playlist.getSongs().contains(s)) {
                                         playlist.addSong(s);
@@ -611,7 +585,7 @@ public class MainController implements Initializable {
     }
 
     private String checkDuplicatePlaylist(String text, int i) {
-        for (Playlist playlist : MusicPlayerApp.getLibrary().getPlaylists()) {
+        for (Playlist playlist : MusifyApp.getLibrary().getPlaylists()) {
             if (playlist.getTitle().equals(text)) {
 
                 int index = text.lastIndexOf(' ') + 1;
@@ -680,7 +654,7 @@ public class MainController implements Initializable {
             Task<Void> task = new Task<Void>() {
                 @Override protected Void call() throws Exception {
                     Platform.runLater(() -> {
-                        MusicPlayerApp.getLibrary().getSongs().stream().filter(x -> x.isSelected()).forEach(x -> x.setSelected(false));
+                        MusifyApp.getLibrary().getSongs().stream().filter(x -> x.isSelected()).forEach(x -> x.setSelected(false));
                         subViewRoot.setVisible(false);
                         subViewRoot.setContent(view);
                         subViewRoot.getContent().setOpacity(0);
@@ -753,7 +727,7 @@ public class MainController implements Initializable {
 
         sideBar.getChildren().get(2).getStyleClass().setAll("sideBarItemSelected");
 
-        Song song = MusicPlayerApp.getNowPlaying();
+        Song song = MusifyApp.getNowPlaying();
 
         var songsController = (SongsController) loadView("Songs");
         songsController.selectSong(song);
@@ -796,10 +770,10 @@ public class MainController implements Initializable {
 
         sideBar.requestFocus();
 
-        if (MusicPlayerApp.isPlaying()) {
-            MusicPlayerApp.pause();
+        if (MusifyApp.isPlaying()) {
+            MusifyApp.pause();
         } else {
-            MusicPlayerApp.play();
+            MusifyApp.play();
         }
     }
 
@@ -807,14 +781,14 @@ public class MainController implements Initializable {
     private void back() {
 
         sideBar.requestFocus();
-        MusicPlayerApp.back();
+        MusifyApp.back();
     }
 
     @FXML
     private void skip() {
 
         sideBar.requestFocus();
-        MusicPlayerApp.skip();
+        MusifyApp.skip();
     }
 
     @FXML
@@ -824,16 +798,6 @@ public class MainController implements Initializable {
         Label eventSource = ((Label)e.getSource());
         char letter = eventSource.getText().charAt(0);
         subViewController.scroll(letter);
-    }
-
-    public void volumeClick() {
-        if (!volumePopup.isShowing()) {
-            Stage stage = MusicPlayerApp.getStage();
-            volumePopup.setX(stage.getX() + stage.getWidth() - 265);
-            volumePopup.setY(stage.getY() + stage.getHeight() - 115);
-            volumePopup.show();
-            volumeShowAnimation.play();
-        }
     }
 
     public void showSearchResults(Search.SearchResult result) {
@@ -877,7 +841,7 @@ public class MainController implements Initializable {
         }
 
         if (!searchPopup.isShowing()) {
-            Stage stage = MusicPlayerApp.getStage();
+            Stage stage = MusifyApp.getStage();
             searchPopup.setX(stage.getX() + 18);
             searchPopup.setY(stage.getY() + 80);
             searchPopup.show();
@@ -886,7 +850,7 @@ public class MainController implements Initializable {
     }
 
     public Slider getVolumeSlider() {
-        return volumePopupController.getSlider();
+        return volumePaneController.getSlider();
     }
 
 //    public boolean isTimeSliderPressed() {
@@ -1080,7 +1044,7 @@ public class MainController implements Initializable {
                 try {
                     hasResults.set(false);
 
-                    List<Song> songResults = MusicPlayerApp.getLibrary()
+                    List<Song> songResults = MusifyApp.getLibrary()
                             .getSongs()
                             .stream()
                             .filter(song -> song.getTitle().toUpperCase().contains(text))

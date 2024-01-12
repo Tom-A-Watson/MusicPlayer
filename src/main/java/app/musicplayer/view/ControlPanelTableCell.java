@@ -7,7 +7,7 @@
 
 package app.musicplayer.view;
 
-import app.musicplayer.MusicPlayerApp;
+import app.musicplayer.MusifyApp;
 import app.musicplayer.model.Song;
 import app.musicplayer.controllers.PlaylistsController;
 import app.musicplayer.Config;
@@ -43,7 +43,7 @@ public class ControlPanelTableCell<S, T> extends TableCell<S, T> {
         } else {
             String fileName;
             // Selects the correct control panel based on whether the user is in a play list or not.
-            if (MusicPlayerApp.getMainController().getSubViewController() instanceof PlaylistsController) {
+            if (MusifyApp.getMainController().getSubViewController() instanceof PlaylistsController) {
                 fileName = Config.FXML + "ControlPanelPlaylists.fxml";
             } else {
                 fileName = Config.FXML + "ControlPanel.fxml";

@@ -1,6 +1,6 @@
 package app.musicplayer.controllers;
 
-import app.musicplayer.MusicPlayerApp;
+import app.musicplayer.MusifyApp;
 import app.musicplayer.model.Song;
 import app.musicplayer.view.ClippedTableCell;
 import app.musicplayer.view.ControlPanelTableCell;
@@ -44,7 +44,7 @@ public class NowPlayingController implements Initializable, SubView {
     	
     	tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        ObservableList<Song> songs = FXCollections.observableArrayList(MusicPlayerApp.getNowPlayingList());
+        ObservableList<Song> songs = FXCollections.observableArrayList(MusifyApp.getNowPlayingList());
 
         titleColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.26));
         artistColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.26));
@@ -147,11 +147,11 @@ public class NowPlayingController implements Initializable, SubView {
             	if (tableView.getSelectionModel().getSelectedIndices().size() > 1) {
             		content.putString("List");
                     db.setContent(content);
-                	MusicPlayerApp.setDraggedItem(tableView.getSelectionModel().getSelectedItems());
+                	MusifyApp.setDraggedItem(tableView.getSelectionModel().getSelectedItems());
             	} else {
             		content.putString("Song");
                     db.setContent(content);
-                	MusicPlayerApp.setDraggedItem(row.getItem());
+                	MusifyApp.setDraggedItem(row.getItem());
             	}
             	ImageView image = new ImageView(row.snapshot(null, null));
             	Rectangle2D rectangle = new Rectangle2D(0, 0, 250, 50);
@@ -186,14 +186,14 @@ public class NowPlayingController implements Initializable, SubView {
     	
     	Song song = selectedSong;
         ObservableList<Song> songList = tableView.getItems();
-        if (MusicPlayerApp.isShuffleActive()) {
+        if (MusifyApp.isShuffleActive()) {
         	Collections.shuffle(songList);
         	songList.remove(song);
         	songList.add(0, song);
         }
-        MusicPlayerApp.setNowPlayingList(songList);
-        MusicPlayerApp.setNowPlaying(song);
-        MusicPlayerApp.play();
+        MusifyApp.setNowPlayingList(songList);
+        MusifyApp.setNowPlaying(song);
+        MusifyApp.play();
     }
     
     @Override

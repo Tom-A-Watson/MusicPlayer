@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 
 public final class Config {
 
+    public static final String VERSION = "2.0";
+
     public static final Path LIBRARY_FILE = Paths.get("library.json");
 
     public static final String FXML = "/assets/ui/";

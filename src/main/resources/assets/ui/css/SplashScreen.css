@@ -8,6 +8,10 @@
     -fx-font-family: verdana;
 }
 
+.logoLabel {
+    -fx-font-size: 22px;
+}
+
 .progress-indicator {
     -fx-progress-color: rgb(52, 109, 207);
 }

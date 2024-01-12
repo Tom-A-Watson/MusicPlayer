@@ -223,7 +223,7 @@
          </center>
 
          <right>
-            <fx:include source="VolumePopup.fxml" BorderPane.alignment="CENTER"/>
+            <fx:include fx:id="volumePane" source="VolumeBox.fxml" BorderPane.alignment="CENTER"/>
          </right>
       </BorderPane>
    </bottom>

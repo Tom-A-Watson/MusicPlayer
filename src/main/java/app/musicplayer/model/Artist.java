@@ -17,7 +17,6 @@ import java.util.List;
  */
 public record Artist(
         String title,
-        Image image,
         List<Album> albums
 ) implements Comparable<Artist> {
 

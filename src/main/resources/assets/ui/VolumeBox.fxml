@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.image.*?>
-<?import java.lang.*?>
 <?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
 
-<HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="250.0" stylesheets="@/assets/ui/css/MainStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.controllers.VolumePopupController">
+<HBox fx:controller="app.musicplayer.controllers.VolumeBoxController" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="250.0" stylesheets="@/assets/ui/css/MainStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <StackPane>
          <children>
@@ -39,18 +38,10 @@
                   <Insets left="25.0" right="25.0" />
                </StackPane.margin>
             </Region>
-            <Slider fx:id="volumeSlider" blockIncrement="1.0" maxWidth="-Infinity" minWidth="-Infinity" pickOnBounds="false" prefWidth="140.0" styleClass="volumeSlider" value="50.0" StackPane.alignment="CENTER">
-               <StackPane.margin>
-                  <Insets />
-               </StackPane.margin>
-            </Slider>
+            <Slider fx:id="volumeSlider" blockIncrement="1.0" maxWidth="-Infinity" minWidth="-Infinity" pickOnBounds="false" prefWidth="140.0" styleClass="volumeSlider" value="50.0" StackPane.alignment="CENTER"/>
          </children>
       </StackPane>
 
-      <Label fx:id="volumeLabel" alignment="CENTER" ellipsisString="" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="40.0" styleClass="volumeLabel" text="50" textOverrun="CLIP">
-         <HBox.margin>
-            <Insets />
-         </HBox.margin>
-      </Label>
+      <Label fx:id="volumeLabel" alignment="CENTER" ellipsisString="" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0" prefWidth="40.0" styleClass="volumeLabel" textOverrun="CLIP" />
    </children>
 </HBox>

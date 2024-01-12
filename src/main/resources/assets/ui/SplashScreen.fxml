@@ -13,14 +13,30 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<VBox alignment="CENTER" styleClass="vbox" stylesheets="@/assets/ui/css/SplashScreen.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.controllers.ImportLibraryController">
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.paint.ImagePattern?>
+<?import javafx.scene.effect.DropShadow?>
+<VBox spacing="40" alignment="TOP_CENTER" styleClass="vbox" stylesheets="@/assets/ui/css/SplashScreen.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.controllers.ImportLibraryController">
+   <padding>
+      <Insets top="25.0" />
+   </padding>
+
    <children>
-      <ImageView fitHeight="300.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@/assets/textures/Logo.png" />
-         </image>
-      </ImageView>
-      <Label text="M   U   S   I   C      P   L   A   Y   E   R" />
+      <Rectangle width="300" height="300" arcWidth="70.0" arcHeight="70.0">
+         <fill>
+            <ImagePattern>
+               <image>
+                  <Image url="@/assets/textures/Logo.png" />
+               </image>
+            </ImagePattern>
+         </fill>
+         <effect>
+            <DropShadow radius="10" />
+         </effect>
+      </Rectangle>
+
+      <Label text="M   U   S   I   F   Y " styleClass="logoLabel"/>
+
       <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="400.0" styleClass="ImportMusicDialog" stylesheets="@css/ImportMusicDialog.css">
          <bottom>
             <StackPane>

@@ -1,7 +1,7 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
-import app.musicplayer.MusicPlayerApp;
+import app.musicplayer.MusifyApp;
 import app.musicplayer.model.*;
 import app.musicplayer.view.ClippedTableCell;
 import app.musicplayer.view.ControlPanelTableCell;
@@ -177,11 +177,11 @@ public class PlaylistsController implements Initializable, SubView {
                 if (tableView.getSelectionModel().getSelectedIndices().size() > 1) {
                     content.putString("List");
                     db.setContent(content);
-                    MusicPlayerApp.setDraggedItem(tableView.getSelectionModel().getSelectedItems());
+                    MusifyApp.setDraggedItem(tableView.getSelectionModel().getSelectedItems());
                 } else {
                     content.putString("Song");
                     db.setContent(content);
-                    MusicPlayerApp.setDraggedItem(row.getItem());
+                    MusifyApp.setDraggedItem(row.getItem());
                 }
                 ImageView image = new ImageView(row.snapshot(null, null));
                 Rectangle2D rectangle = new Rectangle2D(0, 0, 250, 50);
@@ -210,7 +210,7 @@ public class PlaylistsController implements Initializable, SubView {
             }
         });
 
-        ObservableList<Node> playlistBoxChildren = MusicPlayerApp.getMainController().getPlaylistBox().getChildren();
+        ObservableList<Node> playlistBoxChildren = MusifyApp.getMainController().getPlaylistBox().getChildren();
 
         deletePlaylistAnimation.setOnFinished(event -> {
             playlistBoxChildren.remove(cell);
@@ -221,14 +221,14 @@ public class PlaylistsController implements Initializable, SubView {
     public void play() {
         Song song = selectedSong;
         List<Song> songs = selectedPlaylist.getSongs();
-        if (MusicPlayerApp.isShuffleActive()) {
+        if (MusifyApp.isShuffleActive()) {
             Collections.shuffle(songs);
             songs.remove(song);
             songs.add(0, song);
         }
-        MusicPlayerApp.setNowPlayingList(songs);
-        MusicPlayerApp.setNowPlaying(song);
-        MusicPlayerApp.play();
+        MusifyApp.setNowPlayingList(songs);
+        MusifyApp.setNowPlaying(song);
+        MusifyApp.play();
     }
 
     void selectPlaylist(Playlist playlist) {
@@ -298,9 +298,9 @@ public class PlaylistsController implements Initializable, SubView {
     @FXML
     private void playPlaylist() {
         List<Song> songs = selectedPlaylist.getSongs();
-        MusicPlayerApp.setNowPlayingList(songs);
-        MusicPlayerApp.setNowPlaying(songs.get(0));
-        MusicPlayerApp.play();
+        MusifyApp.setNowPlayingList(songs);
+        MusifyApp.setNowPlaying(songs.get(0));
+        MusifyApp.play();
     }
     
     @FXML
@@ -310,7 +310,7 @@ public class PlaylistsController implements Initializable, SubView {
             String selectedPlaylistTitle = selectedPlaylist.getTitle();
 
             // Gets the playlist box children to loop through each to find the correct child to remove.
-            ObservableList<Node> playlistBoxChildren = MusicPlayerApp.getMainController().getPlaylistBox().getChildren();
+            ObservableList<Node> playlistBoxChildren = MusifyApp.getMainController().getPlaylistBox().getChildren();
 
             // Initialize i at 1 to ignore the new playlist cell.
             for (int i = 1; i <= playlistBoxChildren.size(); i++) {
@@ -327,10 +327,10 @@ public class PlaylistsController implements Initializable, SubView {
             deletePlaylistAnimation.play();
 
             // Loads the artists view.
-            MusicPlayerApp.getMainController().loadView("songs");
+            MusifyApp.getMainController().loadView("songs");
 
             // Removes the selected playlist from the library so that it is not reloaded.
-            MusicPlayerApp.getLibrary().removePlaylist(selectedPlaylist);
+            MusifyApp.getLibrary().removePlaylist(selectedPlaylist);
 
             // Resets the selected playlist to avoid storing the deleted playlist's data.
             selectedPlaylist = null;

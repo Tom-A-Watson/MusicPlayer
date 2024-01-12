@@ -7,7 +7,7 @@
 
 package app.musicplayer.controllers;
 
-import app.musicplayer.MusicPlayerApp;
+import app.musicplayer.MusifyApp;
 import com.almasb.fxgl.logging.Logger;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
@@ -20,9 +20,9 @@ import javafx.scene.layout.Region;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public final class VolumePopupController implements Initializable {
+public final class VolumeBoxController implements Initializable {
 
-    private static final Logger log = Logger.get(VolumePopupController.class);
+    private static final Logger log = Logger.get(VolumeBoxController.class);
 
     @FXML
     private Slider volumeSlider;
@@ -61,11 +61,6 @@ public final class VolumePopupController implements Initializable {
     }
 
     @FXML
-    private void onClickVolume() {
-        MusicPlayerApp.getMainController().volumeClick();
-    }
-
-    @FXML
     private void onClickMute() {
         PseudoClass muted = PseudoClass.getPseudoClass("muted");
         boolean isMuted = mutedButton.isVisible();
@@ -74,6 +69,8 @@ public final class VolumePopupController implements Initializable {
         volumeSlider.pseudoClassStateChanged(muted, !isMuted);
         frontVolumeTrack.pseudoClassStateChanged(muted, !isMuted);
         volumeLabel.pseudoClassStateChanged(muted, !isMuted);
-        MusicPlayerApp.mute(isMuted);
+
+        // TODO: extract into property and listen from outside of the controller
+        MusifyApp.mute(isMuted);
     }
 }

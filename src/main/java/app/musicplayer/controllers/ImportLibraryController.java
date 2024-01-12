@@ -7,7 +7,7 @@
 
 package app.musicplayer.controllers;
 
-import app.musicplayer.MusicPlayerApp;
+import app.musicplayer.MusifyApp;
 import app.musicplayer.model.Album;
 import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
@@ -94,7 +94,7 @@ public final class ImportLibraryController {
         label.textProperty().bind(task.messageProperty());
         progressBar.progressProperty().bind(task.progressProperty());
 
-        MusicPlayerApp.getExecutorService().submit(task);
+        MusifyApp.getExecutorService().submit(task);
     }
 
     private static class ImportLibraryTask extends Task<Library> {
@@ -143,38 +143,23 @@ public final class ImportLibraryController {
 
         private Song loadSongData(int id, Path file) throws Exception {
             AudioFile audioFile = AudioFileIO.read(file.toFile());
-            Tag tag = audioFile.getTag();
-            AudioHeader header = audioFile.getAudioHeader();
 
-            String title = tag.getFirst(FieldKey.TITLE);
-            if (isEmpty(title)) {
-                var fileName = file.getFileName().toString();
-                title = fileName.substring(0, fileName.lastIndexOf('.'));
-            }
+            int lengthSeconds = 0;
 
-            String artistTitle = tag.getFirst(FieldKey.ALBUM_ARTIST);
+            if (audioFile != null && audioFile.getAudioHeader() != null)
+                lengthSeconds = audioFile.getAudioHeader().getTrackLength();
 
-            if (isEmpty(artistTitle)) {
-                artistTitle = tag.getFirst(FieldKey.ARTIST);
-            }
-
-            String albumTitle = tag.getFirst(FieldKey.ALBUM);
-
-            int lengthSeconds = header.getTrackLength();
-            String track = tag.getFirst(FieldKey.TRACK);
-            int trackNumber = isEmpty(track) ? 0 : Integer.parseInt(track);
-
-            String disc = tag.getFirst(FieldKey.DISC_NO);
-            int discNumber = isEmpty(disc) ? 0 : Integer.parseInt(disc);
+            String fileName = file.getFileName().toString();
+            String title = fileName.substring(0, fileName.lastIndexOf('.'));
 
             return new Song(
                     id,
-                    makeSafe(title),
-                    makeSafe(artistTitle),
-                    makeSafe(albumTitle),
+                    title,
+                    "Artist",
+                    "Album",
                     lengthSeconds,
-                    trackNumber,
-                    discNumber,
+                    0,
+                    0,
                     0,
                     LocalDateTime.now(),
                     file
@@ -245,7 +230,7 @@ public final class ImportLibraryController {
                 var artistTitle = entry.getKey();
                 var artistAlbums = entry.getValue();
 
-                var artist = new Artist(artistTitle, new Image(Config.IMG + "artistsIcon.png"), artistAlbums);
+                var artist = new Artist(artistTitle, artistAlbums);
 
                 artists.add(artist);
 

@@ -43,9 +43,10 @@ import static app.musicplayer.Config.*;
 // TODO: rename playlist option
 // TODO: remember stage width height
 // TODO: remember last played song
-public class MusicPlayerApp extends Application {
+// TODO: update to high res app icon
+public class MusifyApp extends Application {
 
-    private static final Logger log = Logger.get(MusicPlayerApp.class);
+    private static final Logger log = Logger.get(MusifyApp.class);
 
     private static MainController mainController;
     private static MediaPlayer mediaPlayer;
@@ -66,7 +67,7 @@ public class MusicPlayerApp extends Application {
 
     public static class Launcher {
         public static void main(String[] args) {
-            Application.launch(MusicPlayerApp.class);
+            Application.launch(MusifyApp.class);
         }
     }
 
@@ -84,12 +85,12 @@ public class MusicPlayerApp extends Application {
             timerCounter = 0;
             secondsPlayed = 0;
 
-            MusicPlayerApp.stage = stage;
-            MusicPlayerApp.stage.setMinWidth(850);
-            MusicPlayerApp.stage.setMinHeight(600);
-            MusicPlayerApp.stage.setTitle("Music Player");
-            MusicPlayerApp.stage.getIcons().add(new Image(this.getClass().getResource(IMG + "Icon.png").toString()));
-            MusicPlayerApp.stage.setOnCloseRequest(event -> {
+            MusifyApp.stage = stage;
+            MusifyApp.stage.setMinWidth(850);
+            MusifyApp.stage.setMinHeight(600);
+            MusifyApp.stage.setTitle("Musify " + VERSION);
+            MusifyApp.stage.getIcons().add(new Image(this.getClass().getResource(IMG + "Logo.png").toString()));
+            MusifyApp.stage.setOnCloseRequest(event -> {
 
                 try {
                     if (library != null)
@@ -140,7 +141,7 @@ public class MusicPlayerApp extends Application {
 
             // TODO: check logic
             if (nowPlayingList.isEmpty()) {
-                Artist artist = MusicPlayerApp.getLibrary().getArtists().get(0);
+                Artist artist = MusifyApp.getLibrary().getArtists().get(0);
 
                 for (Album album : artist.albums()) {
                     nowPlayingList.addAll(album.getSongs());
@@ -306,7 +307,7 @@ public class MusicPlayerApp extends Application {
     }
 
     public static void mute(boolean isMuted) {
-        MusicPlayerApp.isMuted = !isMuted;
+        MusifyApp.isMuted = !isMuted;
         if (mediaPlayer != null) {
             mediaPlayer.setMute(!isMuted);
         }
