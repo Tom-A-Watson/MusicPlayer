@@ -301,4 +301,8 @@ public class SongsController implements Initializable, SubView {
     public Song getSelectedSong() {
     	return selectedSong;
     }
+
+    public void selectSong(Song selectedSong) {
+        tableView.getSelectionModel().select(selectedSong);
+    }
 }

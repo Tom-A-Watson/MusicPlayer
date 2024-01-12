@@ -2,14 +2,15 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.*;
-import app.musicplayer.util.Config;
-import app.musicplayer.util.Search;
+import app.musicplayer.Config;
 import app.musicplayer.view.SubView;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.css.PseudoClass;
@@ -32,15 +33,18 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 public class MainController implements Initializable {
 
@@ -68,7 +72,6 @@ public class MainController implements Initializable {
     @FXML private Label timePassed;
     @FXML private Label timeRemaining;
 
-    @FXML private HBox letterBox;
     @FXML private Separator letterSeparator;
 
     @FXML private Pane playButton;
@@ -88,9 +91,6 @@ public class MainController implements Initializable {
 
         frontSliderTrack.prefWidthProperty().bind(timeSlider.widthProperty().multiply(timeSlider.valueProperty().divide(timeSlider.maxProperty())));
 
-//        sliderSkin = new CustomSliderSkin(timeSlider);
-//        timeSlider.setSkin(sliderSkin);
-
         createVolumePopup();
         createSearchPopup();
 
@@ -108,41 +108,34 @@ public class MainController implements Initializable {
 
         timeSlider.setFocusTraversable(false);
 
-        timeSlider.valueChangingProperty().addListener(
-                (slider, wasChanging, isChanging) -> {
+        timeSlider.valueChangingProperty().addListener((slider, wasChanging, isChanging) -> {
+            if (wasChanging) {
+                int seconds = (int) Math.round(timeSlider.getValue() / 4.0);
+                timeSlider.setValue(seconds * 4);
+                MusicPlayerApp.seek(seconds);
+            }
+        });
 
-                    if (wasChanging) {
+        timeSlider.valueProperty().addListener((slider, oldValue, newValue) -> {
 
-                        int seconds = (int) Math.round(timeSlider.getValue() / 4.0);
-                        timeSlider.setValue(seconds * 4);
-                        MusicPlayerApp.seek(seconds);
-                    }
-                }
-        );
+            double previous = oldValue.doubleValue();
+            double current = newValue.doubleValue();
+            // TODO: && !isTimeSliderPressed()
+            if (!timeSlider.isValueChanging() && current != previous + 1) {
 
-        timeSlider.valueProperty().addListener(
-                (slider, oldValue, newValue) -> {
-
-                    double previous = oldValue.doubleValue();
-                    double current = newValue.doubleValue();
-                    // TODO: && !isTimeSliderPressed()
-                    if (!timeSlider.isValueChanging() && current != previous + 1) {
-
-                        int seconds = (int) Math.round(current / 4.0);
-                        timeSlider.setValue(seconds * 4);
-                        MusicPlayerApp.seek(seconds);
-                    }
-                }
-        );
+                int seconds = (int) Math.round(current / 4.0);
+                timeSlider.setValue(seconds * 4);
+                MusicPlayerApp.seek(seconds);
+            }
+        });
 
         unloadLettersAnimation.setOnFinished(x -> {
-            letterBox.setPrefHeight(0);
             letterSeparator.setPrefHeight(0);
         });
 
         searchBox.textProperty().addListener((observable, oldText, newText) -> {
             String text = newText.trim();
-            if (text.equals("")) {
+            if (text.isEmpty()) {
                 if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
                     searchHideAnimation.play();
                 }
@@ -159,11 +152,7 @@ public class MainController implements Initializable {
                     MusicPlayerApp.getStage().toFront();
                 });
                 int height = 0;
-                int artists = result.artistResults().size();
-                int albums = result.albumResults().size();
                 int songs = result.songResults().size();
-                if (artists > 0) height += (artists * 50) + 50;
-                if (albums > 0) height += (albums * 50) + 50;
                 if (songs > 0) height += (songs * 50) + 50;
                 if (height == 0) height = 50;
                 searchPopup.setHeight(height);
@@ -182,18 +171,12 @@ public class MainController implements Initializable {
             }
         });
 
-        for (Node node : letterBox.getChildren()) {
-            Label label = (Label)node;
-            label.prefWidthProperty().bind(letterBox.widthProperty().subtract(50).divide(26).subtract(1));
-        }
-
         updateNowPlayingButton();
         initializeTimeSlider();
         initializeTimeLabels();
         initializePlaylists();
 
-        // Loads the default view: artists.
-        loadView("artists");
+        loadView("songs");
     }
 
     void resetLatch() {
@@ -661,14 +644,8 @@ public class MainController implements Initializable {
             boolean unloadLetters;
 
             switch (viewName.toLowerCase()) {
-                case "artists":
-                case "artistsmain":
-                case "albums":
                 case "songs":
-                    if (subViewController instanceof ArtistsController
-                            || subViewController instanceof ArtistsMainController
-                            || subViewController instanceof AlbumsController
-                            || subViewController instanceof SongsController) {
+                    if (subViewController instanceof SongsController) {
                         loadLetters = false;
                         unloadLetters = false;
                     } else {
@@ -677,10 +654,7 @@ public class MainController implements Initializable {
                     }
                     break;
                 default:
-                    if (subViewController instanceof ArtistsController
-                            || subViewController instanceof ArtistsMainController
-                            || subViewController instanceof AlbumsController
-                            || subViewController instanceof SongsController) {
+                    if (subViewController instanceof SongsController) {
                         loadLetters = false;
                         unloadLetters = true;
                     } else {
@@ -695,6 +669,8 @@ public class MainController implements Initializable {
 
             String fileName = viewName.substring(0, 1).toUpperCase() + viewName.substring(1) + ".fxml";
             fileName = "/assets/ui/" + fileName;
+
+            System.out.println("Loading: " + fileName);
 
             FXMLLoader loader = new FXMLLoader(this.getClass().getResource(fileName));
             Node view = loader.load();
@@ -777,26 +753,26 @@ public class MainController implements Initializable {
 
         sideBar.getChildren().get(2).getStyleClass().setAll("sideBarItemSelected");
 
-        ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
         Song song = MusicPlayerApp.getNowPlaying();
 
-        Artist artist = song.getArtist();
-        Album album = song.getAlbum();
-
-        artistsMainController.selectArtist(artist);
-        artistsMainController.selectAlbum(album);
-        artistsMainController.selectSong(song);
+        var songsController = (SongsController) loadView("Songs");
+        songsController.selectSong(song);
     }
 
     @FXML
-    private void slideSideBar(Event e) {
+    private void onClickSettings(Event e) {
         sideBar.requestFocus();
         searchBox.setText("");
-        if (isSideBarExpanded) {
-            collapseSideBar();
-        } else {
-            expandSideBar();
-        }
+
+        // TODO:
+
+        System.out.println("Clicked on settings");
+
+//        if (isSideBarExpanded) {
+//            collapseSideBar();
+//        } else {
+//            expandSideBar();
+//        }
     }
 
     private void collapseSideBar() {
@@ -864,80 +840,13 @@ public class MainController implements Initializable {
         VBox root = (VBox) searchPopup.getScene().getRoot();
         ObservableList<Node> list = root.getChildren();
         list.clear();
-        if (result.artistResults().size() > 0) {
-            Label header = new Label("Artists");
-            list.add(header);
-            VBox.setMargin(header, new Insets(10, 10, 10, 10));
-            result.artistResults().forEach(artist -> {
-                HBox cell = new HBox();
-                cell.setAlignment(Pos.CENTER_LEFT);
-                cell.setPrefWidth(226);
-                cell.setPrefHeight(50);
-                ImageView image = new ImageView();
-                image.setFitHeight(40);
-                image.setFitWidth(40);
-                image.setImage(artist.image());
-                Label label = new Label(artist.title());
-                label.setTextOverrun(OverrunStyle.CLIP);
-                label.getStyleClass().setAll("searchLabel");
-                cell.getChildren().addAll(image, label);
-                HBox.setMargin(image, new Insets(5, 5, 5, 5));
-                HBox.setMargin(label, new Insets(10, 10, 10, 5));
-                cell.getStyleClass().add("searchResult");
-                cell.setOnMouseClicked(event -> {
-                    loadView("ArtistsMain");
-                    ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
-                    artistsMainController.selectArtist(artist);
-                    searchBox.setText("");
-                    sideBar.requestFocus();
-                });
-                list.add(cell);
-            });
-            Separator separator = new Separator();
-            separator.setPrefWidth(206);
-            list.add(separator);
-            VBox.setMargin(separator, new Insets(10, 10, 0, 10));
-        }
-        if (result.albumResults().size() > 0) {
-            Label header = new Label("Albums");
-            list.add(header);
-            VBox.setMargin(header, new Insets(10, 10, 10, 10));
-            result.albumResults().forEach(album -> {
-                HBox cell = new HBox();
-                cell.setAlignment(Pos.CENTER_LEFT);
-                cell.setPrefWidth(226);
-                cell.setPrefHeight(50);
-                ImageView image = new ImageView();
-                image.setFitHeight(40);
-                image.setFitWidth(40);
-                image.setImage(album.getArtwork());
-                Label label = new Label(album.getTitle());
-                label.setTextOverrun(OverrunStyle.CLIP);
-                label.getStyleClass().setAll("searchLabel");
-                cell.getChildren().addAll(image, label);
-                HBox.setMargin(image, new Insets(5, 5, 5, 5));
-                HBox.setMargin(label, new Insets(10, 10, 10, 5));
-                cell.getStyleClass().add("searchResult");
-                cell.setOnMouseClicked(event -> {
-                    loadView("ArtistsMain");
-                    Artist artist = album.getArtist();
-                    ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
-                    artistsMainController.selectArtist(artist);
-                    artistsMainController.selectAlbum(album);
-                    searchBox.setText("");
-                    sideBar.requestFocus();
-                });
-                list.add(cell);
-            });
-            Separator separator = new Separator();
-            separator.setPrefWidth(206);
-            list.add(separator);
-            VBox.setMargin(separator, new Insets(10, 10, 0, 10));
-        }
-        if (result.songResults().size() > 0) {
+
+        if (!result.songResults().isEmpty()) {
             Label header = new Label("Songs");
+            header.setTextFill(Color.DARKGRAY);
             list.add(header);
             VBox.setMargin(header, new Insets(10, 10, 10, 10));
+
             result.songResults().forEach(song -> {
                 HBox cell = new HBox();
                 cell.setAlignment(Pos.CENTER_LEFT);
@@ -950,25 +859,23 @@ public class MainController implements Initializable {
                 HBox.setMargin(label, new Insets(10, 10, 10, 10));
                 cell.getStyleClass().add("searchResult");
                 cell.setOnMouseClicked(event -> {
-                    loadView("ArtistsMain");
-                    Artist artist = song.getArtist();
-                    Album album = song.getAlbum();
 
-                    ArtistsMainController artistsMainController = (ArtistsMainController) loadView("ArtistsMain");
-                    artistsMainController.selectArtist(artist);
-                    artistsMainController.selectAlbum(album);
-                    artistsMainController.selectSong(song);
+                    var songsController = (SongsController) loadView("Songs");
+                    songsController.selectSong(song);
+
                     searchBox.setText("");
                     sideBar.requestFocus();
                 });
                 list.add(cell);
             });
         }
-        if (list.size() == 0) {
+
+        if (list.isEmpty()) {
             Label label = new Label("No Results");
             list.add(label);
             VBox.setMargin(label, new Insets(10, 10, 10, 10));
         }
+
         if (!searchPopup.isShowing()) {
             Stage stage = MusicPlayerApp.getStage();
             searchPopup.setX(stage.getX() + 18);
@@ -1116,8 +1023,6 @@ public class MainController implements Initializable {
             setInterpolator(Interpolator.EASE_BOTH);
         }
         protected void interpolate(double frac) {
-            letterBox.setPrefHeight(50);
-            letterBox.setOpacity(frac);
             letterSeparator.setPrefHeight(25);
             letterSeparator.setOpacity(frac);
         }
@@ -1129,7 +1034,6 @@ public class MainController implements Initializable {
             setInterpolator(Interpolator.EASE_BOTH);
         }
         protected void interpolate(double frac) {
-            letterBox.setOpacity(1.0 - frac);
             letterSeparator.setOpacity(1.0 - frac);
         }
     };
@@ -1149,4 +1053,96 @@ public class MainController implements Initializable {
             }
         }
     };
+
+    public static class Search {
+
+        private static BooleanProperty hasResults = new SimpleBooleanProperty(false);
+        private static SearchResult result;
+        private static Thread searchThread;
+
+        public static BooleanProperty hasResultsProperty() {
+            return hasResults;
+        }
+
+        public static SearchResult getResult() {
+            hasResults.set(false);
+            return result;
+        }
+
+        public static void search(String searchText) {
+            if (searchThread != null && searchThread.isAlive()) {
+                searchThread.interrupt();
+            }
+
+            String text = searchText.toUpperCase();
+
+            searchThread = new Thread(() -> {
+                try {
+                    hasResults.set(false);
+
+                    List<Song> songResults = MusicPlayerApp.getLibrary()
+                            .getSongs()
+                            .stream()
+                            .filter(song -> song.getTitle().toUpperCase().contains(text))
+                            .sorted((x, y) -> {
+                                return compareSearchString(x.getTitle().toUpperCase(), y.getTitle().toUpperCase(), text);
+                            })
+                            .collect(Collectors.toList());
+
+                    if (searchThread.isInterrupted()) {
+                        throw new InterruptedException();
+                    }
+
+                    if (songResults.size() > 3)
+                        songResults = songResults.subList(0, 3);
+
+                    result = new SearchResult(songResults);
+
+                    hasResults.set(true);
+
+                } catch (InterruptedException ex) {
+                    // terminate thread
+                }
+            });
+            searchThread.start();
+        }
+
+        /**
+         * All arguments must be uppercase.
+         *
+         * @return Comparator compareTo() int
+         */
+        private static int compareSearchString(String s1, String s2, String text) {
+            boolean xMatch = s1.equals(text);
+            boolean yMatch = s2.equals(text);
+            if (xMatch && yMatch)
+                return 0;
+            if (xMatch)
+                return -1;
+            if (yMatch)
+                return 1;
+
+            boolean xStartWith = s1.startsWith(text);
+            boolean yStartWith = s2.startsWith(text);
+            if (xStartWith && yStartWith)
+                return 0;
+            if (xStartWith)
+                return -1;
+            if (yStartWith)
+                return 1;
+
+            boolean xContains = s1.contains(" " + text);
+            boolean yContains = s2.contains(" " + text);
+            if (xContains && yContains)
+                return 0;
+            if (xContains)
+                return -1;
+            if (yContains)
+                return 1;
+
+            return 0;
+        }
+
+        public record SearchResult(List<Song> songResults) { }
+    }
 }

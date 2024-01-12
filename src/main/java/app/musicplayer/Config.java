@@ -5,7 +5,7 @@
  * See LICENSE for details.
  */
 
-package app.musicplayer.util;
+package app.musicplayer;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

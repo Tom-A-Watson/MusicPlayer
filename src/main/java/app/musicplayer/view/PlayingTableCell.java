@@ -7,7 +7,7 @@
 
 package app.musicplayer.view;
 
-import app.musicplayer.util.Config;
+import app.musicplayer.Config;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TableCell;
 import javafx.scene.layout.Pane;

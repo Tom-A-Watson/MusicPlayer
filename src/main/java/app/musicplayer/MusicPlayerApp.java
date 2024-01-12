@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.LogManager;
 
-import static app.musicplayer.util.Config.*;
+import static app.musicplayer.Config.*;
 
 // TODO: adding new songs after app closed
 // TODO: adding new songs when app is running (add rescan button?)
@@ -39,6 +39,7 @@ import static app.musicplayer.util.Config.*;
 // TODO: most played and recently played are not serialized back as instances of classes
 // TODO: volume is not serialized
 // TODO: light and dark themes
+// TODO: on startup "Your Library" is not focused
 public class MusicPlayerApp extends Application {
 
     private static final Logger log = Logger.get(MusicPlayerApp.class);

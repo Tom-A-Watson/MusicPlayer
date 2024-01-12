@@ -14,7 +14,7 @@ import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import app.musicplayer.model.serializable.SerializableLibrary;
 import app.musicplayer.model.serializable.Serializer;
-import app.musicplayer.util.Config;
+import app.musicplayer.Config;
 import com.almasb.fxgl.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;

@@ -1,8 +1,8 @@
 package app.musicplayer.controllers;
 
+import app.musicplayer.Config;
 import app.musicplayer.MusicPlayerApp;
 import app.musicplayer.model.*;
-import app.musicplayer.util.*;
 import app.musicplayer.view.ClippedTableCell;
 import app.musicplayer.view.ControlPanelTableCell;
 import app.musicplayer.view.PlayingTableCell;
@@ -327,7 +327,7 @@ public class PlaylistsController implements Initializable, SubView {
             deletePlaylistAnimation.play();
 
             // Loads the artists view.
-            MusicPlayerApp.getMainController().loadView("artists");
+            MusicPlayerApp.getMainController().loadView("songs");
 
             // Removes the selected playlist from the library so that it is not reloaded.
             MusicPlayerApp.getLibrary().removePlaylist(selectedPlaylist);
