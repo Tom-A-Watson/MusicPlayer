@@ -106,9 +106,6 @@
                      </children>
                   </VBox>
                </content>
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
             </ScrollPane>
          </children>
       </VBox>

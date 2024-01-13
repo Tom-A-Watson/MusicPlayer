@@ -1,10 +1,8 @@
 package app.musicplayer;
 
-import app.musicplayer.controllers.SplashScreenController;
 import app.musicplayer.controllers.MainController;
 import app.musicplayer.controllers.NowPlayingController;
-import app.musicplayer.model.Album;
-import app.musicplayer.model.Artist;
+import app.musicplayer.controllers.SplashScreenController;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import app.musicplayer.model.serializable.Serializer;
@@ -25,8 +23,12 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -90,6 +92,7 @@ public class MusifyApp extends Application {
             log.info("start(Stage)");
 
             executorService = Executors.newScheduledThreadPool(4);
+            executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
 
             MusifyApp.stage = stage;
             MusifyApp.stage.setMinWidth(850);
@@ -108,7 +111,14 @@ public class MusifyApp extends Application {
                 }
             });
 
-            showSplashScreen(stage);
+            if (Files.exists(LIBRARY_FILE)) {
+                showSplashScreenView(stage);
+            } else {
+                library = new Library(Paths.get("./"), Collections.emptyList());
+                showMainView(stage);
+            }
+
+            stage.show();
 
         } catch (Exception e) {
             log.fatal("Cannot start Musify", e);
@@ -116,94 +126,44 @@ public class MusifyApp extends Application {
         }
     }
 
-    private void showSplashScreen(Stage stage) throws Exception {
+    private void showSplashScreenView(Stage stage) throws Exception {
+        // TODO: view and css loading
         FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "views/SplashScreenView.fxml"));
         Parent view = loader.load();
 
         SplashScreenController controller = loader.getController();
-        controller.setOnFinished(lib -> {
-            library = lib;
 
-            var task = new InitAppTask();
-            executorService.submit(task);
+        var task = new DeserializeLibraryTask(LIBRARY_FILE);
+
+        controller.getProgressLabel().textProperty().bind(task.messageProperty());
+        controller.getProgressBar().progressProperty().bind(task.progressProperty());
+
+        task.setOnSucceeded(e -> {
+            library = task.getValue();
+
+            try {
+                showMainView(stage);
+            } catch (Exception ex) {
+                log.fatal("Cannot open main view", ex);
+            }
         });
 
-        if (Files.exists(LIBRARY_FILE)) {
-            var lib = Serializer.readFromFile(LIBRARY_FILE);
-            controller.loadFromLibrary(lib);
-        }
+        executorService.submit(task);
 
         Scene scene = new Scene(view);
         scene.getStylesheets().add(getClass().getResource(CSS + "Global.css").toExternalForm());
         stage.setScene(scene);
-        stage.show();
     }
 
-    private class InitAppTask extends Task<Void> {
+    private void showMainView(Stage stage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "Main.fxml"));
+        Parent view = loader.load();
 
-        @Override
-        protected Void call() throws Exception {
-            nowPlayingList = new ArrayList<>();
+        mainController = loader.getController();
 
-            // TODO: check logic, should be "load last played song"
-//            if (nowPlayingList.isEmpty()) {
-//                Artist artist = MusifyApp.getLibrary().getArtists().get(0);
-//
-//                for (Album album : artist.albums()) {
-//                    nowPlayingList.addAll(album.getSongs());
-//                }
-//
-//                nowPlayingList.sort(Comparator.comparing(Song::getAlbum).thenComparing(song -> song));
-//            }
-//
-//            nowPlaying = nowPlayingList.get(0);
-//            nowPlayingIndex = 0;
-//            nowPlaying.setPlaying(true);
-//
-//            timerCounter = 0;
-//            secondsPlayed = 0;
-//            Media media = new Media(nowPlaying.getFile().toUri().toString());
-//            mediaPlayer = new MediaPlayer(media);
-//            mediaPlayer.setVolume(0.5);
-//            mediaPlayer.setOnEndOfMedia(MusifyApp::skip);
-
-            return null;
-        }
-
-        @Override
-        protected void succeeded() {
-            showMain();
-
-            executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    /**
-     * Initializes the main layout.
-     */
-    private void showMain() {
-        try {
-            // Load main layout from fxml file.
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "Main.fxml"));
-            BorderPane view = loader.load();
-
-            // Shows the scene containing the layout.
-            double width = stage.getScene().getWidth();
-            double height = stage.getScene().getHeight();
-
-            view.setPrefWidth(width);
-            view.setPrefHeight(height);
-
-            Scene scene = new Scene(view);
-            stage.setScene(scene);
-
-            // Gives the controller access to the music player main application.
-            mainController = loader.getController();
-            mediaPlayer.volumeProperty().bind(mainController.getVolumeSlider().valueProperty().divide(200));
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        Scene scene = new Scene(view);
+        scene.getStylesheets().add(getClass().getResource(CSS + "Global.css").toExternalForm());
+        stage.setScene(scene);
     }
 
     private static class TimeUpdater implements Runnable {
@@ -222,10 +182,8 @@ public class MusifyApp extends Application {
                         secondsPlayed++;
                     }
 
-                    // TODO:
-//                    if (!mainController.isTimeSliderPressed()) {
-//                        mainController.updateTimeSlider();
-//                    }
+                    // called every tick (250 ms) because in main controller max value is length in seconds * 4
+                    mainController.updateTimeSlider();
                 }
             });
         }
@@ -378,10 +336,13 @@ public class MusifyApp extends Application {
             nowPlaying.setPlaying(true);
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
+                // TODO:
+                //mediaPlayer.dispose();
             }
 
             timerCounter = 0;
             secondsPlayed = 0;
+
             Media media = new Media(song.getFile().toUri().toString());
             mediaPlayer = new MediaPlayer(media);
             mediaPlayer.volumeProperty().bind(mainController.getVolumeSlider().valueProperty().divide(200));
@@ -441,5 +402,64 @@ public class MusifyApp extends Application {
 
     public static ExecutorService getExecutorService() {
         return executorService;
+    }
+
+    private static class DeserializeLibraryTask extends Task<Library> {
+
+        private final Path file;
+
+        private int songIndex = 0;
+        private int playlistIndex = 0;
+
+        private DeserializeLibraryTask(Path file) {
+            this.file = file;
+        }
+
+        @Override
+        protected Library call() throws Exception {
+            updateMessage("Loading library");
+
+            var library = Serializer.readFromFile(file);
+
+            updateMessage("Loading songs");
+
+            var numSongs = library.songs().size();
+            var numPlaylists = library.playlists().size();
+
+            var songs = library.songs()
+                    .stream()
+                    .map(song -> {
+                        updateProgress(songIndex++, numSongs);
+
+                        return Serializer.fromSerializable(song);
+                    })
+                    .toList();
+
+            updateMessage("Loading playlists");
+
+            var playlists = library.playlists()
+                    .stream()
+                    .map(p -> {
+                        updateProgress(playlistIndex++, numPlaylists);
+
+                        var playlist = Serializer.fromSerializable(p);
+
+                        p.songIDs().forEach(id -> {
+                            songs.stream()
+                                    .filter(s -> s.getId() == id)
+                                    .findAny()
+                                    .ifPresent(playlist::addSong);
+                        });
+
+                        return playlist;
+                    })
+                    .toList();
+
+            return new Library(
+                    Paths.get(library.musicDirectoryPath()),
+                    songs,
+                    playlists
+            );
+        }
     }
 }

@@ -22,6 +22,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
@@ -52,9 +53,7 @@ public class MainController implements Initializable {
     private static final Logger log = Logger.get(MainController.class);
 
     private SubView subViewController;
-    private Stage volumePopup;
     private Stage searchPopup;
-    private CountDownLatch viewLoadedLatch;
 
     @FXML private ScrollPane subViewRoot;
     @FXML private VBox sideBar;
@@ -80,8 +79,6 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         log.info("initialize()");
-
-        resetLatch();
 
         // remove pause button until needed
         controlBox.getChildren().remove(3);
@@ -113,12 +110,9 @@ public class MainController implements Initializable {
         });
 
         timeSlider.valueProperty().addListener((slider, oldValue, newValue) -> {
-
             double previous = oldValue.doubleValue();
             double current = newValue.doubleValue();
-            // TODO: && !isTimeSliderPressed()
-            if (!timeSlider.isValueChanging() && current != previous + 1) {
-
+            if (!timeSlider.isValueChanging() && current != previous + 1 && !timeSlider.isPressed()) {
                 int seconds = (int) Math.round(current / 4.0);
                 timeSlider.setValue(seconds * 4);
                 MusifyApp.seek(seconds);
@@ -169,10 +163,6 @@ public class MainController implements Initializable {
         initializePlaylists();
 
         loadView("songs");
-    }
-
-    void resetLatch() {
-        viewLoadedLatch = new CountDownLatch(1);
     }
 
     private void createSearchPopup() {
@@ -226,7 +216,9 @@ public class MainController implements Initializable {
     }
 
     public void updateTimeSlider() {
-        timeSlider.increment();
+        if (!timeSlider.isPressed()) {
+            timeSlider.increment();
+        }
     }
 
     public void initializeTimeLabels() {
@@ -256,14 +248,12 @@ public class MainController implements Initializable {
                 FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
                 HBox cell = loader.load();
                 Label label = (Label) cell.getChildren().get(0);
-                // TODO: num songs
-                label.setText(playlist.getTitle() + " (13 songs)");
+                label.setText(playlist.getTitle() + " (" + playlist.getSongs().size() + " songs)");
 
                 cell.setOnMouseClicked(x -> {
                     selectView(x);
 
-                    // TODO:
-                    //((PlaylistsController) subViewController).selectPlaylist(playlist);
+                    ((PlaylistsController) subViewController).selectPlaylist(playlist);
                 });
 
                 cell.setOnDragDetected(event -> {
@@ -315,24 +305,6 @@ public class MainController implements Initializable {
                     String dragString = event.getDragboard().getString();
                     new Thread(() -> {
                         switch (dragString) {
-                            case "Artist":
-                                Artist artist = (Artist) MusifyApp.getDraggedItem();
-                                for (Album album : artist.albums()) {
-                                    for (Song song : album.getSongs()) {
-                                        if (!playlist.getSongs().contains(song)) {
-                                            playlist.addSong(song);
-                                        }
-                                    }
-                                }
-                                break;
-                            case "Album":
-                                Album album = (Album) MusifyApp.getDraggedItem();
-                                for (Song song : album.getSongs()) {
-                                    if (!playlist.getSongs().contains(song)) {
-                                        playlist.addSong(song);
-                                    }
-                                }
-                                break;
                             case "Playlist":
                                 Playlist list = (Playlist) MusifyApp.getDraggedItem();
                                 for (Song song : list.getSongs()) {
@@ -372,36 +344,16 @@ public class MainController implements Initializable {
 
     @FXML
     private void selectView(Event e) {
-        System.out.println("Select view:  " + e);
+        var node = (Node) e.getSource();
+        node.requestFocus();
 
+        log.info("selectView(" + node.getId() + ")");
 
-        // TODO:
-
-//        HBox eventSource = ((HBox)e.getSource());
-//
-//        eventSource.requestFocus();
-//
-//        Optional<Node> previous = sideBar.getChildren().stream().filter(x -> x.getStyleClass().get(0).equals("sideBarItemSelected")).findFirst();
-//
-//        if (previous.isPresent()) {
-//            HBox previousItem = (HBox) previous.get();
-//            previousItem.getStyleClass().setAll("sideBarItem");
-//        } else {
-//            previous = playlistBox.getChildren().stream().filter(x -> x.getStyleClass().get(0).equals("sideBarItemSelected")).findFirst();
-//            if (previous.isPresent()) {
-//                HBox previousItem = (HBox) previous.get();
-//                previousItem.getStyleClass().setAll("sideBarItem");
-//            }
-//        }
-//
-//        ObservableList<String> styles = eventSource.getStyleClass();
-//
-//        if (styles.get(0).equals("sideBarItem")) {
-//            styles.setAll("sideBarItemSelected");
-//            loadView(eventSource.getId());
-//        } else if (styles.get(0).equals("bottomBarItem")) {
-//            loadView(eventSource.getId());
-//        }
+        switch (node.getId()) {
+            case "songs", "playlists" -> {
+                loadView(node.getId());
+            }
+        }
     }
 
     private static Playlist getPlaylist(String title) {
@@ -410,7 +362,6 @@ public class MainController implements Initializable {
     
     @FXML
     private void newPlaylist() {
-
         if (!newPlaylistAnimation.getStatus().equals(Status.RUNNING)) {
 
             try {
@@ -418,7 +369,7 @@ public class MainController implements Initializable {
                 FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
                 HBox cell = loader.load();
 
-                Label label = (Label) cell.getChildren().get(1);
+                Label label = (Label) cell.getChildren().get(0);
                 label.setVisible(false);
                 HBox.setMargin(label, new Insets(0, 0, 0, 0));
 
@@ -508,24 +459,6 @@ public class MainController implements Initializable {
                     String dragString = event.getDragboard().getString();
                     new Thread(() -> {
                         switch (dragString) {
-                            case "Artist":
-                                Artist artist = (Artist) MusifyApp.getDraggedItem();
-                                for (Album album : artist.albums()) {
-                                    for (Song song : album.getSongs()) {
-                                        if (!playlist.getSongs().contains(song)) {
-                                            playlist.addSong(song);
-                                        }
-                                    }
-                                }
-                                break;
-                            case "Album":
-                                Album album = (Album) MusifyApp.getDraggedItem();
-                                for (Song song : album.getSongs()) {
-                                    if (!playlist.getSongs().contains(song)) {
-                                        playlist.addSong(song);
-                                    }
-                                }
-                                break;
                             case "Playlist":
                                 Playlist list = (Playlist) MusifyApp.getDraggedItem();
                                 for (Song song : list.getSongs()) {
@@ -602,53 +535,12 @@ public class MainController implements Initializable {
             String fileName = viewName.substring(0, 1).toUpperCase() + viewName.substring(1) + ".fxml";
             fileName = "/assets/ui/" + fileName;
 
-            System.out.println("Loading: " + fileName);
+            log.info("loadView(): " + fileName);
 
             FXMLLoader loader = new FXMLLoader(this.getClass().getResource(fileName));
-            Node view = loader.load();
+            Parent view = loader.load();
 
-            CountDownLatch latch = new CountDownLatch(1);
-
-            Task<Void> task = new Task<Void>() {
-                @Override protected Void call() throws Exception {
-                    Platform.runLater(() -> {
-                        MusifyApp.getLibrary().getSongs().stream().filter(x -> x.isSelected()).forEach(x -> x.setSelected(false));
-                        subViewRoot.setVisible(false);
-                        subViewRoot.setContent(view);
-                        subViewRoot.getContent().setOpacity(0);
-                        latch.countDown();
-                    });
-                    return null;
-                }
-            };
-
-            task.setOnSucceeded(x -> new Thread(() -> {
-                try {
-                    latch.await();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                Platform.runLater(() -> {
-                    subViewRoot.setVisible(true);
-
-                    loadViewAnimation.play();
-                });
-            }).start());
-
-            Thread thread = new Thread(task);
-
-            unloadViewAnimation.setOnFinished(x -> thread.start());
-
-            loadViewAnimation.setOnFinished(x -> viewLoadedLatch.countDown());
-
-            if (subViewRoot.getContent() != null) {
-
-            } else {
-                subViewRoot.setContent(view);
-
-                loadViewAnimation.play();
-            }
-
+            subViewRoot.setContent(view);
             subViewController = loader.getController();
             return subViewController;
 
@@ -769,10 +661,6 @@ public class MainController implements Initializable {
     public Slider getVolumeSlider() {
         return volumePaneController.getSlider();
     }
-
-//    public boolean isTimeSliderPressed() {
-//        return sliderSkin.getThumb().isPressed() || sliderSkin.getTrack().isPressed();
-//    }
 
     public SubView getSubViewController() {
 
