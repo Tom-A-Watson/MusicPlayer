@@ -27,19 +27,6 @@ public class PlayingTableCell<S, T> extends TableCell<S, T> {
                 Pane pane = loader.load();
                 setGraphic(pane);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

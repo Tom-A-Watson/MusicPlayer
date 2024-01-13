@@ -27,7 +27,6 @@ public class ControlPanelTableCell<S, T> extends TableCell<S, T> {
 
     @Override
     protected void updateItem(T item, boolean empty) {
-
         super.updateItem(item, empty);
 
         Song song = (Song) this.getTableRow().getItem();
@@ -41,6 +40,8 @@ public class ControlPanelTableCell<S, T> extends TableCell<S, T> {
             song.selectedProperty().removeListener(listener);
             song.selectedProperty().addListener(listener);
         } else {
+
+
             String fileName;
             // Selects the correct control panel based on whether the user is in a play list or not.
             if (MusifyApp.getMainController().getSubViewController() instanceof PlaylistsController) {
@@ -54,17 +55,22 @@ public class ControlPanelTableCell<S, T> extends TableCell<S, T> {
                 FXMLLoader loader = new FXMLLoader(this.getClass().getResource(fileName));
                 HBox controlPanel = loader.load();
                 BorderPane cell = new BorderPane();
-                cell.setRight(controlPanel);
-                cell.setCenter(text);
-                BorderPane.setAlignment(text, Pos.CENTER_LEFT);
-                BorderPane.setAlignment(controlPanel, Pos.CENTER_LEFT);
+                //cell.setLeft(controlPanel);
+                //cell.setCenter(text);
+//                BorderPane.setAlignment(text, Pos.CENTER_LEFT);
+//                BorderPane.setAlignment(controlPanel, Pos.CENTER_LEFT);
+
                 setText(null);
-                setGraphic(cell);
+                setGraphic(controlPanel);
+
                 song.selectedProperty().removeListener(listener);
                 song.selectedProperty().addListener(listener);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
+
+
+
         }
     }
 }

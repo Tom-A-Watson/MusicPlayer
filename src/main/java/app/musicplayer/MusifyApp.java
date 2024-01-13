@@ -46,6 +46,8 @@ import static app.musicplayer.Config.*;
 // TODO: remember stage width height
 // TODO: remember last played song
 // TODO: update to high res app icon
+// TODO: update project title as Musify is taken
+// TODO: consider free streaming music API online
 public class MusifyApp extends Application {
 
     private static final Logger log = Logger.get(MusifyApp.class);

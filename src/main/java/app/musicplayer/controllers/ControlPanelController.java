@@ -82,7 +82,7 @@ public class ControlPanelController implements Initializable {
 
         contextMenu.getItems().add(playing);
 
-        if (playlistTitles.size() > 0) {
+        if (!playlistTitles.isEmpty()) {
             SeparatorMenuItem item = new SeparatorMenuItem();
             item.getContent().setStyle(
                     "-fx-border-width: 1 0 0 0; " +

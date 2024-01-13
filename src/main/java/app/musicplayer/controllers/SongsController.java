@@ -8,6 +8,7 @@ import app.musicplayer.view.PlayingTableCell;
 import app.musicplayer.view.SubView;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,6 +30,7 @@ public class SongsController implements Initializable, SubView {
 
 	@FXML private TableView<Song> tableView;
     @FXML private TableColumn<Song, Boolean> playingColumn;
+	@FXML private TableColumn<Song, String> controlColumn;
     @FXML private TableColumn<Song, String> titleColumn;
     @FXML private TableColumn<Song, String> lengthColumn;
     
@@ -45,15 +47,19 @@ public class SongsController implements Initializable, SubView {
     public void initialize(URL location, ResourceBundle resources) {
     	
     	tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    	
-    	titleColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.76));
-        lengthColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.24));
+
+		// 50 (playingColumn) + 70 (controlColumn)
+		//controlColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.10));
+    	titleColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(120).multiply(0.75));
+        lengthColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(120).multiply(0.25));
 
         playingColumn.setCellFactory(x -> new PlayingTableCell<>());
-        titleColumn.setCellFactory(x -> new ControlPanelTableCell<>());
+		controlColumn.setCellFactory(x -> new ControlPanelTableCell<>());
+        //titleColumn.setCellFactory(x -> new ControlPanelTableCell<>());
         lengthColumn.setCellFactory(x -> new ClippedTableCell<>());
 
         playingColumn.setCellValueFactory(new PropertyValueFactory<>("playing"));
+		controlColumn.setCellValueFactory(param -> new SimpleStringProperty(""));
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         lengthColumn.setCellValueFactory(new PropertyValueFactory<>("displayLength"));
         
