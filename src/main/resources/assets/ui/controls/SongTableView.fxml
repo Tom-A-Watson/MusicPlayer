@@ -2,8 +2,15 @@
 
 <?import javafx.scene.control.*?>
 
+<!--
+  ~ JavaFX Music Player. The MIT License (MIT).
+  ~ Copyright (c) Almas Baim.
+  ~ Copyright (c) Gerardo Prada, Michael Martin.
+  ~ See LICENSE for details.
+  -->
+
 <TableView fx:id="tableView"
-           fx:controller="app.musicplayer.controllers.SongsController"
+           fx:controller="app.musicplayer.controllers.SongTableViewController"
            stylesheets="@/assets/ui/css/Songs.css"
            fixedCellSize="50.0"
            maxHeight="1.7976931348623157E308"

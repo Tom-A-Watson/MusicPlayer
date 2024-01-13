@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class SongsController implements Initializable, SubView {
+public class SongTableViewController implements Initializable, SubView {
 
 	@FXML
 	private TableView<Song> tableView;

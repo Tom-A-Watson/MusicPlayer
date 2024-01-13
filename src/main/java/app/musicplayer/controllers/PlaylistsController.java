@@ -324,7 +324,8 @@ public class PlaylistsController implements Initializable, SubView {
             deletePlaylistAnimation.play();
 
             // Loads the artists view.
-            MusifyApp.getMainController().loadView("songs");
+            // TODO:
+            //MusifyApp.getMainController().loadView("songs");
 
             // Removes the selected playlist from the library so that it is not reloaded.
             MusifyApp.getLibrary().removePlaylist(selectedPlaylist);

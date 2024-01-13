@@ -1,8 +1,11 @@
 package app.musicplayer.controllers;
 
-import app.musicplayer.MusifyApp;
-import app.musicplayer.model.*;
 import app.musicplayer.Config;
+import app.musicplayer.MusifyApp;
+import app.musicplayer.model.MostPlayedPlaylist;
+import app.musicplayer.model.Playlist;
+import app.musicplayer.model.RecentlyPlayedPlaylist;
+import app.musicplayer.model.Song;
 import app.musicplayer.view.SubView;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
@@ -13,7 +16,6 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.css.PseudoClass;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -43,9 +45,7 @@ import javafx.util.Duration;
 
 import java.net.URL;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 public class MainController implements Initializable {
@@ -65,8 +65,11 @@ public class MainController implements Initializable {
     @FXML private Region frontSliderTrack;
     @FXML private Label timePassed;
     @FXML private Label timeRemaining;
-    @FXML private HBox volumePane;
-    @FXML private VolumeBoxController volumePaneController;
+
+    @FXML
+    private HBox volumePane;
+    @FXML
+    private VolumeBoxController volumePaneController;
 
     @FXML private Pane playButton;
     @FXML private Pane pauseButton;
@@ -75,6 +78,11 @@ public class MainController implements Initializable {
     @FXML private HBox controlBox;
 
     @FXML private TextField searchBox;
+
+    @FXML
+    private TableView<Song> songTableView;
+    @FXML
+    private SongTableViewController songTableViewController;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -98,8 +106,6 @@ public class MainController implements Initializable {
             MusifyApp.toggleShuffle();
             shuffleButton.pseudoClassStateChanged(active, MusifyApp.isShuffleActive());
         });
-
-        timeSlider.setFocusTraversable(false);
 
         timeSlider.valueChangingProperty().addListener((slider, wasChanging, isChanging) -> {
             if (wasChanging) {
@@ -162,7 +168,7 @@ public class MainController implements Initializable {
         initializeTimeLabels();
         initializePlaylists();
 
-        loadView("songs");
+        subViewRoot.setContent(songTableView);
     }
 
     private void createSearchPopup() {
@@ -182,7 +188,6 @@ public class MainController implements Initializable {
             searchPopup = popup;
 
         } catch (Exception ex) {
-
             ex.printStackTrace();
         }
     }
@@ -349,10 +354,13 @@ public class MainController implements Initializable {
 
         log.info("selectView(" + node.getId() + ")");
 
-        switch (node.getId()) {
-            case "songs", "playlists" -> {
-                loadView(node.getId());
-            }
+        if (node.getId().equals("playlists")) {
+            loadView(node.getId());
+        }
+
+        if (node.getId().equals("songs")) {
+            subViewRoot.setContent(songTableView);
+            subViewController = songTableViewController;
         }
     }
 
@@ -365,7 +373,6 @@ public class MainController implements Initializable {
         if (!newPlaylistAnimation.getStatus().equals(Status.RUNNING)) {
 
             try {
-
                 FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
                 HBox cell = loader.load();
 
@@ -495,7 +502,6 @@ public class MainController implements Initializable {
                 textBox.requestFocus();
 
             } catch (Exception e) {
-
                 e.printStackTrace();
             }
 
@@ -552,28 +558,11 @@ public class MainController implements Initializable {
 
     @FXML
     private void navigateToCurrentSong() {
-
-        Optional<Node> previous = sideBar.getChildren().stream()
-                .filter(x -> x.getStyleClass().get(0).equals("sideBarItemSelected")).findFirst();
-
-        if (previous.isPresent()) {
-            HBox previousItem = (HBox) previous.get();
-            previousItem.getStyleClass().setAll("sideBarItem");
-        } else {
-            previous = playlistBox.getChildren().stream()
-                    .filter(x -> x.getStyleClass().get(0).equals("sideBarItemSelected")).findFirst();
-            if (previous.isPresent()) {
-                HBox previousItem = (HBox) previous.get();
-                previousItem.getStyleClass().setAll("sideBarItem");
-            }
-        }
-
-        sideBar.getChildren().get(2).getStyleClass().setAll("sideBarItemSelected");
-
-        Song song = MusifyApp.getNowPlaying();
-
-        var songsController = (SongsController) loadView("Songs");
-        songsController.selectSong(song);
+        // TODO:
+//        Song song = MusifyApp.getNowPlaying();
+//
+//        var songsController = (SongsController) loadView("ongs");
+//        songsController.selectSong(song);
     }
 
     @FXML
@@ -633,8 +622,8 @@ public class MainController implements Initializable {
                 cell.getStyleClass().add("searchResult");
                 cell.setOnMouseClicked(event -> {
 
-                    var songsController = (SongsController) loadView("Songs");
-                    songsController.selectSong(song);
+                    // TODO: navigate to this song?
+                    songTableViewController.selectSong(song);
 
                     searchBox.setText("");
                     sideBar.requestFocus();
@@ -663,7 +652,6 @@ public class MainController implements Initializable {
     }
 
     public SubView getSubViewController() {
-
         return subViewController;
     }
 

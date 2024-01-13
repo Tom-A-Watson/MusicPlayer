@@ -222,7 +222,7 @@
                            <Region fx:id="frontSliderTrack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="2.0" styleClass="frontSliderTrack" StackPane.alignment="CENTER_LEFT" />
                            <Region maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="block" StackPane.alignment="CENTER_LEFT" />
                            <Region maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="block" StackPane.alignment="CENTER_RIGHT" />
-                           <Slider fx:id="timeSlider" blockIncrement="1.0" pickOnBounds="false" StackPane.alignment="CENTER_LEFT" />
+                           <Slider fx:id="timeSlider" blockIncrement="1.0" pickOnBounds="false" StackPane.alignment="CENTER_LEFT" focusTraversable="false" />
                         </children>
                      </StackPane>
                   </center>
@@ -249,16 +249,20 @@
                </children>
             </VBox>
          </top>
+
          <center>
             <ScrollPane fx:id="subViewRoot" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
-               <BorderPane.margin>
-                  <Insets />
-               </BorderPane.margin>
                <padding>
                   <Insets left="25.0" right="25.0" />
                </padding>
+
+               <content>
+                  <fx:include fx:id="songTableView" source="controls/SongTableView.fxml" />
+               </content>
             </ScrollPane>
          </center>
+
       </BorderPane>
+
    </center>
 </BorderPane>
