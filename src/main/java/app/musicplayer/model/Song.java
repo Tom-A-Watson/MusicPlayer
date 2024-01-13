@@ -28,8 +28,6 @@ public final class Song implements Comparable<Song> {
     private StringProperty displayLength;
     private BooleanProperty isPlaying;
     private BooleanProperty isSelected;
-    private ObjectProperty<Album> album;
-    private ObjectProperty<Artist> artist;
 
     public Song(
             int id,
@@ -61,8 +59,6 @@ public final class Song implements Comparable<Song> {
         this.displayLength = new SimpleStringProperty(displayLength);
         this.isPlaying = new SimpleBooleanProperty(false);
         this.isSelected = new SimpleBooleanProperty(false);
-        this.album = new SimpleObjectProperty<>(null);
-        this.artist = new SimpleObjectProperty<>(null);
     }
 
     public int getId() {
@@ -215,30 +211,6 @@ public final class Song implements Comparable<Song> {
 
     public void setSelected(boolean isSelected) {
         this.isSelected.set(isSelected);
-    }
-
-    public Album getAlbum() {
-        return album.get();
-    }
-
-    public ObjectProperty<Album> albumProperty() {
-        return album;
-    }
-
-    public void setAlbum(Album album) {
-        this.album.set(album);
-    }
-
-    public Artist getArtist() {
-        return artist.get();
-    }
-
-    public ObjectProperty<Artist> artistProperty() {
-        return artist;
-    }
-
-    public void setArtist(Artist artist) {
-        this.artist.set(artist);
     }
 
     @Override

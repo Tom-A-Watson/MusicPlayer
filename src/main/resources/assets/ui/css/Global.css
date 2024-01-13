@@ -1,0 +1,19 @@
+* {
+    -fx-main-color: rgb(52, 109, 207);
+}
+
+/**
+ * ProgressBar
+ */
+.progress-bar > .track {
+	-fx-background-color: lightgray;
+	-fx-background-radius: 0;
+}
+
+.progress-bar > .bar {
+	-fx-background-color: -fx-main-color;
+}
+
+.label {
+    -fx-font-family: verdana;
+}

@@ -6,8 +6,6 @@ import app.musicplayer.view.ClippedTableCell;
 import app.musicplayer.view.ControlPanelTableCell;
 import app.musicplayer.view.PlayingTableCell;
 import app.musicplayer.view.SubView;
-import javafx.animation.Animation;
-import javafx.animation.Transition;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -21,25 +19,29 @@ import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
-import javafx.util.Duration;
 
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class SongsController implements Initializable, SubView {
 
-	@FXML private TableView<Song> tableView;
-    @FXML private TableColumn<Song, Boolean> playingColumn;
-	@FXML private TableColumn<Song, String> controlColumn;
-    @FXML private TableColumn<Song, String> titleColumn;
-    @FXML private TableColumn<Song, String> lengthColumn;
+	@FXML
+	private TableView<Song> tableView;
+
+    @FXML
+	private TableColumn<Song, Boolean> playingColumn;
+	@FXML
+	private TableColumn<Song, String> controlColumn;
+    @FXML
+	private TableColumn<Song, String> titleColumn;
+    @FXML
+	private TableColumn<Song, String> lengthColumn;
     
     // Initializes table view scroll bar.
     private ScrollBar scrollBar;
-    
-    // Keeps track of which column is being used to sort table view and in what order (ascending or descending)
-    private String currentSortColumn = "titleColumn";
-    private String currentSortOrder = null;
     
     private Song selectedSong;
     
@@ -49,7 +51,6 @@ public class SongsController implements Initializable, SubView {
     	tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		// 50 (playingColumn) + 70 (controlColumn)
-		//controlColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(50).multiply(0.10));
     	titleColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(120).multiply(0.75));
         lengthColumn.prefWidthProperty().bind(tableView.widthProperty().subtract(120).multiply(0.25));
 

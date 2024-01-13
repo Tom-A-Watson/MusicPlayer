@@ -16,8 +16,6 @@ import java.util.*;
 public final class Library {
 
     private List<Song> songs = new ArrayList<>();
-    private List<Album> albums = new ArrayList<>();
-    private List<Artist> artists = new ArrayList<>();
     private List<Playlist> playlists = new ArrayList<>();
 
     private Path musicDirectory;
@@ -25,8 +23,8 @@ public final class Library {
     /**
      * Ctor for importing library from music directory.
      */
-    public Library(Path musicDirectory, List<Song> songs, List<Album> albums, List<Artist> artists) {
-        this(musicDirectory, songs, albums, artists, List.of(
+    public Library(Path musicDirectory, List<Song> songs) {
+        this(musicDirectory, songs, List.of(
                 new MostPlayedPlaylist(-2),
                 new RecentlyPlayedPlaylist(-1)
         ));
@@ -35,11 +33,9 @@ public final class Library {
     /**
      * Ctor for loading library from its serialized form.
      */
-    public Library(Path musicDirectory, List<Song> songs, List<Album> albums, List<Artist> artists, List<Playlist> playlists) {
+    public Library(Path musicDirectory, List<Song> songs, List<Playlist> playlists) {
         this.musicDirectory = musicDirectory;
         this.songs.addAll(songs);
-        this.albums.addAll(albums);
-        this.artists.addAll(artists);
         this.playlists.addAll(playlists);
 
         // TODO: sort others?
@@ -54,14 +50,6 @@ public final class Library {
         return new ArrayList<>(songs);
     }
 
-    public List<Album> getAlbums() {
-        return new ArrayList<>(albums);
-    }
-
-    public List<Artist> getArtists() {
-        return new ArrayList<>(artists);
-    }
-
     public List<Playlist> getPlaylists() {
         return new ArrayList<>(playlists);
     }
@@ -69,18 +57,6 @@ public final class Library {
     public Optional<Song> findSongByTitle(String title) {
         return songs.stream()
                 .filter(song -> title.equals(song.getTitle()))
-                .findFirst();
-    }
-
-    public Optional<Album> findAlbumByTitle(String title) {
-        return albums.stream()
-                .filter(album -> title.equals(album.getTitle()))
-                .findFirst();
-    }
-
-    public Optional<Artist> findArtistByTitle(String title) {
-        return artists.stream()
-                .filter(artist -> title.equals(artist.getTitle()))
                 .findFirst();
     }
 

@@ -1,0 +1,8 @@
+.logoLabel {
+    -fx-text-fill: -fx-main-color;
+    -fx-font-size: 22px;
+}
+
+.progressLabel {
+    -fx-font-size: 14px;
+}

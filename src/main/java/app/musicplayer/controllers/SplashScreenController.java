@@ -7,31 +7,23 @@
 
 package app.musicplayer.controllers;
 
+import app.musicplayer.Config;
 import app.musicplayer.MusifyApp;
-import app.musicplayer.model.Album;
-import app.musicplayer.model.Artist;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import app.musicplayer.model.serializable.SerializableLibrary;
 import app.musicplayer.model.serializable.Serializer;
-import app.musicplayer.Config;
 import com.almasb.fxgl.logging.Logger;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.AudioHeader;
-import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,28 +31,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class ImportLibraryController {
+public final class SplashScreenController {
 
-    private static final Logger log = Logger.get(ImportLibraryController.class);
-
-    @FXML
-    private Label label;
+    private static final Logger log = Logger.get(SplashScreenController.class);
 
     @FXML
-    private Button importMusicButton;
+    private Label progressLabel;
 
     @FXML
     private ProgressBar progressBar;
 
-    private Stage ownerStage = null;
     private Consumer<Library> onFinished = null;
-
-    public void setOwnerStage(Stage ownerStage) {
-        this.ownerStage = ownerStage;
-    }
 
     public void setOnFinished(Consumer<Library> onFinished) {
         this.onFinished = onFinished;
@@ -70,28 +53,14 @@ public final class ImportLibraryController {
         startLoadingTask(new DeserializeLibraryTask(library));
     }
 
-    @FXML
-    private void onClickImport() {
-        var dirChooser = new DirectoryChooser();
-        File selectedDir = dirChooser.showDialog(ownerStage);
-
-        if (selectedDir == null) {
-            log.info("User did not select any directory");
-            return;
-        }
-
-        startLoadingTask(new ImportLibraryTask(selectedDir.toPath()));
-    }
-
     private void startLoadingTask(Task<Library> task) {
-        importMusicButton.setVisible(false);
         progressBar.setVisible(true);
 
         task.setOnSucceeded(e -> {
             onFinished.accept(task.getValue());
         });
 
-        label.textProperty().bind(task.messageProperty());
+        progressLabel.textProperty().bind(task.messageProperty());
         progressBar.progressProperty().bind(task.progressProperty());
 
         MusifyApp.getExecutorService().submit(task);
@@ -108,10 +77,8 @@ public final class ImportLibraryController {
         @Override
         protected Library call() throws Exception {
             var songs = loadSongs();
-            var albums = loadAlbums(songs);
-            var artists = loadArtists(albums);
 
-            return new Library(directory, songs, albums, artists);
+            return new Library(directory, songs);
         }
 
         private List<Song> loadSongs() {
@@ -166,32 +133,6 @@ public final class ImportLibraryController {
             );
         }
 
-        protected List<Album> loadAlbums(List<Song> songs) {
-            List<Album> albums = new ArrayList<>();
-
-            // album title -> songs
-            var albumMap = songs.stream().collect(Collectors.groupingBy(Song::getAlbumTitle));
-
-            int id = 0;
-
-            for (var entry : albumMap.entrySet()) {
-                var albumTitle = entry.getKey();
-                var albumSongs = entry.getValue();
-
-                updateMessage("Loading album: " + albumTitle);
-
-                var album = new Album(id++, albumTitle, albumSongs.get(0).getArtistTitle(), loadArtwork(albumSongs.get(0)), albumSongs);
-
-                albums.add(album);
-
-                albumSongs.forEach(song -> song.setAlbum(album));
-
-                updateProgress(id, albumMap.size());
-            }
-
-            return albums;
-        }
-
         // TODO:
         private Image loadArtwork(Song song) {
             Image artwork = null;
@@ -217,31 +158,6 @@ public final class ImportLibraryController {
 
             return new Image(Config.IMG + "albumsIcon.png");
         }
-
-        protected List<Artist> loadArtists(List<Album> albums) {
-            updateMessage("Loading artists");
-
-            List<Artist> artists = new ArrayList<>();
-
-            // artist title -> albums
-            var artistMap = albums.stream().collect(Collectors.groupingBy(Album::getArtistTitle));
-
-            for (var entry : artistMap.entrySet()) {
-                var artistTitle = entry.getKey();
-                var artistAlbums = entry.getValue();
-
-                var artist = new Artist(artistTitle, artistAlbums);
-
-                artists.add(artist);
-
-                artistAlbums.forEach(album -> {
-                    album.setArtist(artist);
-                    album.getSongs().forEach(song -> song.setArtist(artist));
-                });
-            }
-
-            return artists;
-        }
     }
 
     private static class DeserializeLibraryTask extends ImportLibraryTask {
@@ -257,9 +173,9 @@ public final class ImportLibraryController {
         protected Library call() throws Exception {
             updateMessage("Loading songs");
 
+            Thread.sleep(5000);
+
             var songs = library.songs().stream().map(Serializer::fromSerializable).toList();
-            var albums = loadAlbums(songs);
-            var artists = loadArtists(albums);
 
             var playlists = library.playlists()
                     .stream()
@@ -280,22 +196,9 @@ public final class ImportLibraryController {
             return new Library(
                     Paths.get(library.musicDirectoryPath()),
                     songs,
-                    albums,
-                    artists,
                     playlists
             );
         }
-    }
-
-    private static String makeSafe(String s) {
-        if (isEmpty(s))
-            return "Unknown";
-
-        return s;
-    }
-
-    private static boolean isEmpty(String s) {
-        return s == null || s.isEmpty() || s.equals("null");
     }
 
     public static boolean isSupportedFileType(Path file) {

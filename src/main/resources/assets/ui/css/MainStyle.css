@@ -7,6 +7,11 @@
     -fx-font-size: 18px;
 }
 
+.playlist-title {
+    -fx-font-family: verdana;
+    -fx-font-size: 12px;
+}
+
 .text-field, .text-field:focused {
     -fx-border-width: 0 0 0 0;
     -fx-border-color: transparent;

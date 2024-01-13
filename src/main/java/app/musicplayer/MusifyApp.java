@@ -1,6 +1,6 @@
 package app.musicplayer;
 
-import app.musicplayer.controllers.ImportLibraryController;
+import app.musicplayer.controllers.SplashScreenController;
 import app.musicplayer.controllers.MainController;
 import app.musicplayer.controllers.NowPlayingController;
 import app.musicplayer.model.Album;
@@ -48,6 +48,11 @@ import static app.musicplayer.Config.*;
 // TODO: update to high res app icon
 // TODO: update project title as Musify is taken
 // TODO: consider free streaming music API online
+// TODO: playlists panel scroll bar apply css
+// TODO: playlists + panel should be outside of the scroll bar
+// TODO: remove songs from library
+// TODO: if song is removed from folder
+// TODO: <Button fx:id="importMusicButton" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#onClickImport" prefHeight="45.0" prefWidth="400.0" text="Import Music Library" />
 public class MusifyApp extends Application {
 
     private static final Logger log = Logger.get(MusifyApp.class);
@@ -112,11 +117,10 @@ public class MusifyApp extends Application {
     }
 
     private void showSplashScreen(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "SplashScreen.fxml"));
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "views/SplashScreenView.fxml"));
         Parent view = loader.load();
 
-        ImportLibraryController controller = loader.getController();
-        controller.setOwnerStage(stage);
+        SplashScreenController controller = loader.getController();
         controller.setOnFinished(lib -> {
             library = lib;
 
@@ -130,6 +134,7 @@ public class MusifyApp extends Application {
         }
 
         Scene scene = new Scene(view);
+        scene.getStylesheets().add(getClass().getResource(CSS + "Global.css").toExternalForm());
         stage.setScene(scene);
         stage.show();
     }
@@ -140,27 +145,27 @@ public class MusifyApp extends Application {
         protected Void call() throws Exception {
             nowPlayingList = new ArrayList<>();
 
-            // TODO: check logic
-            if (nowPlayingList.isEmpty()) {
-                Artist artist = MusifyApp.getLibrary().getArtists().get(0);
-
-                for (Album album : artist.albums()) {
-                    nowPlayingList.addAll(album.getSongs());
-                }
-
-                nowPlayingList.sort(Comparator.comparing(Song::getAlbum).thenComparing(song -> song));
-            }
-
-            nowPlaying = nowPlayingList.get(0);
-            nowPlayingIndex = 0;
-            nowPlaying.setPlaying(true);
-
-            timerCounter = 0;
-            secondsPlayed = 0;
-            Media media = new Media(nowPlaying.getFile().toUri().toString());
-            mediaPlayer = new MediaPlayer(media);
-            mediaPlayer.setVolume(0.5);
-            mediaPlayer.setOnEndOfMedia(MusifyApp::skip);
+            // TODO: check logic, should be "load last played song"
+//            if (nowPlayingList.isEmpty()) {
+//                Artist artist = MusifyApp.getLibrary().getArtists().get(0);
+//
+//                for (Album album : artist.albums()) {
+//                    nowPlayingList.addAll(album.getSongs());
+//                }
+//
+//                nowPlayingList.sort(Comparator.comparing(Song::getAlbum).thenComparing(song -> song));
+//            }
+//
+//            nowPlaying = nowPlayingList.get(0);
+//            nowPlayingIndex = 0;
+//            nowPlaying.setPlaying(true);
+//
+//            timerCounter = 0;
+//            secondsPlayed = 0;
+//            Media media = new Media(nowPlaying.getFile().toUri().toString());
+//            mediaPlayer = new MediaPlayer(media);
+//            mediaPlayer.setVolume(0.5);
+//            mediaPlayer.setOnEndOfMedia(MusifyApp::skip);
 
             return null;
         }

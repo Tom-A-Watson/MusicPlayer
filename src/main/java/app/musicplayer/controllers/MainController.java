@@ -51,13 +51,6 @@ public class MainController implements Initializable {
 
     private static final Logger log = Logger.get(MainController.class);
 
-    private boolean isSideBarExpanded = true;
-    private double expandedWidth = 250;
-    private double collapsedWidth = 50;
-    private double expandedHeight = 50;
-    private double collapsedHeight = 0;
-    private double searchExpanded = 180;
-    private double searchCollapsed = 0;
     private SubView subViewController;
     private Stage volumePopup;
     private Stage searchPopup;
@@ -75,8 +68,6 @@ public class MainController implements Initializable {
     @FXML private Label timeRemaining;
     @FXML private HBox volumePane;
     @FXML private VolumeBoxController volumePaneController;
-
-    @FXML private Separator letterSeparator;
 
     @FXML private Pane playButton;
     @FXML private Pane pauseButton;
@@ -134,20 +125,16 @@ public class MainController implements Initializable {
             }
         });
 
-        unloadLettersAnimation.setOnFinished(x -> {
-            letterSeparator.setPrefHeight(0);
-        });
-
-        searchBox.textProperty().addListener((observable, oldText, newText) -> {
-            String text = newText.trim();
-            if (text.isEmpty()) {
-                if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
-                    searchHideAnimation.play();
-                }
-            } else {
-                Search.search(text);
-            }
-        });
+//        searchBox.textProperty().addListener((observable, oldText, newText) -> {
+//            String text = newText.trim();
+//            if (text.isEmpty()) {
+//                if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
+//                    searchHideAnimation.play();
+//                }
+//            } else {
+//                Search.search(text);
+//            }
+//        });
 
         Search.hasResultsProperty().addListener((observable, hadResults, hasResults) -> {
             if (hasResults) {
@@ -188,10 +175,6 @@ public class MainController implements Initializable {
         viewLoadedLatch = new CountDownLatch(1);
     }
 
-    CountDownLatch getLatch() {
-        return viewLoadedLatch;
-    }
-
     private void createSearchPopup() {
         try {
             Stage stage = MusifyApp.getStage();
@@ -218,8 +201,8 @@ public class MainController implements Initializable {
         Song song = MusifyApp.getNowPlaying();
         if (song != null) {
             nowPlayingTitle.setText(song.getTitle());
-            nowPlayingArtist.setText(song.getArtistTitle());
-            nowPlayingArtwork.setImage(song.getAlbum().getArtwork());
+            nowPlayingArtist.setText("// TODO:");
+            //nowPlayingArtwork.setImage(song.getAlbum().getArtwork());
         } else {
             nowPlayingTitle.setText("");
             nowPlayingArtist.setText("");
@@ -267,18 +250,20 @@ public class MainController implements Initializable {
         timeRemaining.setText(MusifyApp.getTimeRemaining());
     }
 
-    @SuppressWarnings("unchecked")
     private void initializePlaylists() {
         for (Playlist playlist : MusifyApp.getLibrary().getPlaylists()) {
             try {
                 FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
                 HBox cell = loader.load();
-                Label label = (Label) cell.getChildren().get(1);
-                label.setText(playlist.getTitle());
+                Label label = (Label) cell.getChildren().get(0);
+                // TODO: num songs
+                label.setText(playlist.getTitle() + " (13 songs)");
 
                 cell.setOnMouseClicked(x -> {
                     selectView(x);
-                    ((PlaylistsController) subViewController).selectPlaylist(playlist);
+
+                    // TODO:
+                    //((PlaylistsController) subViewController).selectPlaylist(playlist);
                 });
 
                 cell.setOnDragDetected(event -> {
@@ -302,7 +287,6 @@ public class MainController implements Initializable {
                             && event.getDragboard().hasString()) {
 
                         cell.pseudoClassStateChanged(hover, true);
-                        //cell.getStyleClass().setAll("sideBarItemSelected");
                     }
                 });
 
@@ -313,7 +297,6 @@ public class MainController implements Initializable {
                             && event.getDragboard().hasString()) {
 
                         cell.pseudoClassStateChanged(hover, false);
-                        //cell.getStyleClass().setAll("sideBarItem");
                     }
                 });
 
@@ -389,34 +372,36 @@ public class MainController implements Initializable {
 
     @FXML
     private void selectView(Event e) {
+        System.out.println("Select view:  " + e);
 
-        HBox eventSource = ((HBox)e.getSource());
 
-        eventSource.requestFocus();
+        // TODO:
 
-        Optional<Node> previous = sideBar.getChildren().stream()
-                .filter(x -> x.getStyleClass().get(0).equals("sideBarItemSelected")).findFirst();
-
-        if (previous.isPresent()) {
-            HBox previousItem = (HBox) previous.get();
-            previousItem.getStyleClass().setAll("sideBarItem");
-        } else {
-            previous = playlistBox.getChildren().stream()
-                    .filter(x -> x.getStyleClass().get(0).equals("sideBarItemSelected")).findFirst();
-            if (previous.isPresent()) {
-                HBox previousItem = (HBox) previous.get();
-                previousItem.getStyleClass().setAll("sideBarItem");
-            }
-        }
-
-        ObservableList<String> styles = eventSource.getStyleClass();
-
-        if (styles.get(0).equals("sideBarItem")) {
-            styles.setAll("sideBarItemSelected");
-            loadView(eventSource.getId());
-        } else if (styles.get(0).equals("bottomBarItem")) {
-            loadView(eventSource.getId());
-        }
+//        HBox eventSource = ((HBox)e.getSource());
+//
+//        eventSource.requestFocus();
+//
+//        Optional<Node> previous = sideBar.getChildren().stream().filter(x -> x.getStyleClass().get(0).equals("sideBarItemSelected")).findFirst();
+//
+//        if (previous.isPresent()) {
+//            HBox previousItem = (HBox) previous.get();
+//            previousItem.getStyleClass().setAll("sideBarItem");
+//        } else {
+//            previous = playlistBox.getChildren().stream().filter(x -> x.getStyleClass().get(0).equals("sideBarItemSelected")).findFirst();
+//            if (previous.isPresent()) {
+//                HBox previousItem = (HBox) previous.get();
+//                previousItem.getStyleClass().setAll("sideBarItem");
+//            }
+//        }
+//
+//        ObservableList<String> styles = eventSource.getStyleClass();
+//
+//        if (styles.get(0).equals("sideBarItem")) {
+//            styles.setAll("sideBarItemSelected");
+//            loadView(eventSource.getId());
+//        } else if (styles.get(0).equals("bottomBarItem")) {
+//            loadView(eventSource.getId());
+//        }
     }
 
     private static Playlist getPlaylist(String title) {
@@ -614,34 +599,6 @@ public class MainController implements Initializable {
 
     public SubView loadView(String viewName) {
         try {
-
-            boolean loadLetters;
-            boolean unloadLetters;
-
-            switch (viewName.toLowerCase()) {
-                case "songs":
-                    if (subViewController instanceof SongsController) {
-                        loadLetters = false;
-                        unloadLetters = false;
-                    } else {
-                        loadLetters = true;
-                        unloadLetters = false;
-                    }
-                    break;
-                default:
-                    if (subViewController instanceof SongsController) {
-                        loadLetters = false;
-                        unloadLetters = true;
-                    } else {
-                        loadLetters = false;
-                        unloadLetters = false;
-                    }
-                    break;
-            }
-
-            final boolean loadLettersFinal = loadLetters;
-            final boolean unloadLettersFinal = unloadLetters;
-
             String fileName = viewName.substring(0, 1).toUpperCase() + viewName.substring(1) + ".fxml";
             fileName = "/assets/ui/" + fileName;
 
@@ -673,9 +630,7 @@ public class MainController implements Initializable {
                 }
                 Platform.runLater(() -> {
                     subViewRoot.setVisible(true);
-                    if (loadLettersFinal) {
-                        loadLettersAnimation.play();
-                    }
+
                     loadViewAnimation.play();
                 });
             }).start());
@@ -687,15 +642,10 @@ public class MainController implements Initializable {
             loadViewAnimation.setOnFinished(x -> viewLoadedLatch.countDown());
 
             if (subViewRoot.getContent() != null) {
-                if (unloadLettersFinal) {
-                    unloadLettersAnimation.play();
-                }
-                unloadViewAnimation.play();
+
             } else {
                 subViewRoot.setContent(view);
-                if (loadLettersFinal) {
-                    loadLettersAnimation.play();
-                }
+
                 loadViewAnimation.play();
             }
 
@@ -829,10 +779,6 @@ public class MainController implements Initializable {
         return subViewController;
     }
 
-    ScrollPane getScrollPane() {
-        return this.subViewRoot;
-    }
-
     VBox getPlaylistBox() {
         return playlistBox;
     }
@@ -844,10 +790,6 @@ public class MainController implements Initializable {
         } else {
             controlBox.getChildren().add(2, playButton);
         }
-    }
-
-    private void setSlideDirection() {
-        isSideBarExpanded = !isSideBarExpanded;
     }
 
     private Animation searchShowAnimation = new Transition() {
@@ -878,8 +820,6 @@ public class MainController implements Initializable {
         }
         protected void interpolate(double frac) {
             subViewRoot.setVvalue(0);
-            double curHeight = collapsedHeight + (expandedHeight - collapsedHeight) * (frac);
-            subViewRoot.getContent().setTranslateY(expandedHeight - curHeight);
             subViewRoot.getContent().setOpacity(frac);
         }
     };
@@ -890,30 +830,7 @@ public class MainController implements Initializable {
             setInterpolator(Interpolator.EASE_BOTH);
         }
         protected void interpolate(double frac) {
-            double curHeight = collapsedHeight + (expandedHeight - collapsedHeight) * (1 - frac);
-            subViewRoot.getContent().setTranslateY(expandedHeight - curHeight);
             subViewRoot.getContent().setOpacity(1 - frac);
-        }
-    };
-
-    private Animation loadLettersAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-        }
-        protected void interpolate(double frac) {
-            letterSeparator.setPrefHeight(25);
-            letterSeparator.setOpacity(frac);
-        }
-    };
-
-    private Animation unloadLettersAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-        }
-        protected void interpolate(double frac) {
-            letterSeparator.setOpacity(1.0 - frac);
         }
     };
 
