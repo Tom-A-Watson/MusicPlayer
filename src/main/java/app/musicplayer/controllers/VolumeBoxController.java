@@ -7,8 +7,10 @@
 
 package app.musicplayer.controllers;
 
-import app.musicplayer.MusifyApp;
 import com.almasb.fxgl.logging.Logger;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -39,6 +41,8 @@ public final class VolumeBoxController implements Initializable {
     @FXML
     private Pane mutedButton;
 
+    private BooleanProperty muted = new SimpleBooleanProperty(false);
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         log.info("initialize()");
@@ -49,28 +53,32 @@ public final class VolumeBoxController implements Initializable {
 
         volumeLabel.textProperty().bind(volumeSlider.valueProperty().asString("%.0f"));
 
-        volumeSlider.setOnMousePressed(x -> {
+        volumeSlider.setOnMousePressed(e -> {
             if (mutedButton.isVisible()) {
                 onClickMute();
             }
         });
     }
 
-    Slider getSlider() {
-        return volumeSlider;
+    DoubleProperty volumeProperty() {
+        return volumeSlider.valueProperty();
+    }
+
+    BooleanProperty mutedProperty() {
+        return muted;
     }
 
     @FXML
     private void onClickMute() {
-        PseudoClass muted = PseudoClass.getPseudoClass("muted");
+        // TODO: check pseudo class impl
+        PseudoClass mutedClass = PseudoClass.getPseudoClass("muted");
         boolean isMuted = mutedButton.isVisible();
         muteButton.setVisible(isMuted);
         mutedButton.setVisible(!isMuted);
-        volumeSlider.pseudoClassStateChanged(muted, !isMuted);
-        frontVolumeTrack.pseudoClassStateChanged(muted, !isMuted);
-        volumeLabel.pseudoClassStateChanged(muted, !isMuted);
+        volumeSlider.pseudoClassStateChanged(mutedClass, !isMuted);
+        frontVolumeTrack.pseudoClassStateChanged(mutedClass, !isMuted);
+        volumeLabel.pseudoClassStateChanged(mutedClass, !isMuted);
 
-        // TODO: extract into property and listen from outside of the controller
-        MusifyApp.mute(isMuted);
+        muted.set(isMuted);
     }
 }

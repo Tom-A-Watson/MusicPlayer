@@ -350,7 +350,7 @@ public class MusifyApp extends Application {
 
             Media media = new Media(song.getFile().toUri().toString());
             mediaPlayer = new MediaPlayer(media);
-            mediaPlayer.volumeProperty().bind(mainController.getVolumeSlider().valueProperty().divide(200));
+            mediaPlayer.volumeProperty().bind(mainController.volumeProperty().divide(200));
             mediaPlayer.setOnEndOfMedia(MusifyApp::skip);
             mediaPlayer.setMute(isMuted);
             mainController.updateNowPlayingButton();

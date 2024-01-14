@@ -20,6 +20,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
@@ -166,6 +167,10 @@ public class MainController implements Initializable {
             if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
                 searchHideAnimation.play();
             }
+        });
+
+        volumePaneController.mutedProperty().addListener((observable, wasMuted, isMuted) -> {
+            MusifyApp.mute(isMuted);
         });
 
         updateNowPlayingButton();
@@ -661,8 +666,8 @@ public class MainController implements Initializable {
         }
     }
 
-    public Slider getVolumeSlider() {
-        return volumePaneController.getSlider();
+    public DoubleProperty volumeProperty() {
+        return volumePaneController.volumeProperty();
     }
 
     VBox getPlaylistBox() {
