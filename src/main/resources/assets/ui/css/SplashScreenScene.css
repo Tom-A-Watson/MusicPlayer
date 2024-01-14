@@ -1,3 +1,10 @@
+/*
+ * JavaFX Music Player. The MIT License (MIT).
+ * Copyright (c) Almas Baim.
+ * Copyright (c) Gerardo Prada, Michael Martin.
+ * See LICENSE for details.
+ */
+
 .logoLabel {
     -fx-text-fill: -fx-main-color;
     -fx-font-size: 22px;
