@@ -12,7 +12,14 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane fx:id="mainWindow" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="450.0" minWidth="600.0" prefHeight="600.0" prefWidth="900.0" styleClass="mainWindow" stylesheets="@/assets/ui/css/MainStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.controllers.MainController">
+<!--
+  ~ JavaFX Music Player. The MIT License (MIT).
+  ~ Copyright (c) Almas Baim.
+  ~ Copyright (c) Gerardo Prada, Michael Martin.
+  ~ See LICENSE for details.
+  -->
+
+<BorderPane fx:id="mainWindow" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="450.0" minWidth="600.0" prefHeight="600.0" prefWidth="900.0" styleClass="mainWindow" stylesheets="@/assets/ui/css/MainScene.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.controllers.MainController">
    <left>
       <VBox fx:id="sideBar" maxWidth="-Infinity" minWidth="50.0" prefWidth="250.0" styleClass="sideBar" BorderPane.alignment="CENTER">
          <children>
@@ -231,7 +238,7 @@
          </center>
 
          <right>
-            <fx:include fx:id="volumePane" source="controls/VolumeBox.fxml" BorderPane.alignment="CENTER"/>
+            <fx:include fx:id="volumePane" source="../controls/VolumeBox.fxml" BorderPane.alignment="CENTER"/>
          </right>
       </BorderPane>
    </bottom>
@@ -257,7 +264,7 @@
                </padding>
 
                <content>
-                  <fx:include fx:id="songTableView" source="controls/SongTableView.fxml" />
+                  <fx:include fx:id="songTableView" source="../controls/SongTableView.fxml" />
                </content>
             </ScrollPane>
          </center>

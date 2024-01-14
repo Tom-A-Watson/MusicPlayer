@@ -6,7 +6,6 @@ import app.musicplayer.model.MostPlayedPlaylist;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.RecentlyPlayedPlaylist;
 import app.musicplayer.model.Song;
-import app.musicplayer.view.SubView;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -52,7 +51,6 @@ public class MainController implements Initializable {
 
     private static final Logger log = Logger.get(MainController.class);
 
-    private SubView subViewController;
     private Stage searchPopup;
 
     @FXML private ScrollPane subViewRoot;
@@ -175,7 +173,7 @@ public class MainController implements Initializable {
         try {
             Stage stage = MusifyApp.getStage();
             VBox view = new VBox();
-            view.getStylesheets().add(Config.CSS + "MainStyle.css");
+            view.getStylesheets().add(Config.CSS + "MainScene.css");
             view.getStyleClass().add("searchPopup");
             Stage popup = new Stage();
             popup.setScene(new Scene(view));
@@ -258,7 +256,8 @@ public class MainController implements Initializable {
                 cell.setOnMouseClicked(x -> {
                     selectView(x);
 
-                    ((PlaylistsController) subViewController).selectPlaylist(playlist);
+                    // TODO:
+                    //((PlaylistsController) subViewController).selectPlaylist(playlist);
                 });
 
                 cell.setOnDragDetected(event -> {
@@ -349,18 +348,25 @@ public class MainController implements Initializable {
 
     @FXML
     private void selectView(Event e) {
-        var node = (Node) e.getSource();
-        node.requestFocus();
+        Parent parent = (Parent) e.getSource();
+        parent.requestFocus();
 
-        log.info("selectView(" + node.getId() + ")");
+        log.info("selectView(" + parent.getId() + ")");
 
-        if (node.getId().equals("playlists")) {
-            loadView(node.getId());
+        if (parent.getId().equals("playlists")) {
+            //loadView(node.getId());
+
+            // TODO: handle in a less dangerous way
+            var label = (Label) parent.getChildrenUnmodifiable().get(0);
+            var title = label.getText().substring(0, label.getText().lastIndexOf(" ("));
+
+            var playlist = getPlaylist(title);
+
+            songTableViewController.setSongs(playlist.getSongs());
         }
 
-        if (node.getId().equals("songs")) {
-            subViewRoot.setContent(songTableView);
-            subViewController = songTableViewController;
+        if (parent.getId().equals("songs")) {
+            songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
         }
     }
 
@@ -407,7 +413,8 @@ public class MainController implements Initializable {
                 cell.setOnMouseClicked(x -> {
                     selectView(x);
                     Playlist playlist = getPlaylist(label.getText());
-                    ((PlaylistsController) subViewController).selectPlaylist(playlist);
+
+                    // TODO: select playlist
                 });
 
                 cell.setOnDragDetected(event -> {
@@ -536,25 +543,25 @@ public class MainController implements Initializable {
         return text;
     }
 
-    public SubView loadView(String viewName) {
-        try {
-            String fileName = viewName.substring(0, 1).toUpperCase() + viewName.substring(1) + ".fxml";
-            fileName = "/assets/ui/" + fileName;
-
-            log.info("loadView(): " + fileName);
-
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(fileName));
-            Parent view = loader.load();
-
-            subViewRoot.setContent(view);
-            subViewController = loader.getController();
-            return subViewController;
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-    }
+//    public SubView loadView(String viewName) {
+//        try {
+//            String fileName = viewName.substring(0, 1).toUpperCase() + viewName.substring(1) + ".fxml";
+//            fileName = "/assets/ui/" + fileName;
+//
+//            log.info("loadView(): " + fileName);
+//
+//            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(fileName));
+//            Parent view = loader.load();
+//
+//            subViewRoot.setContent(view);
+//            subViewController = loader.getController();
+//            return subViewController;
+//
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//            return null;
+//        }
+//    }
 
     @FXML
     private void navigateToCurrentSong() {
@@ -649,10 +656,6 @@ public class MainController implements Initializable {
 
     public Slider getVolumeSlider() {
         return volumePaneController.getSlider();
-    }
-
-    public SubView getSubViewController() {
-        return subViewController;
     }
 
     VBox getPlaylistBox() {

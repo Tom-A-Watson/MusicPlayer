@@ -11,7 +11,7 @@
 <?import javafx.scene.shape.Rectangle?>
 
 <VBox fx:controller="app.musicplayer.controllers.SplashScreenController"
-      stylesheets="@/assets/ui/css/SplashScreenView.css"
+      stylesheets="@/assets/ui/css/SplashScreenScene.css"
       spacing="40"
       alignment="CENTER"
       xmlns:fx="http://javafx.com/fxml/1">

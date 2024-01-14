@@ -5,7 +5,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<HBox fx:id="controlBox" fx:controller="app.musicplayer.controllers.ControlPanelController" alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="70.0" stylesheets="@/assets/ui/css/MainStyle.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<HBox fx:id="controlBox" fx:controller="app.musicplayer.controllers.ControlPanelController" alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="70.0" stylesheets="@/assets/ui/css/MainScene.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Pane fx:id="playButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#playSong" prefHeight="20.0" prefWidth="20.0" styleClass="controlPane">
          <children>

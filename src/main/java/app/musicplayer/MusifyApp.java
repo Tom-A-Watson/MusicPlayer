@@ -1,7 +1,6 @@
 package app.musicplayer;
 
 import app.musicplayer.controllers.MainController;
-import app.musicplayer.controllers.NowPlayingController;
 import app.musicplayer.controllers.SplashScreenController;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
@@ -16,7 +15,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
@@ -54,7 +52,8 @@ import static app.musicplayer.Config.*;
 // TODO: playlists + panel should be outside of the scroll bar
 // TODO: remove songs from library
 // TODO: if song is removed from folder
-// TODO: <Button fx:id="importMusicButton" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#onClickImport" prefHeight="45.0" prefWidth="400.0" text="Import Music Library" />
+// TODO: check shuffle and loop
+// TODO: fix song table view selection when moving from a different playlist, that song is selected in the new one
 public class MusifyApp extends Application {
 
     private static final Logger log = Logger.get(MusifyApp.class);
@@ -128,7 +127,7 @@ public class MusifyApp extends Application {
 
     private void showSplashScreenView(Stage stage) throws Exception {
         // TODO: view and css loading
-        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "views/SplashScreenView.fxml"));
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "scenes/SplashScreenScene.fxml"));
         Parent view = loader.load();
 
         SplashScreenController controller = loader.getController();
@@ -140,6 +139,9 @@ public class MusifyApp extends Application {
 
         task.setOnSucceeded(e -> {
             library = task.getValue();
+
+            log.info("Loaded: " + LIBRARY_FILE);
+            log.info("Playlists: " + library.getPlaylists());
 
             try {
                 showMainView(stage);
@@ -156,7 +158,7 @@ public class MusifyApp extends Application {
     }
 
     private void showMainView(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "Main.fxml"));
+        FXMLLoader loader = new FXMLLoader(this.getClass().getResource(FXML + "scenes/MainScene.fxml"));
         Parent view = loader.load();
 
         mainController = loader.getController();
@@ -288,10 +290,6 @@ public class MusifyApp extends Application {
         }
 
         nowPlayingIndex = nowPlayingList.indexOf(nowPlaying);
-
-        if (mainController.getSubViewController() instanceof NowPlayingController) {
-            mainController.loadView("nowPlaying");
-        }
     }
 
     public static boolean isShuffleActive() {
