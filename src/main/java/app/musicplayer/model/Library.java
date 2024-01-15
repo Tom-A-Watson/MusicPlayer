@@ -38,8 +38,8 @@ public final class Library {
         this.songs.addAll(songs);
         this.playlists.addAll(playlists);
 
-        // TODO: sort others?
-        this.playlists.sort((p1, p2) -> Integer.compare(p2.getId(), p1.getId()));
+        Collections.sort(this.songs);
+        Collections.sort(this.playlists);
     }
 
     public Path getMusicDirectory() {

@@ -179,6 +179,7 @@ public class MainController implements Initializable {
         initializePlaylists();
 
         subViewRoot.setContent(songTableView);
+        songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
     }
 
     private void createSearchPopup() {

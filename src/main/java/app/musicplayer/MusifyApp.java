@@ -341,8 +341,7 @@ public class MusifyApp extends Application {
             nowPlaying.setPlaying(true);
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
-                // TODO:
-                //mediaPlayer.dispose();
+                mediaPlayer.dispose();
             }
 
             timerCounter = 0;

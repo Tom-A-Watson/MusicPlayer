@@ -2,13 +2,6 @@
 
 <?import javafx.scene.control.*?>
 
-<!--
-  ~ JavaFX Music Player. The MIT License (MIT).
-  ~ Copyright (c) Almas Baim.
-  ~ Copyright (c) Gerardo Prada, Michael Martin.
-  ~ See LICENSE for details.
-  -->
-
 <TableView fx:id="tableView"
            fx:controller="app.musicplayer.controllers.SongTableViewController"
            stylesheets="@/assets/ui/css/Songs.css"
@@ -22,7 +15,6 @@
     </placeholder>
 
     <columns>
-        <TableColumn fx:id="playingColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="50.0" resizable="false" styleClass="playingColumn" />
         <TableColumn fx:id="controlColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="70.0" resizable="false" styleClass="textColumn" />
         <TableColumn fx:id="titleColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="200.0" resizable="false" styleClass="firstColumn" text="Title" />
         <TableColumn fx:id="lengthColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="10.0" resizable="false" styleClass="numberColumn" text="Length" />

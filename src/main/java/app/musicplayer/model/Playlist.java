@@ -10,7 +10,8 @@ package app.musicplayer.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Playlist {
+// TODO: sort songs
+public class Playlist implements Comparable<Playlist> {
 
     private int id;
     private String title;
@@ -41,6 +42,11 @@ public class Playlist {
     
     public void removeSong(int songId) {
         songs.removeIf(s -> s.getId() == songId);
+    }
+
+    @Override
+    public int compareTo(Playlist other) {
+        return Integer.compare(getId(), other.getId());
     }
 
     @Override

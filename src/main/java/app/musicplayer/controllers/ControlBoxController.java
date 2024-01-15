@@ -12,46 +12,50 @@ import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+public final class ControlBoxController {
 
-public class ControlPanelController implements Initializable {
+    private ControlBoxHandler handler = new ControlBoxHandler() {
+        @Override
+        public void onClickPlaySong() {}
 
-    @FXML private Pane playButton;
-    @FXML private Pane playlistButton;
+        @Override
+        public void onClickAddToPlaylist() {}
+    };
+
+    @FXML
+    private Pane playButton;
+    @FXML
+    private Pane playlistButton;
 
     private ContextMenu contextMenu;
 
-    private Animation showMenuAnimation = new Transition() {
+    private final Animation showMenuAnimation = new Transition() {
         {
             setCycleDuration(Duration.millis(250));
             setInterpolator(Interpolator.EASE_BOTH);
         }
+
+        @Override
         protected void interpolate(double frac) {
             contextMenu.setOpacity(frac);
         }
     };
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {}
-
-    @FXML
-    private void playSong(Event e) {
-        System.out.println("TODO: PLAY SONG" + e);
-
-        // TODO:
-//        SubView controller = MusifyApp.getMainController().getSubViewController();
-//        controller.play();
-//        e.consume();
+    public void setHandler(ControlBoxHandler handler) {
+        this.handler = handler;
     }
 
     @FXML
-    private void addToPlaylist(Event e) {
+    private void onClickPlaySong(Event e) {
+        handler.onClickPlaySong();
+    }
+
+    @FXML
+    private void onClickAddToPlaylist(Event e) {
         // TODO:
         System.out.println("TODO ADD TO PLAYLIST: " + e);
 
@@ -120,5 +124,10 @@ public class ControlPanelController implements Initializable {
 //        showMenuAnimation.play();
 //
 //        e.consume();
+    }
+
+    public interface ControlBoxHandler {
+        void onClickPlaySong();
+        void onClickAddToPlaylist();
     }
 }

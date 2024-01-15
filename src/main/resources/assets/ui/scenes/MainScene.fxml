@@ -12,13 +12,6 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<!--
-  ~ JavaFX Music Player. The MIT License (MIT).
-  ~ Copyright (c) Almas Baim.
-  ~ Copyright (c) Gerardo Prada, Michael Martin.
-  ~ See LICENSE for details.
-  -->
-
 <BorderPane fx:id="mainWindow" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="450.0" minWidth="600.0" prefHeight="600.0" prefWidth="900.0" styleClass="mainWindow" stylesheets="@/assets/ui/css/MainScene.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.controllers.MainController">
    <left>
       <VBox fx:id="sideBar" maxWidth="-Infinity" minWidth="50.0" prefWidth="250.0" styleClass="sideBar" BorderPane.alignment="CENTER">
@@ -224,13 +217,17 @@
                   </right>
                   <center>
                      <StackPane BorderPane.alignment="CENTER">
-                        <children>
-                           <Region fx:id="backSliderTrack" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="2.0" styleClass="backSliderTrack" StackPane.alignment="CENTER_LEFT" />
-                           <Region fx:id="frontSliderTrack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="2.0" styleClass="frontSliderTrack" StackPane.alignment="CENTER_LEFT" />
-                           <Region maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="block" StackPane.alignment="CENTER_LEFT" />
-                           <Region maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="block" StackPane.alignment="CENTER_RIGHT" />
-                           <Slider fx:id="timeSlider" blockIncrement="1.0" pickOnBounds="false" StackPane.alignment="CENTER_LEFT" focusTraversable="false" />
-                        </children>
+                        <Region fx:id="backSliderTrack" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="2.0"
+                                styleClass="backSliderTrack" StackPane.alignment="CENTER_LEFT"/>
+                        <Region fx:id="frontSliderTrack" maxHeight="-Infinity" maxWidth="-Infinity"
+                                minHeight="-Infinity" minWidth="-Infinity" prefHeight="2.0"
+                                styleClass="frontSliderTrack" StackPane.alignment="CENTER_LEFT"/>
+                        <Region maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="block"
+                                StackPane.alignment="CENTER_LEFT"/>
+                        <Region maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="block"
+                                StackPane.alignment="CENTER_RIGHT"/>
+                        <Slider fx:id="timeSlider" blockIncrement="1.0" pickOnBounds="false"
+                                StackPane.alignment="CENTER_LEFT" focusTraversable="false"/>
                      </StackPane>
                   </center>
                </BorderPane>
