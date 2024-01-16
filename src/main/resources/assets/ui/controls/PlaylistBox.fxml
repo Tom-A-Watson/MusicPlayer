@@ -4,17 +4,17 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 
-<HBox id="playlists"
+<HBox fx:id="playlistBox"
+      fx:controller="app.musicplayer.controllers.PlaylistBoxController"
+      stylesheets="@/assets/ui/css/PlaylistBox.css"
       styleClass="sideBarItem"
-      maxHeight="-Infinity"
-      maxWidth="-Infinity"
-      minHeight="-Infinity"
       minWidth="50.0"
       prefHeight="50.0"
       prefWidth="250.0"
       xmlns:fx="http://javafx.com/fxml/1">
 
-   <Label styleClass="playlist-title"
+   <Label fx:id="playlistTitleLabel"
+          styleClass="playlist-title-label"
           prefHeight="30.0"
           textOverrun="CLIP">
 

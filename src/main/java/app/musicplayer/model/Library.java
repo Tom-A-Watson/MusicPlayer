@@ -7,6 +7,9 @@
 
 package app.musicplayer.model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.nio.file.Path;
 import java.util.*;
 
@@ -15,7 +18,7 @@ import java.util.*;
  */
 public final class Library {
 
-    private List<Song> songs = new ArrayList<>();
+    private ObservableList<Song> songs = FXCollections.observableArrayList();
     private List<Playlist> playlists = new ArrayList<>();
 
     private Path musicDirectory;
@@ -46,8 +49,8 @@ public final class Library {
         return musicDirectory;
     }
 
-    public List<Song> getSongs() {
-        return new ArrayList<>(songs);
+    public ObservableList<Song> getSongs() {
+        return songs;
     }
 
     public List<Playlist> getPlaylists() {
@@ -66,13 +69,17 @@ public final class Library {
                 .findFirst();
     }
 
-    public void addPlaylist(String title) {
+    public Playlist addPlaylist(String title) {
         int highestID = playlists.stream()
                 .max(Comparator.comparingInt(Playlist::getId))
                 .map(Playlist::getId)
                 .orElse(0);
 
-        playlists.add(new Playlist(highestID + 1, title));
+        var p = new Playlist(highestID + 1, title);
+
+        playlists.add(p);
+
+        return p;
     }
 
     public void removePlaylist(Playlist playlist) {

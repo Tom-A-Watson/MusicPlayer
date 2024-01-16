@@ -18,12 +18,13 @@ public final class RecentlyPlayedPlaylist extends Playlist {
         super(id, "Recently Played");
     }
 
-    @Override
-    public List<Song> getSongs() {
-        return MusifyApp.getLibrary().getSongs().stream()
-                .filter(song -> song.getPlayCount() > 0)
-                .sorted((s1, s2) -> s2.getPlayDate().compareTo(s1.getPlayDate()))
-                .limit(100)
-                .collect(Collectors.toList());
-    }
+    // TODO:
+//    @Override
+//    public List<Song> getSongs() {
+//        return MusifyApp.getLibrary().getSongs().stream()
+//                .filter(song -> song.getPlayCount() > 0)
+//                .sorted((s1, s2) -> s2.getPlayDate().compareTo(s1.getPlayDate()))
+//                .limit(100)
+//                .collect(Collectors.toList());
+//    }
 }

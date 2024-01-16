@@ -12,7 +12,6 @@ import app.musicplayer.MusifyApp;
 import app.musicplayer.model.Song;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
@@ -23,14 +22,14 @@ import javafx.scene.control.*;
 import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.*;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class SongTableViewController implements Initializable, ControlBoxController.ControlBoxHandler {
 
@@ -63,8 +62,6 @@ public class SongTableViewController implements Initializable, ControlBoxControl
 		controlColumn.setCellValueFactory(param -> new SimpleStringProperty(""));
 		titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
 		lengthColumn.setCellValueFactory(new PropertyValueFactory<>("displayLength"));
-
-		lengthColumn.setSortable(false);
 
 		tableView.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
 			tableView.requestFocus();
@@ -162,20 +159,12 @@ public class SongTableViewController implements Initializable, ControlBoxControl
 
 			row.setOnDragDetected(event -> {
 				Dragboard db = row.startDragAndDrop(TransferMode.ANY);
-				ClipboardContent content = new ClipboardContent();
-				if (tableView.getSelectionModel().getSelectedIndices().size() > 1) {
-					content.putString("List");
-					db.setContent(content);
 
-					// TODO:
-					//MusifyApp.setDraggedItem(tableView.getSelectionModel().getSelectedItems());
-				} else {
-					content.putString("Song");
-					db.setContent(content);
+				List<Song> draggedSongs = new ArrayList<>(tableView.getSelectionModel().getSelectedItems());
+				MusifyApp.setDraggedItems(draggedSongs);
 
-					// TODO:
-					//MusifyApp.setDraggedItem(row.getItem());
-				}
+				db.setContent(Map.of(Config.DRAG_SONG_LIST, ""));
+
 				ImageView image = new ImageView(row.snapshot(null, null));
 				Rectangle2D rectangle = new Rectangle2D(0, 0, 250, 50);
 				image.setViewport(rectangle);
@@ -205,8 +194,10 @@ public class SongTableViewController implements Initializable, ControlBoxControl
 		tableView.getSelectionModel().select(selectedSong);
 	}
 
-	public void setSongs(List<Song> songs) {
-		tableView.setItems(FXCollections.observableArrayList(songs));
+	public void setSongs(ObservableList<Song> songs) {
+		tableView.getSelectionModel().clearSelection();
+
+		tableView.setItems(songs);
 
 		if (!songs.isEmpty()) {
 			selectSong(songs.get(0));

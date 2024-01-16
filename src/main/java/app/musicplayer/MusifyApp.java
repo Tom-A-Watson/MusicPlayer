@@ -22,6 +22,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.DataFormat;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
@@ -34,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -75,7 +77,7 @@ public class MusifyApp extends Application {
     private static boolean isLoopActive = false;
     private static boolean isShuffleActive = false;
     private static boolean isMuted = false;
-    private static Object draggedItem;
+    private static List<Song> draggedItems = new ArrayList<>();
     private static ScheduledExecutorService executorService;
 
     private static Library library;
@@ -392,12 +394,12 @@ public class MusifyApp extends Application {
         return minutes + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
     }
 
-    public static void setDraggedItem(Object item) {
-        draggedItem = item;
+    public static void setDraggedItems(List<Song> draggedItems) {
+        MusifyApp.draggedItems = draggedItems;
     }
 
-    public static Object getDraggedItem() {
-        return draggedItem;
+    public static List<Song> getDraggedItems() {
+        return draggedItems;
     }
 
     public static Library getLibrary() {

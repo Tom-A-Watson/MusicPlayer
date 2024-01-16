@@ -7,7 +7,9 @@
 
 package app.musicplayer.model;
 
-import java.util.ArrayList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.util.List;
 
 // TODO: sort songs
@@ -15,7 +17,7 @@ public class Playlist implements Comparable<Playlist> {
 
     private int id;
     private String title;
-    private List<Song> songs = new ArrayList<>();
+    private ObservableList<Song> songs = FXCollections.observableArrayList();
 
     public Playlist(int id, String title) {
         this.id = id;
@@ -30,8 +32,8 @@ public class Playlist implements Comparable<Playlist> {
         return title;
     }
 
-    public List<Song> getSongs() {
-        return new ArrayList<>(songs);
+    public ObservableList<Song> getSongs() {
+        return songs;
     }
     
     public void addSong(Song song) {

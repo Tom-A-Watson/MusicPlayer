@@ -9,9 +9,7 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
 import app.musicplayer.MusifyApp;
-import app.musicplayer.model.MostPlayedPlaylist;
 import app.musicplayer.model.Playlist;
-import app.musicplayer.model.RecentlyPlayedPlaylist;
 import app.musicplayer.model.Song;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
@@ -31,21 +29,15 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -260,140 +252,42 @@ public class MainController implements Initializable {
 
     private void initializePlaylists() {
         for (Playlist playlist : MusifyApp.getLibrary().getPlaylists()) {
-            try {
-                FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
-                HBox cell = loader.load();
-                Label label = (Label) cell.getChildren().get(0);
-                label.setText(playlist.getTitle() + " (" + playlist.getSongs().size() + " songs)");
+            addNewPlaylistToUI(playlist);
+        }
+    }
 
-                cell.setOnMouseClicked(x -> {
-                    selectView(x);
+    private void addNewPlaylistToUI(Playlist playlist) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(Config.FXML + "controls/PlaylistBox.fxml"));
+            HBox playlistView = loader.load();
 
-                    // TODO:
-                    //((PlaylistsController) subViewController).selectPlaylist(playlist);
-                });
+            PlaylistBoxController controller = loader.getController();
+            controller.setPlaylist(playlist);
 
-                cell.setOnDragDetected(event -> {
-                    PseudoClass pressed = PseudoClass.getPseudoClass("pressed");
-                    cell.pseudoClassStateChanged(pressed, false);
-                    Dragboard db = cell.startDragAndDrop(TransferMode.ANY);
-                    ClipboardContent content = new ClipboardContent();
-                    content.putString("Playlist");
-                    db.setContent(content);
-                    MusifyApp.setDraggedItem(playlist);
-                    db.setDragView(cell.snapshot(null, null), 125, 25);
-                    event.consume();
-                });
+            playlistView.setOnMouseClicked(e -> {
+                songTableViewController.setSongs(playlist.getSongs());
+            });
 
-                PseudoClass hover = PseudoClass.getPseudoClass("hover");
+            playlistBox.getChildren().add(playlistView);
 
-                cell.setOnDragEntered(event -> {
-                    if (!(playlist instanceof MostPlayedPlaylist)
-                            && !(playlist instanceof RecentlyPlayedPlaylist)
-                            && event.getGestureSource() != cell
-                            && event.getDragboard().hasString()) {
-
-                        cell.pseudoClassStateChanged(hover, true);
-                    }
-                });
-
-                cell.setOnDragExited(event -> {
-                    if (!(playlist instanceof MostPlayedPlaylist)
-                            && !(playlist instanceof RecentlyPlayedPlaylist)
-                            && event.getGestureSource() != cell
-                            && event.getDragboard().hasString()) {
-
-                        cell.pseudoClassStateChanged(hover, false);
-                    }
-                });
-
-                cell.setOnDragOver(event -> {
-                    if (!(playlist instanceof MostPlayedPlaylist)
-                            && !(playlist instanceof RecentlyPlayedPlaylist)
-                            && event.getGestureSource() != cell
-                            && event.getDragboard().hasString()) {
-
-                        event.acceptTransferModes(TransferMode.ANY);
-                    }
-                    event.consume();
-                });
-
-                cell.setOnDragDropped(event -> {
-                    String dragString = event.getDragboard().getString();
-                    new Thread(() -> {
-                        switch (dragString) {
-                            case "Playlist":
-                                Playlist list = (Playlist) MusifyApp.getDraggedItem();
-                                for (Song song : list.getSongs()) {
-                                    if (!playlist.getSongs().contains(song)) {
-                                        playlist.addSong(song);
-                                    }
-                                }
-                                break;
-                            case "Song":
-                                Song song = (Song) MusifyApp.getDraggedItem();
-                                if (!playlist.getSongs().contains(song)) {
-                                    playlist.addSong(song);
-                                }
-                                break;
-                            case "List":
-                                ObservableList<Song> songs = (ObservableList<Song>) MusifyApp.getDraggedItem();
-                                for (Song s : songs) {
-                                    if (!playlist.getSongs().contains(s)) {
-                                        playlist.addSong(s);
-                                    }
-                                }
-                                break;
-                        }
-                    }).start();
-
-                    event.consume();
-                });
-
-                playlistBox.getChildren().add(cell);
-
-            } catch (Exception e) {
-
-                e.printStackTrace();
-            }
+        } catch (Exception e) {
+            log.warning("Cannot load playlist view for: " + playlist, e);
         }
     }
 
     @FXML
-    private void selectView(Event e) {
-        Parent parent = (Parent) e.getSource();
-        parent.requestFocus();
-
-        log.info("selectView(" + parent.getId() + ")");
-
-        if (parent.getId().equals("playlists")) {
-            //loadView(node.getId());
-
-            // TODO: handle in a less dangerous way
-            var label = (Label) parent.getChildrenUnmodifiable().get(0);
-            var title = label.getText().substring(0, label.getText().lastIndexOf(" ("));
-
-            var playlist = getPlaylist(title);
-
-            songTableViewController.setSongs(playlist.getSongs());
-        }
-
-        if (parent.getId().equals("songs")) {
-            songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
-        }
-    }
-
-    private static Playlist getPlaylist(String title) {
-        return MusifyApp.getLibrary().findPlaylistByTitle(title).get();
+    private void onClickYourLibrary(Event e) {
+        songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
     }
     
     @FXML
-    private void newPlaylist() {
+    private void onClickAddNewPlaylist() {
         if (!newPlaylistAnimation.getStatus().equals(Status.RUNNING)) {
 
             try {
-                FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "PlaylistCell.fxml"));
+                FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "controls/PlaylistBox.fxml"));
                 HBox cell = loader.load();
+                PlaylistBoxController controller = loader.getController();
 
                 Label label = (Label) cell.getChildren().get(0);
                 label.setVisible(false);
@@ -406,14 +300,18 @@ public class MainController implements Initializable {
 
                 textBox.focusedProperty().addListener((obs, oldValue, newValue) -> {
                     if (oldValue && !newValue) {
-                        String text = textBox.getText().equals("") ? "New Playlist" : textBox.getText();
+                        String text = textBox.getText().isEmpty() ? "New Playlist" : textBox.getText();
                         text = checkDuplicatePlaylist(text, 0);
                         label.setText(text);
                         cell.getChildren().remove(textBox);
                         HBox.setMargin(label, new Insets(10, 10, 10, 10));
                         label.setVisible(true);
 
-                        MusifyApp.getLibrary().addPlaylist(text);
+                        var playlist = MusifyApp.getLibrary().addPlaylist(text);
+
+                        addNewPlaylistToUI(playlist);
+
+                        controller.setPlaylist(playlist);
                     }
                 });
 
@@ -421,97 +319,6 @@ public class MainController implements Initializable {
                     if (x.getCode() == KeyCode.ENTER)  {
                         sideBar.requestFocus();
                     }
-                });
-
-                cell.setOnMouseClicked(x -> {
-                    selectView(x);
-                    Playlist playlist = getPlaylist(label.getText());
-
-                    // TODO: select playlist
-                });
-
-                cell.setOnDragDetected(event -> {
-                    PseudoClass pressed = PseudoClass.getPseudoClass("pressed");
-                    cell.pseudoClassStateChanged(pressed, false);
-                    Playlist playlist = getPlaylist(label.getText());
-                    Dragboard db = cell.startDragAndDrop(TransferMode.ANY);
-                    ClipboardContent content = new ClipboardContent();
-                    content.putString("Playlist");
-                    db.setContent(content);
-                    MusifyApp.setDraggedItem(playlist);
-                    SnapshotParameters sp = new SnapshotParameters();
-                    sp.setTransform(Transform.scale(1.5, 1.5));
-                    db.setDragView(cell.snapshot(sp, null));
-                    event.consume();
-                });
-
-                PseudoClass hover = PseudoClass.getPseudoClass("hover");
-
-                cell.setOnDragEntered(event -> {
-                    Playlist playlist = getPlaylist(label.getText());
-                    if (!(playlist instanceof MostPlayedPlaylist)
-                            && !(playlist instanceof RecentlyPlayedPlaylist)
-                            && event.getGestureSource() != cell
-                            && event.getDragboard().hasString()) {
-
-                        cell.pseudoClassStateChanged(hover, true);
-                    }
-                });
-
-                cell.setOnDragExited(event -> {
-                    Playlist playlist = getPlaylist(label.getText());
-                    if (!(playlist instanceof MostPlayedPlaylist)
-                            && !(playlist instanceof RecentlyPlayedPlaylist)
-                            && event.getGestureSource() != cell
-                            && event.getDragboard().hasString()) {
-
-                        cell.pseudoClassStateChanged(hover, false);
-                    }
-                });
-
-                cell.setOnDragOver(event -> {
-                    Playlist playlist = getPlaylist(label.getText());
-                    if (!(playlist instanceof MostPlayedPlaylist)
-                            && !(playlist instanceof RecentlyPlayedPlaylist)
-                            && event.getGestureSource() != cell
-                            && event.getDragboard().hasString()) {
-
-                        event.acceptTransferModes(TransferMode.ANY);
-                    }
-                    event.consume();
-                });
-
-                cell.setOnDragDropped(event -> {
-                    Playlist playlist = getPlaylist(label.getText());
-                    String dragString = event.getDragboard().getString();
-                    new Thread(() -> {
-                        switch (dragString) {
-                            case "Playlist":
-                                Playlist list = (Playlist) MusifyApp.getDraggedItem();
-                                for (Song song : list.getSongs()) {
-                                    if (!playlist.getSongs().contains(song)) {
-                                        playlist.addSong(song);
-                                    }
-                                }
-                                break;
-                            case "Song":
-                                Song song = (Song) MusifyApp.getDraggedItem();
-                                if (!playlist.getSongs().contains(song)) {
-                                    playlist.addSong(song);
-                                }
-                                break;
-                            case "List":
-                                ObservableList<Song> songs = (ObservableList<Song>) MusifyApp.getDraggedItem();
-                                for (Song s : songs) {
-                                    if (!playlist.getSongs().contains(s)) {
-                                        playlist.addSong(s);
-                                    }
-                                }
-                                break;
-                        }
-                    }).start();
-
-                    event.consume();
                 });
 
                 cell.setPrefHeight(0);
@@ -555,26 +362,6 @@ public class MainController implements Initializable {
 
         return text;
     }
-
-//    public SubView loadView(String viewName) {
-//        try {
-//            String fileName = viewName.substring(0, 1).toUpperCase() + viewName.substring(1) + ".fxml";
-//            fileName = "/assets/ui/" + fileName;
-//
-//            log.info("loadView(): " + fileName);
-//
-//            FXMLLoader loader = new FXMLLoader(this.getClass().getResource(fileName));
-//            Parent view = loader.load();
-//
-//            subViewRoot.setContent(view);
-//            subViewController = loader.getController();
-//            return subViewController;
-//
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//            return null;
-//        }
-//    }
 
     @FXML
     private void navigateToCurrentSong() {
@@ -669,10 +456,6 @@ public class MainController implements Initializable {
 
     public DoubleProperty volumeProperty() {
         return volumePaneController.volumeProperty();
-    }
-
-    VBox getPlaylistBox() {
-        return playlistBox;
     }
 
     public void updatePlayPauseIcon(boolean isPlaying) {

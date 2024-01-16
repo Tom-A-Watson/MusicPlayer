@@ -15,8 +15,8 @@
     </placeholder>
 
     <columns>
-        <TableColumn fx:id="controlColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="70.0" resizable="false" styleClass="textColumn" />
-        <TableColumn fx:id="titleColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="200.0" resizable="false" styleClass="firstColumn" text="Title" />
-        <TableColumn fx:id="lengthColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="10.0" resizable="false" styleClass="numberColumn" text="Length" />
+        <TableColumn fx:id="controlColumn" editable="false" sortable="false" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="70.0" resizable="false" styleClass="textColumn" />
+        <TableColumn fx:id="titleColumn" editable="false" sortable="false" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="200.0" resizable="false" styleClass="firstColumn" text="Title" />
+        <TableColumn fx:id="lengthColumn" editable="false" sortable="false" maxWidth="1.7976931348623157E308" minWidth="-1.0" prefWidth="10.0" resizable="false" styleClass="numberColumn" text="Length" />
     </columns>
 </TableView>

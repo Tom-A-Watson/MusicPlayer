@@ -45,7 +45,7 @@
 <!--               </children>-->
 <!--            </HBox>-->
 
-            <HBox id="songs" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="50.0" onMouseClicked="#selectView" prefHeight="50.0" prefWidth="250.0" styleClass="sideBarItem">
+            <HBox id="songs" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="50.0" onMouseClicked="#onClickYourLibrary" prefHeight="50.0" prefWidth="250.0" styleClass="sideBarItem">
                <children>
                   <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="30.0" styleClass="iconContainer">
                      <children>
@@ -93,7 +93,7 @@
                                  </HBox.margin>
                               </Label>
 
-                              <Pane onMouseClicked="#newPlaylist" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="30.0" styleClass="sideBarItem">
+                              <Pane onMouseClicked="#onClickAddNewPlaylist" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="30.0" styleClass="sideBarItem">
                                  <children>
                                     <SVGPath content="M 277.00,92.00           C 277.00,92.00 277.00,235.00 277.00,235.00             277.00,235.00 420.00,235.00 420.00,235.00             420.00,235.00 420.00,277.00 420.00,277.00             420.00,277.00 277.00,277.00 277.00,277.00             277.00,277.00 277.00,420.00 277.00,420.00             277.00,420.00 235.00,420.00 235.00,420.00             235.00,420.00 235.00,277.00 235.00,277.00             235.00,277.00 92.00,277.00 92.00,277.00             92.00,277.00 92.00,235.00 92.00,235.00             92.00,235.00 235.00,235.00 235.00,235.00             235.00,235.00 235.00,92.00 235.00,92.00             235.00,92.00 277.00,92.00 277.00,92.00 Z" scaleX="0.05" scaleY="0.05" styleClass="icon" translateX="-241.0" translateY="-241.0" />
                                  </children>
