@@ -20,6 +20,7 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.event.Event;
@@ -27,6 +28,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -75,7 +77,8 @@ public class MainController implements Initializable {
     @FXML private Pane shuffleButton;
     @FXML private HBox controlBox;
 
-    @FXML private TextField searchBox;
+    @FXML
+    private TextField searchField;
 
     @FXML
     private TableView<Song> songTableView;
@@ -123,23 +126,28 @@ public class MainController implements Initializable {
             }
         });
 
-//        searchBox.textProperty().addListener((observable, oldText, newText) -> {
-//            String text = newText.trim();
-//            if (text.isEmpty()) {
+        searchField.textProperty().addListener((observable, oldText, newText) -> {
+            String text = newText.trim();
+            if (text.isEmpty()) {
+                // TODO: what if playlist is selected
+                songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
+
+
+                // TODO:
 //                if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
 //                    searchHideAnimation.play();
 //                }
-//            } else {
-//                Search.search(text);
-//            }
-//        });
+            } else {
+                Search.search(text);
+            }
+        });
 
         Search.hasResultsProperty().addListener((observable, hadResults, hasResults) -> {
             if (hasResults) {
                 Search.SearchResult result = Search.getResult();
                 Platform.runLater(() -> {
-                    showSearchResults(result);
-                    MusifyApp.getStage().toFront();
+
+                    songTableViewController.setSongs(FXCollections.observableArrayList(result.songResults()));
                 });
                 int height = 0;
                 int songs = result.songResults().size();
@@ -184,6 +192,7 @@ public class MainController implements Initializable {
             popup.setScene(new Scene(view));
             popup.initStyle(StageStyle.UNDECORATED);
             popup.initOwner(stage);
+
             searchHideAnimation.setOnFinished(x -> popup.hide());
 
             popup.show();
@@ -268,7 +277,7 @@ public class MainController implements Initializable {
                 songTableViewController.setSongs(playlist.getSongs());
             });
 
-            playlistBox.getChildren().add(playlistView);
+            playlistBox.getChildren().add(1, playlistView);
 
         } catch (Exception e) {
             log.warning("Cannot load playlist view for: " + playlist, e);
@@ -284,53 +293,41 @@ public class MainController implements Initializable {
     private void onClickAddNewPlaylist() {
         if (!newPlaylistAnimation.getStatus().equals(Status.RUNNING)) {
 
-            try {
-                FXMLLoader loader = new FXMLLoader(this.getClass().getResource(Config.FXML + "controls/PlaylistBox.fxml"));
-                HBox cell = loader.load();
-                PlaylistBoxController controller = loader.getController();
+            HBox cell = new HBox();
 
-                Label label = (Label) cell.getChildren().get(0);
-                label.setVisible(false);
-                HBox.setMargin(label, new Insets(0, 0, 0, 0));
+            TextField textBox = new TextField();
+            textBox.setPrefHeight(30);
+            cell.getChildren().add(textBox);
+            HBox.setMargin(textBox, new Insets(10, 10, 10, 9));
 
-                TextField textBox = new TextField();
-                textBox.setPrefHeight(30);
-                cell.getChildren().add(textBox);
-                HBox.setMargin(textBox, new Insets(10, 10, 10, 9));
+            textBox.focusedProperty().addListener((obs, oldValue, newValue) -> {
+                if (oldValue && !newValue) {
+                    playlistBox.getChildren().remove(cell);
 
-                textBox.focusedProperty().addListener((obs, oldValue, newValue) -> {
-                    if (oldValue && !newValue) {
-                        String text = textBox.getText().isEmpty() ? "New Playlist" : textBox.getText();
+                    String text = textBox.getText();
+
+                    if (!text.isEmpty()) {
                         text = checkDuplicatePlaylist(text, 0);
-                        label.setText(text);
-                        cell.getChildren().remove(textBox);
-                        HBox.setMargin(label, new Insets(10, 10, 10, 10));
-                        label.setVisible(true);
 
                         var playlist = MusifyApp.getLibrary().addPlaylist(text);
 
                         addNewPlaylistToUI(playlist);
-
-                        controller.setPlaylist(playlist);
                     }
-                });
+                }
+            });
 
-                textBox.setOnKeyPressed(x -> {
-                    if (x.getCode() == KeyCode.ENTER)  {
-                        sideBar.requestFocus();
-                    }
-                });
+            textBox.setOnKeyPressed(x -> {
+                if (x.getCode() == KeyCode.ENTER)  {
+                    sideBar.requestFocus();
+                }
+            });
 
-                cell.setPrefHeight(0);
-                cell.setOpacity(0);
+            cell.setPrefHeight(0);
+            cell.setOpacity(0);
 
-                playlistBox.getChildren().add(1, cell);
+            playlistBox.getChildren().add(1, cell);
 
-                textBox.requestFocus();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            textBox.requestFocus();
 
             newPlaylistAnimation.play();
         }
@@ -375,7 +372,7 @@ public class MainController implements Initializable {
     @FXML
     private void onClickSettings(Event e) {
         sideBar.requestFocus();
-        searchBox.setText("");
+        searchField.setText("");
 
         // TODO:
 
@@ -403,55 +400,6 @@ public class MainController implements Initializable {
     private void skip() {
         sideBar.requestFocus();
         MusifyApp.skip();
-    }
-
-    public void showSearchResults(Search.SearchResult result) {
-        VBox root = (VBox) searchPopup.getScene().getRoot();
-        ObservableList<Node> list = root.getChildren();
-        list.clear();
-
-        if (!result.songResults().isEmpty()) {
-            Label header = new Label("Songs");
-            header.setTextFill(Color.DARKGRAY);
-            list.add(header);
-            VBox.setMargin(header, new Insets(10, 10, 10, 10));
-
-            result.songResults().forEach(song -> {
-                HBox cell = new HBox();
-                cell.setAlignment(Pos.CENTER_LEFT);
-                cell.setPrefWidth(226);
-                cell.setPrefHeight(50);
-                Label label = new Label(song.getTitle());
-                label.setTextOverrun(OverrunStyle.CLIP);
-                label.getStyleClass().setAll("searchLabel");
-                cell.getChildren().add(label);
-                HBox.setMargin(label, new Insets(10, 10, 10, 10));
-                cell.getStyleClass().add("searchResult");
-                cell.setOnMouseClicked(event -> {
-
-                    // TODO: navigate to this song?
-                    songTableViewController.selectSong(song);
-
-                    searchBox.setText("");
-                    sideBar.requestFocus();
-                });
-                list.add(cell);
-            });
-        }
-
-        if (list.isEmpty()) {
-            Label label = new Label("No Results");
-            list.add(label);
-            VBox.setMargin(label, new Insets(10, 10, 10, 10));
-        }
-
-        if (!searchPopup.isShowing()) {
-            Stage stage = MusifyApp.getStage();
-            searchPopup.setX(stage.getX() + 18);
-            searchPopup.setY(stage.getY() + 80);
-            searchPopup.show();
-            searchShowAnimation.play();
-        }
     }
 
     public DoubleProperty volumeProperty() {

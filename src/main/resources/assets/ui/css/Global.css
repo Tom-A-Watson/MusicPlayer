@@ -51,11 +51,11 @@
 }
 
 .scroll-bar:vertical .thumb {
-    -fx-background-color: rgb(52, 109, 207);
+    -fx-background-color: -fx-main-color;
     -fx-background-radius: 20;
     -fx-background-insets: 0;
 }
 
 .scroll-bar:vertical .thumb:hover {
-    -fx-background-color: rgb(52, 109, 237);
+    -fx-background-color: -fx-main-color;
 }

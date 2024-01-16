@@ -14,100 +14,89 @@
 
 <BorderPane fx:id="mainWindow" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="450.0" minWidth="600.0" prefHeight="600.0" prefWidth="900.0" styleClass="mainWindow" stylesheets="@/assets/ui/css/MainScene.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.musicplayer.controllers.MainController">
    <left>
-      <VBox fx:id="sideBar" maxWidth="-Infinity" minWidth="50.0" prefWidth="250.0" styleClass="sideBar" BorderPane.alignment="CENTER">
-         <children>
-<!--            TODO: -->
-<!--            <HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="50.0" prefHeight="50.0" prefWidth="50.0" styleClass="hbox">-->
-<!--               <children>-->
+      <VBox fx:id="sideBar" maxWidth="-Infinity" minWidth="50.0" prefWidth="250.0" styleClass="sideBar"
+            BorderPane.alignment="CENTER">
 
-<!--                  <TextField fx:id="searchBox" focusTraversable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="180.0" promptText="Search" styleClass="searchBox">-->
-<!--                     <HBox.margin>-->
-<!--                        <Insets bottom="10.0" left="10.0" right="5.0" top="10.0" />-->
-<!--                     </HBox.margin>-->
-<!--                  </TextField>-->
 
-<!--                  <HBox onMouseClicked="#onClickSettings" styleClass="sideBarItem">-->
-<!--                     <children>-->
-<!--                        <ImageView fx:id="settingsButton" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">-->
-<!--                           <VBox.margin>-->
-<!--                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />-->
-<!--                           </VBox.margin>-->
-<!--                           <image>-->
-<!--                              <Image url="@/assets/textures/SettingsIcon.png" />-->
-<!--                           </image>-->
-<!--                           <HBox.margin>-->
-<!--                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />-->
-<!--                           </HBox.margin>-->
-<!--                        </ImageView>-->
-<!--                     </children>-->
-<!--                  </HBox>-->
+         <HBox id="songs" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="50.0"
+               onMouseClicked="#onClickYourLibrary" prefHeight="50.0" prefWidth="250.0" styleClass="sideBarItem">
 
-<!--               </children>-->
-<!--            </HBox>-->
+            <VBox.margin>
+               <Insets top="10.0"/>
+            </VBox.margin>
 
-            <HBox id="songs" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="50.0" onMouseClicked="#onClickYourLibrary" prefHeight="50.0" prefWidth="250.0" styleClass="sideBarItem">
-               <children>
-                  <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="30.0" styleClass="iconContainer">
-                     <children>
-                        <SVGPath content="M 100.00,13.53           C 103.23,11.06 108.95,8.69 113.00,8.22             116.72,7.79 123.12,9.45 127.00,10.20             127.00,10.20 147.00,13.80 147.00,13.80             147.00,13.80 155.00,15.91 155.00,15.91             155.00,15.91 204.00,25.28 204.00,25.28             204.00,25.28 218.00,28.71 218.00,28.71             218.00,28.71 260.00,36.44 260.00,36.44             269.21,39.27 271.58,45.64 276.00,47.00             276.22,53.44 278.98,52.62 279.00,65.00             279.00,65.00 279.00,188.00 279.00,188.00             279.00,188.00 279.00,228.00 279.00,228.00             279.00,244.90 280.35,254.14 271.98,269.91             266.46,280.30 261.51,280.51 256.00,287.00             248.77,287.28 248.02,291.94 235.00,292.00             231.06,292.02 223.63,292.13 220.00,291.31             215.88,290.39 212.27,288.31 208.00,288.00             205.41,285.18 203.87,283.59 200.00,283.00             199.18,280.20 196.82,277.75 194.00,277.00             193.10,272.94 189.94,269.76 188.13,266.00             185.12,259.71 184.01,254.90 184.00,248.00             183.99,241.54 183.54,235.20 185.71,229.00             193.02,208.18 211.41,196.76 233.00,197.00             240.89,197.09 243.80,198.51 251.00,201.00             251.00,201.00 251.00,90.00 251.00,90.00             251.00,90.00 217.00,83.29 217.00,83.29             217.00,83.29 174.00,75.21 174.00,75.21             174.00,75.21 141.00,68.58 141.00,68.58             141.00,68.58 117.00,64.00 117.00,64.00             117.00,64.00 117.00,216.00 117.00,216.00             117.00,216.00 114.70,234.00 114.70,234.00             114.70,234.00 109.00,247.00 109.00,247.00             105.11,248.24 101.45,253.75 99.00,257.00             99.00,257.00 82.00,264.15 82.00,264.15             77.02,265.39 63.10,265.55 57.96,264.15             54.26,263.47 47.37,260.56 44.05,258.62             40.63,256.63 38.81,254.60 36.04,251.85             36.04,251.85 30.14,245.55 30.14,245.55             15.64,225.47 20.70,195.00 39.72,179.80             53.96,168.41 72.56,167.64 89.00,174.00             89.00,174.00 89.00,38.00 89.00,38.00             89.00,38.00 92.00,20.00 92.00,20.00             95.22,18.91 97.28,15.62 100.00,13.53 Z           M 114.00,232.00           C 114.00,232.00 115.00,233.00 115.00,233.00             115.00,233.00 115.00,232.00 115.00,232.00             115.00,232.00 114.00,232.00 114.00,232.00 Z" scaleX="0.1" scaleY="0.1" styleClass="icon" translateX="-136.0" translateY="-135.0" />
-                     </children>
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Pane>
-                  <Label ellipsisString="" maxHeight="-Infinity" minHeight="-Infinity" minWidth="0.0" prefHeight="30.0" text="Your Library" textOverrun="CLIP">
-                     <HBox.margin>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Label>
-               </children>
-               <VBox.margin>
-                  <Insets top="10.0" />
-               </VBox.margin>
-            </HBox>
+            <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                  prefHeight="30.0" prefWidth="30.0" styleClass="iconContainer">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+               </HBox.margin>
+               <SVGPath
+                       content="M 100.00,13.53           C 103.23,11.06 108.95,8.69 113.00,8.22             116.72,7.79 123.12,9.45 127.00,10.20             127.00,10.20 147.00,13.80 147.00,13.80             147.00,13.80 155.00,15.91 155.00,15.91             155.00,15.91 204.00,25.28 204.00,25.28             204.00,25.28 218.00,28.71 218.00,28.71             218.00,28.71 260.00,36.44 260.00,36.44             269.21,39.27 271.58,45.64 276.00,47.00             276.22,53.44 278.98,52.62 279.00,65.00             279.00,65.00 279.00,188.00 279.00,188.00             279.00,188.00 279.00,228.00 279.00,228.00             279.00,244.90 280.35,254.14 271.98,269.91             266.46,280.30 261.51,280.51 256.00,287.00             248.77,287.28 248.02,291.94 235.00,292.00             231.06,292.02 223.63,292.13 220.00,291.31             215.88,290.39 212.27,288.31 208.00,288.00             205.41,285.18 203.87,283.59 200.00,283.00             199.18,280.20 196.82,277.75 194.00,277.00             193.10,272.94 189.94,269.76 188.13,266.00             185.12,259.71 184.01,254.90 184.00,248.00             183.99,241.54 183.54,235.20 185.71,229.00             193.02,208.18 211.41,196.76 233.00,197.00             240.89,197.09 243.80,198.51 251.00,201.00             251.00,201.00 251.00,90.00 251.00,90.00             251.00,90.00 217.00,83.29 217.00,83.29             217.00,83.29 174.00,75.21 174.00,75.21             174.00,75.21 141.00,68.58 141.00,68.58             141.00,68.58 117.00,64.00 117.00,64.00             117.00,64.00 117.00,216.00 117.00,216.00             117.00,216.00 114.70,234.00 114.70,234.00             114.70,234.00 109.00,247.00 109.00,247.00             105.11,248.24 101.45,253.75 99.00,257.00             99.00,257.00 82.00,264.15 82.00,264.15             77.02,265.39 63.10,265.55 57.96,264.15             54.26,263.47 47.37,260.56 44.05,258.62             40.63,256.63 38.81,254.60 36.04,251.85             36.04,251.85 30.14,245.55 30.14,245.55             15.64,225.47 20.70,195.00 39.72,179.80             53.96,168.41 72.56,167.64 89.00,174.00             89.00,174.00 89.00,38.00 89.00,38.00             89.00,38.00 92.00,20.00 92.00,20.00             95.22,18.91 97.28,15.62 100.00,13.53 Z           M 114.00,232.00           C 114.00,232.00 115.00,233.00 115.00,233.00             115.00,233.00 115.00,232.00 115.00,232.00             115.00,232.00 114.00,232.00 114.00,232.00 Z"
+                       scaleX="0.1" scaleY="0.1" styleClass="icon" translateX="-136.0" translateY="-135.0"/>
+            </Pane>
 
-            <Separator maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="30.0" prefHeight="25.0" prefWidth="230.0">
-               <VBox.margin>
-                  <Insets left="10.0" right="10.0" />
-               </VBox.margin>
-            </Separator>
+            <Label ellipsisString="" maxHeight="-Infinity" minHeight="-Infinity" minWidth="0.0" prefHeight="30.0"
+                   text="Your Library" textOverrun="CLIP">
+               <HBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+               </HBox.margin>
+            </Label>
+         </HBox>
 
-            <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefViewportHeight="50.0" prefViewportWidth="250.0" styleClass="playlistBox" VBox.vgrow="ALWAYS">
-               <content>
-                  <VBox fx:id="playlistBox">
-                     <children>
-                        <HBox id="playlists" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="50.0" prefHeight="50.0" prefWidth="250.0">
-                           <children>
-                              <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="30.0" styleClass="iconContainer">
-                                 <children>
-                                    <SVGPath content="M 167.00,47.00           C 167.00,47.00 8.00,47.00 8.00,47.00             8.00,47.00 8.00,19.00 8.00,19.00             8.00,19.00 116.00,19.00 116.00,19.00             116.00,19.00 148.00,19.00 148.00,19.00             148.00,19.00 167.00,18.00 167.00,18.00             167.00,18.00 167.00,47.00 167.00,47.00 Z           M 198.09,32.00           C 203.67,38.89 206.16,41.44 213.00,47.08             234.16,64.53 252.69,70.32 272.00,93.00             276.83,98.68 285.38,109.54 286.00,117.00             289.67,119.84 290.35,126.57 291.20,131.00             292.03,135.38 291.99,136.62 292.00,141.00             292.02,155.85 292.68,163.83 284.21,177.00             280.88,182.18 272.22,190.85 271.00,196.00             271.00,196.00 265.00,197.00 265.00,197.00             267.73,188.49 270.66,179.05 270.66,170.00             270.66,161.58 268.54,154.97 264.29,147.83             253.03,128.89 239.70,123.93 221.00,115.00             221.00,115.00 221.00,229.00 221.00,229.00             220.94,266.42 174.17,287.83 142.04,275.29             129.37,270.35 127.78,262.77 122.00,257.00             122.00,257.00 120.04,245.00 120.04,245.00             119.70,236.32 122.37,229.50 126.63,222.09             129.43,217.22 138.02,209.51 139.00,206.00             143.11,205.63 153.77,199.13 159.00,197.18             167.47,194.02 180.13,193.41 189.00,195.00             189.00,195.00 189.00,23.00 189.00,23.00             194.10,24.94 194.73,27.84 198.09,32.00 Z           M 30.00,78.00           C 30.00,78.00 70.00,78.00 70.00,78.00             70.00,78.00 134.00,78.00 134.00,78.00             134.00,78.00 168.00,77.00 168.00,77.00             166.31,83.94 166.31,100.06 168.00,107.00             168.00,107.00 148.00,106.00 148.00,106.00             148.00,106.00 115.00,106.00 115.00,106.00             115.00,106.00 8.00,106.00 8.00,106.00             8.00,106.00 7.00,77.00 7.00,77.00             7.00,77.00 30.00,78.00 30.00,78.00 Z           M 167.00,137.00           C 167.00,137.00 167.00,165.00 167.00,165.00             167.00,165.00 8.00,165.00 8.00,165.00             8.00,165.00 8.00,137.00 8.00,137.00             8.00,137.00 167.00,137.00 167.00,137.00 Z           M 38.00,195.00           C 38.00,195.00 97.00,195.00 97.00,195.00             97.00,195.00 97.00,223.00 97.00,223.00             97.00,223.00 8.00,223.00 8.00,223.00             8.00,223.00 7.00,194.00 7.00,194.00             7.00,194.00 38.00,195.00 38.00,195.00 Z           M 38.00,254.00           C 38.00,254.00 97.00,254.00 97.00,254.00             97.00,254.00 97.00,282.00 97.00,282.00             97.00,282.00 8.00,282.00 8.00,282.00             8.00,282.00 7.00,253.00 7.00,253.00             7.00,253.00 38.00,254.00 38.00,254.00 Z" scaleX="0.1" scaleY="0.1" styleClass="icon" translateX="-135.0" translateY="-135.0" />
-                                 </children>
-                                 <HBox.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </HBox.margin>
-                              </Pane>
+         <Separator maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="30.0" prefHeight="25.0"
+                    prefWidth="230.0">
+            <VBox.margin>
+               <Insets left="10.0" right="10.0"/>
+            </VBox.margin>
+         </Separator>
 
-                              <Label maxHeight="-Infinity" minHeight="-Infinity" minWidth="0.0" prefWidth="150.0" prefHeight="30.0" text="Playlists" textOverrun="CLIP">
-                                 <HBox.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </HBox.margin>
-                              </Label>
+         <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" prefViewportHeight="50.0"
+                     prefViewportWidth="250.0" styleClass="playlistBox" VBox.vgrow="ALWAYS">
+            <content>
+               <VBox fx:id="playlistBox">
+                  <children>
+                     <HBox id="playlists" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                           minWidth="50.0" prefHeight="50.0" prefWidth="250.0">
+                        <children>
+                           <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                 prefHeight="30.0" prefWidth="30.0" styleClass="iconContainer">
+                              <children>
+                                 <SVGPath
+                                         content="M 167.00,47.00           C 167.00,47.00 8.00,47.00 8.00,47.00             8.00,47.00 8.00,19.00 8.00,19.00             8.00,19.00 116.00,19.00 116.00,19.00             116.00,19.00 148.00,19.00 148.00,19.00             148.00,19.00 167.00,18.00 167.00,18.00             167.00,18.00 167.00,47.00 167.00,47.00 Z           M 198.09,32.00           C 203.67,38.89 206.16,41.44 213.00,47.08             234.16,64.53 252.69,70.32 272.00,93.00             276.83,98.68 285.38,109.54 286.00,117.00             289.67,119.84 290.35,126.57 291.20,131.00             292.03,135.38 291.99,136.62 292.00,141.00             292.02,155.85 292.68,163.83 284.21,177.00             280.88,182.18 272.22,190.85 271.00,196.00             271.00,196.00 265.00,197.00 265.00,197.00             267.73,188.49 270.66,179.05 270.66,170.00             270.66,161.58 268.54,154.97 264.29,147.83             253.03,128.89 239.70,123.93 221.00,115.00             221.00,115.00 221.00,229.00 221.00,229.00             220.94,266.42 174.17,287.83 142.04,275.29             129.37,270.35 127.78,262.77 122.00,257.00             122.00,257.00 120.04,245.00 120.04,245.00             119.70,236.32 122.37,229.50 126.63,222.09             129.43,217.22 138.02,209.51 139.00,206.00             143.11,205.63 153.77,199.13 159.00,197.18             167.47,194.02 180.13,193.41 189.00,195.00             189.00,195.00 189.00,23.00 189.00,23.00             194.10,24.94 194.73,27.84 198.09,32.00 Z           M 30.00,78.00           C 30.00,78.00 70.00,78.00 70.00,78.00             70.00,78.00 134.00,78.00 134.00,78.00             134.00,78.00 168.00,77.00 168.00,77.00             166.31,83.94 166.31,100.06 168.00,107.00             168.00,107.00 148.00,106.00 148.00,106.00             148.00,106.00 115.00,106.00 115.00,106.00             115.00,106.00 8.00,106.00 8.00,106.00             8.00,106.00 7.00,77.00 7.00,77.00             7.00,77.00 30.00,78.00 30.00,78.00 Z           M 167.00,137.00           C 167.00,137.00 167.00,165.00 167.00,165.00             167.00,165.00 8.00,165.00 8.00,165.00             8.00,165.00 8.00,137.00 8.00,137.00             8.00,137.00 167.00,137.00 167.00,137.00 Z           M 38.00,195.00           C 38.00,195.00 97.00,195.00 97.00,195.00             97.00,195.00 97.00,223.00 97.00,223.00             97.00,223.00 8.00,223.00 8.00,223.00             8.00,223.00 7.00,194.00 7.00,194.00             7.00,194.00 38.00,195.00 38.00,195.00 Z           M 38.00,254.00           C 38.00,254.00 97.00,254.00 97.00,254.00             97.00,254.00 97.00,282.00 97.00,282.00             97.00,282.00 8.00,282.00 8.00,282.00             8.00,282.00 7.00,253.00 7.00,253.00             7.00,253.00 38.00,254.00 38.00,254.00 Z"
+                                         scaleX="0.1" scaleY="0.1" styleClass="icon" translateX="-135.0"
+                                         translateY="-135.0"/>
+                              </children>
+                              <HBox.margin>
+                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                              </HBox.margin>
+                           </Pane>
 
-                              <Pane onMouseClicked="#onClickAddNewPlaylist" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="30.0" styleClass="sideBarItem">
-                                 <children>
-                                    <SVGPath content="M 277.00,92.00           C 277.00,92.00 277.00,235.00 277.00,235.00             277.00,235.00 420.00,235.00 420.00,235.00             420.00,235.00 420.00,277.00 420.00,277.00             420.00,277.00 277.00,277.00 277.00,277.00             277.00,277.00 277.00,420.00 277.00,420.00             277.00,420.00 235.00,420.00 235.00,420.00             235.00,420.00 235.00,277.00 235.00,277.00             235.00,277.00 92.00,277.00 92.00,277.00             92.00,277.00 92.00,235.00 92.00,235.00             92.00,235.00 235.00,235.00 235.00,235.00             235.00,235.00 235.00,92.00 235.00,92.00             235.00,92.00 277.00,92.00 277.00,92.00 Z" scaleX="0.05" scaleY="0.05" styleClass="icon" translateX="-241.0" translateY="-241.0" />
-                                 </children>
-                                 <HBox.margin>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </HBox.margin>
-                              </Pane>
-                           </children>
-                        </HBox>
-                     </children>
-                  </VBox>
-               </content>
-            </ScrollPane>
-         </children>
+                           <Label maxHeight="-Infinity" minHeight="-Infinity" minWidth="0.0" prefWidth="150.0"
+                                  prefHeight="30.0" text="Playlists" textOverrun="CLIP">
+                              <HBox.margin>
+                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                              </HBox.margin>
+                           </Label>
+
+                           <Pane onMouseClicked="#onClickAddNewPlaylist" maxHeight="-Infinity" maxWidth="-Infinity"
+                                 minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" prefWidth="30.0"
+                                 styleClass="sideBarItem">
+                              <children>
+                                 <SVGPath
+                                         content="M 277.00,92.00           C 277.00,92.00 277.00,235.00 277.00,235.00             277.00,235.00 420.00,235.00 420.00,235.00             420.00,235.00 420.00,277.00 420.00,277.00             420.00,277.00 277.00,277.00 277.00,277.00             277.00,277.00 277.00,420.00 277.00,420.00             277.00,420.00 235.00,420.00 235.00,420.00             235.00,420.00 235.00,277.00 235.00,277.00             235.00,277.00 92.00,277.00 92.00,277.00             92.00,277.00 92.00,235.00 92.00,235.00             92.00,235.00 235.00,235.00 235.00,235.00             235.00,235.00 235.00,92.00 235.00,92.00             235.00,92.00 277.00,92.00 277.00,92.00 Z"
+                                         scaleX="0.05" scaleY="0.05" styleClass="icon" translateX="-241.0"
+                                         translateY="-241.0"/>
+                              </children>
+                              <HBox.margin>
+                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                              </HBox.margin>
+                           </Pane>
+                        </children>
+                     </HBox>
+                  </children>
+               </VBox>
+            </content>
+         </ScrollPane>
       </VBox>
    </left>
 
@@ -244,25 +233,50 @@
       <BorderPane>
          <top>
             <VBox>
-               <children>
-                  <Separator visible="false" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="25.0">
-                     <VBox.margin>
-                        <Insets left="25.0" right="25.0" />
-                     </VBox.margin>
-                  </Separator>
-               </children>
+               <BorderPane>
+
+                  <VBox.margin>
+                     <Insets top="15.0" left="25.0" right="25.0"/>
+                  </VBox.margin>
+
+                  <left>
+                     <TextField fx:id="searchField" styleClass="searchField" focusTraversable="false" prefHeight="30.0" prefWidth="210.0" promptText="  Search">
+                        <HBox.margin>
+                           <Insets bottom="10.0" left="10.0" right="5.0" top="10.0" />
+                        </HBox.margin>
+                     </TextField>
+                  </left>
+
+                  <right>
+                     <Label styleClass="deleteButton" text="Delete" onMouseClicked="#onClickSettings">
+                        <padding>
+                           <Insets topRightBottomLeft="10" />
+                        </padding>
+                     </Label>
+
+<!--                     <HBox onMouseClicked="#onClickSettings" styleClass="sideBarItem">-->
+<!--                        <ImageView fx:id="settingsButton" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">-->
+<!--                           <Image url="@/assets/textures/SettingsIcon.png"/>-->
+<!--                        </ImageView>-->
+<!--                     </HBox>-->
+                  </right>
+               </BorderPane>
+
+               <Separator prefHeight="15.0">
+                  <VBox.margin>
+                     <Insets left="25.0" right="25.0"/>
+                  </VBox.margin>
+               </Separator>
             </VBox>
          </top>
 
          <center>
-            <ScrollPane fx:id="subViewRoot" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="subViewRoot" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" BorderPane.alignment="CENTER">
                <padding>
-                  <Insets left="25.0" right="25.0" />
+                  <Insets left="25.0" right="25.0"/>
                </padding>
 
-               <content>
-                  <fx:include fx:id="songTableView" source="../controls/SongTableView.fxml" />
-               </content>
+               <fx:include fx:id="songTableView" source="../controls/SongTableView.fxml"/>
             </ScrollPane>
          </center>
 

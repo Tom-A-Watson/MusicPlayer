@@ -14,8 +14,6 @@
     -fx-font-size: 18px;
 }
 
-
-
 .text-field, .text-field:focused {
     -fx-border-width: 0 0 0 0;
     -fx-border-color: transparent;
@@ -196,12 +194,6 @@
     -fx-border-color: #dadada;
 }
 
-.searchPopup {
-    -fx-background-color: #ffffff;
-    -fx-border-width: 2;
-    -fx-border-color: #dadada;
-}
-
 .volumeIcon {
     -fx-fill: rgb(255, 255, 255);
 }
@@ -250,25 +242,22 @@
     -fx-background-color: #c2c2c2;
 }
 
-.searchBox, .searchBox:focused {
+.searchField, .searchField:focused {
     -fx-background-color: #ffffff;
     -fx-border-width: 2;
-    -fx-border-color: #dadada;
-    -fx-accent: rgb(52, 109, 207);
+    -fx-border-radius: 15 15 15 15;
+    -fx-background-radius: 15 15 15 15;
+    -fx-border-color: rgba(240, 240, 240, 0.5);
     -fx-padding: 0 5 0 5;
-}
 
-.searchResult:hover {
-    -fx-background-color: #dadada;
-}
-
-.searchResult:pressed {
-    -fx-background-color: #c2c2c2;
-}
-
-.searchLabel {
-    -fx-font-family: verdana;
     -fx-font-size: 12px;
-    -fx-font-weight: normal;
-    -fx-text-fill: black;
+}
+
+.deleteButton {
+    -fx-text-fill: red;
+    -fx-font-size: 14px;
+}
+
+.deleteButton: hover {
+    -fx-background-color: #dadada;
 }
