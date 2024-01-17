@@ -12,6 +12,9 @@ import app.musicplayer.controllers.SplashScreenController;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Song;
 import app.musicplayer.model.serializable.Serializer;
+import com.almasb.fxgl.app.GameApplication;
+import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.logging.ConsoleOutput;
 import com.almasb.fxgl.logging.Logger;
 import com.almasb.fxgl.logging.LoggerLevel;
@@ -90,14 +93,25 @@ public class MusifyApp extends Application {
         }
     }
 
+    private static class GameApp extends GameApplication {
+
+        @Override
+        protected void initSettings(GameSettings settings) {
+
+        }
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
         try {
             // disable java.util.logging.Logger from jaudiotagger lib
             LogManager.getLogManager().reset();
 
-            Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
+            //Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
             log.info("start(Stage)");
+
+            // TODO: fully headless start if no game app needed?
+            GameApplication.embeddedLaunch(new GameApp());
 
             executorService = Executors.newScheduledThreadPool(4);
             executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
@@ -114,6 +128,8 @@ public class MusifyApp extends Application {
                         Serializer.writeToFile(library, LIBRARY_FILE);
 
                     executorService.shutdownNow();
+
+                    FXGL.getGameController().exit();
                 } catch (Exception e) {
                     log.warning("Error during exit", e);
                 }

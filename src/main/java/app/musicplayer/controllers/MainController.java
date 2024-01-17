@@ -11,6 +11,7 @@ import app.musicplayer.Config;
 import app.musicplayer.MusifyApp;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -40,6 +41,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -52,8 +54,6 @@ import java.util.stream.Collectors;
 public class MainController implements Initializable {
 
     private static final Logger log = Logger.get(MainController.class);
-
-    private Stage searchPopup;
 
     @FXML private ScrollPane subViewRoot;
     @FXML private VBox sideBar;
@@ -94,8 +94,6 @@ public class MainController implements Initializable {
 
         frontSliderTrack.prefWidthProperty().bind(timeSlider.widthProperty().multiply(timeSlider.valueProperty().divide(timeSlider.maxProperty())));
 
-        createSearchPopup();
-
         PseudoClass active = PseudoClass.getPseudoClass("active");
         loopButton.setOnMouseClicked(x -> {
             sideBar.requestFocus();
@@ -132,11 +130,6 @@ public class MainController implements Initializable {
                 // TODO: what if playlist is selected
                 songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
 
-
-                // TODO:
-//                if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
-//                    searchHideAnimation.play();
-//                }
             } else {
                 Search.search(text);
             }
@@ -149,23 +142,6 @@ public class MainController implements Initializable {
 
                     songTableViewController.setSongs(FXCollections.observableArrayList(result.songResults()));
                 });
-                int height = 0;
-                int songs = result.songResults().size();
-                if (songs > 0) height += (songs * 50) + 50;
-                if (height == 0) height = 50;
-                searchPopup.setHeight(height);
-            }
-        });
-
-        MusifyApp.getStage().xProperty().addListener((observable, oldValue, newValue) -> {
-            if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
-                searchHideAnimation.play();
-            }
-        });
-
-        MusifyApp.getStage().yProperty().addListener((observable, oldValue, newValue) -> {
-            if (searchPopup.isShowing() && !searchHideAnimation.getStatus().equals(Status.RUNNING)) {
-                searchHideAnimation.play();
             }
         });
 
@@ -180,28 +156,6 @@ public class MainController implements Initializable {
 
         subViewRoot.setContent(songTableView);
         songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
-    }
-
-    private void createSearchPopup() {
-        try {
-            Stage stage = MusifyApp.getStage();
-            VBox view = new VBox();
-            view.getStylesheets().add(Config.CSS + "MainScene.css");
-            view.getStyleClass().add("searchPopup");
-            Stage popup = new Stage();
-            popup.setScene(new Scene(view));
-            popup.initStyle(StageStyle.UNDECORATED);
-            popup.initOwner(stage);
-
-            searchHideAnimation.setOnFinished(x -> popup.hide());
-
-            popup.show();
-            popup.hide();
-            searchPopup = popup;
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
     }
 
     public void updateNowPlayingButton() {
@@ -277,7 +231,7 @@ public class MainController implements Initializable {
                 songTableViewController.setSongs(playlist.getSongs());
             });
 
-            playlistBox.getChildren().add(1, playlistView);
+            playlistBox.getChildren().add(0, playlistView);
 
         } catch (Exception e) {
             log.warning("Cannot load playlist view for: " + playlist, e);
@@ -300,18 +254,23 @@ public class MainController implements Initializable {
             cell.getChildren().add(textBox);
             HBox.setMargin(textBox, new Insets(10, 10, 10, 9));
 
-            textBox.focusedProperty().addListener((obs, oldValue, newValue) -> {
-                if (oldValue && !newValue) {
+            textBox.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (wasFocused && !isFocused) {
                     playlistBox.getChildren().remove(cell);
 
                     String text = textBox.getText();
 
                     if (!text.isEmpty()) {
-                        text = checkDuplicatePlaylist(text, 0);
+                        if (MusifyApp.getLibrary().findPlaylistByTitle(text).isPresent()) {
+                            System.out.println("TODO: Playlist already exists");
+                        } else {
 
-                        var playlist = MusifyApp.getLibrary().addPlaylist(text);
+                            // TODO: if too long title
 
-                        addNewPlaylistToUI(playlist);
+                            var playlist = MusifyApp.getLibrary().addPlaylist(text);
+
+                            addNewPlaylistToUI(playlist);
+                        }
                     }
                 }
             });
@@ -325,39 +284,12 @@ public class MainController implements Initializable {
             cell.setPrefHeight(0);
             cell.setOpacity(0);
 
-            playlistBox.getChildren().add(1, cell);
+            playlistBox.getChildren().add(0, cell);
 
             textBox.requestFocus();
 
             newPlaylistAnimation.play();
         }
-    }
-
-    private String checkDuplicatePlaylist(String text, int i) {
-        for (Playlist playlist : MusifyApp.getLibrary().getPlaylists()) {
-            if (playlist.getTitle().equals(text)) {
-
-                int index = text.lastIndexOf(' ') + 1;
-                if (index != 0) {
-                    try {
-                        i = Integer.parseInt(text.substring(index));
-                    } catch (Exception ex) {
-                        // do nothing
-                    }
-                }
-
-                i++;
-
-                if (i == 1) {
-                    text = checkDuplicatePlaylist(text + " " + i, i);
-                } else {
-                    text = checkDuplicatePlaylist(text.substring(0, index) + i, i);
-                }
-                break;
-            }
-        }
-
-        return text;
     }
 
     @FXML
@@ -415,27 +347,6 @@ public class MainController implements Initializable {
         }
     }
 
-    private Animation searchShowAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-        }
-
-        protected void interpolate(double frac) {
-            searchPopup.setOpacity(frac);
-        }
-    };
-
-    private Animation searchHideAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-        }
-        protected void interpolate(double frac) {
-            searchPopup.setOpacity(1.0 - frac);
-        }
-    };
-
     private Animation loadViewAnimation = new Transition() {
         {
             setCycleDuration(Duration.millis(250));
@@ -463,7 +374,7 @@ public class MainController implements Initializable {
             setInterpolator(Interpolator.EASE_BOTH);
         }
         protected void interpolate(double frac) {
-            HBox cell = (HBox) playlistBox.getChildren().get(1);
+            HBox cell = (HBox) playlistBox.getChildren().get(0);
             if (frac < 0.5) {
                 cell.setPrefHeight(frac * 100);
             } else {
@@ -506,14 +417,13 @@ public class MainController implements Initializable {
                             .sorted((x, y) -> {
                                 return compareSearchString(x.getTitle().toUpperCase(), y.getTitle().toUpperCase(), text);
                             })
+                            // TODO: 10 search items
+                            .limit(10)
                             .collect(Collectors.toList());
 
                     if (searchThread.isInterrupted()) {
                         throw new InterruptedException();
                     }
-
-                    if (songResults.size() > 3)
-                        songResults = songResults.subList(0, 3);
 
                     result = new SearchResult(songResults);
 

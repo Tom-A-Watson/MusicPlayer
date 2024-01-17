@@ -84,6 +84,7 @@ public final class PlaylistBoxController {
 
         playlistBox.setOnDragDropped(event -> {
             if (event.getDragboard().hasContent(Config.DRAG_SONG_LIST)) {
+                // TODO: extra ref to App
                 List<Song> songs = MusifyApp.getDraggedItems();
 
                 songs.forEach(playlist::addSong);
@@ -98,5 +99,10 @@ public final class PlaylistBoxController {
                 && !(playlist instanceof RecentlyPlayedPlaylist)
                 && event.getGestureSource() != playlistBox
                 && event.getDragboard().hasContent(Config.DRAG_SONG_LIST);
+    }
+
+    @FXML
+    private void onClickMenu() {
+
     }
 }

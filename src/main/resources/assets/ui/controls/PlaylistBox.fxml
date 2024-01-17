@@ -3,15 +3,25 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 
 <HBox fx:id="playlistBox"
       fx:controller="app.musicplayer.controllers.PlaylistBoxController"
       stylesheets="@/assets/ui/css/PlaylistBox.css"
-      styleClass="sideBarItem"
-      minWidth="50.0"
       prefHeight="50.0"
       prefWidth="250.0"
       xmlns:fx="http://javafx.com/fxml/1">
+
+   <HBox onMouseClicked="#onClickMenu" styleClass="sideBarItem" prefWidth="40" prefHeight="40" alignment="CENTER">
+      <ImageView fitHeight="25.0" fitWidth="25.0" preserveRatio="true">
+         <Image url="@/assets/textures/MenuIcon.png"/>
+
+         <HBox.margin>
+            <Insets topRightBottomLeft="10"/>
+         </HBox.margin>
+      </ImageView>
+   </HBox>
 
    <Label fx:id="playlistTitleLabel"
           styleClass="playlist-title-label"

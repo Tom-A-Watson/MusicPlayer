@@ -31,7 +31,7 @@ import javafx.scene.layout.HBox;
 import java.net.URL;
 import java.util.*;
 
-public class SongTableViewController implements Initializable, ControlBoxController.ControlBoxHandler {
+public final class SongTableViewController implements Initializable, ControlBoxController.ControlBoxHandler {
 
 	@FXML
 	private TableView<Song> tableView;
