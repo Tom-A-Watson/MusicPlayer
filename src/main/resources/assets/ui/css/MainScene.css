@@ -261,3 +261,7 @@
 .deleteButton: hover {
     -fx-background-color: #dadada;
 }
+
+.transparent-pane {
+    -fx-background-color: rgba(52, 109, 207, 0.25);
+}

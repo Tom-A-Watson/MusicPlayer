@@ -11,7 +11,6 @@ import app.musicplayer.Config;
 import app.musicplayer.MusifyApp;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
-import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -22,17 +21,12 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -40,10 +34,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Popup;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.net.URL;
@@ -51,7 +41,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class MainController implements Initializable {
+public class MainController implements Initializable, PlaylistBoxController.PlaylistBoxHandler {
 
     private static final Logger log = Logger.get(MainController.class);
 
@@ -224,10 +214,17 @@ public class MainController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(Config.FXML + "controls/PlaylistBox.fxml"));
             HBox playlistView = loader.load();
 
+            // TODO: safety
+            playlistView.getProperties().put("PLAYLIST", playlist);
+
+            // TODO: maybe move to FXML + controller
+            var title = playlistView.getChildren().get(1);
+
             PlaylistBoxController controller = loader.getController();
             controller.setPlaylist(playlist);
+            controller.setHandler(this);
 
-            playlistView.setOnMouseClicked(e -> {
+            title.setOnMouseClicked(e -> {
                 songTableViewController.setSongs(playlist.getSongs());
             });
 
@@ -239,7 +236,7 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    private void onClickYourLibrary(Event e) {
+    private void onClickYourLibrary() {
         songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
     }
     
@@ -332,6 +329,20 @@ public class MainController implements Initializable {
     private void skip() {
         sideBar.requestFocus();
         MusifyApp.skip();
+    }
+
+    @Override
+    public void onClickRemovePlaylist(Playlist playlist) {
+        playlistBox.getChildren()
+                .stream()
+                .filter(view -> view.getProperties().get("PLAYLIST") == playlist)
+                .findAny()
+                .ifPresent(view -> {
+                    // TODO: only set songs from different playlist if we are removing the selected one
+                    onClickYourLibrary();
+                    MusifyApp.getLibrary().removePlaylist(playlist);
+                    playlistBox.getChildren().remove(view);
+                });
     }
 
     public DoubleProperty volumeProperty() {

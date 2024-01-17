@@ -28,6 +28,7 @@ public final class Library {
      */
     public Library(Path musicDirectory, List<Song> songs) {
         this(musicDirectory, songs, List.of(
+                new Playlist(-3, "All songs"),
                 new MostPlayedPlaylist(-2),
                 new RecentlyPlayedPlaylist(-1)
         ));
@@ -43,6 +44,9 @@ public final class Library {
 
         Collections.sort(this.songs);
         Collections.sort(this.playlists);
+
+        // TODO:
+        //this.playlists.get(0).getSongs().addAll(songs);
     }
 
     public Path getMusicDirectory() {

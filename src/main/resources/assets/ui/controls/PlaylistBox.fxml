@@ -23,13 +23,16 @@
       </ImageView>
    </HBox>
 
-   <Label fx:id="playlistTitleLabel"
-          styleClass="playlist-title-label"
-          prefHeight="30.0"
-          textOverrun="CLIP">
+   <HBox styleClass="sideBarItem" HBox.hgrow="ALWAYS">
+      <Label fx:id="playlistTitleLabel"
+             styleClass="playlist-title-label"
+             prefHeight="30.0"
+             textOverrun="CLIP">
 
-      <HBox.margin>
-         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-      </HBox.margin>
-   </Label>
+         <HBox.margin>
+            <Insets topRightBottomLeft="10"/>
+         </HBox.margin>
+      </Label>
+   </HBox>
+
 </HBox>

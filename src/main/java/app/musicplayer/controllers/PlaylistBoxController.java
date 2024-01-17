@@ -36,10 +36,21 @@ public final class PlaylistBoxController {
 
     private Playlist playlist;
 
+    // TODO: unnecessary code, here and in ControlBox
+    private PlaylistBoxHandler handler = new PlaylistBoxHandler() {
+        @Override
+        public void onClickRemovePlaylist(Playlist playlist) {
+        }
+    };
+
     public void setPlaylist(Playlist playlist) {
         this.playlist = playlist;
 
         initializePlaylist();
+    }
+
+    public void setHandler(PlaylistBoxHandler handler) {
+        this.handler = handler;
     }
 
     private void initializePlaylist() {
@@ -103,6 +114,10 @@ public final class PlaylistBoxController {
 
     @FXML
     private void onClickMenu() {
+        handler.onClickRemovePlaylist(playlist);
+    }
 
+    public interface PlaylistBoxHandler {
+        void onClickRemovePlaylist(Playlist playlist);
     }
 }
