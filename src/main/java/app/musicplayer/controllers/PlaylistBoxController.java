@@ -9,9 +9,7 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
 import app.musicplayer.MusifyApp;
-import app.musicplayer.model.MostPlayedPlaylist;
 import app.musicplayer.model.Playlist;
-import app.musicplayer.model.RecentlyPlayedPlaylist;
 import app.musicplayer.model.Song;
 import javafx.beans.binding.Bindings;
 import javafx.css.PseudoClass;
@@ -54,9 +52,19 @@ public final class PlaylistBoxController {
     }
 
     private void initializePlaylist() {
-        playlistTitleLabel.textProperty().bind(
-                Bindings.size(playlist.getSongs()).asString(playlist.getTitle() + " (%d songs)")
-        );
+        switch (playlist.getType()) {
+            case ALL_SONGS, USER_CREATED -> {
+                playlistTitleLabel.textProperty().bind(
+                        Bindings.size(playlist.getSongs()).asString(playlist.getTitle() + " (%d)")
+                );
+            }
+
+            default -> {
+                playlistTitleLabel.textProperty().bind(
+                        playlist.titleProperty()
+                );
+            }
+        }
 
         // TODO: drag playlist to other playlists
 //        playlistBox.setOnDragDetected(event -> {
@@ -106,8 +114,7 @@ public final class PlaylistBoxController {
     }
 
     private boolean canDragDrop(DragEvent event) {
-        return !(playlist instanceof MostPlayedPlaylist)
-                && !(playlist instanceof RecentlyPlayedPlaylist)
+        return playlist.isModifiable()
                 && event.getGestureSource() != playlistBox
                 && event.getDragboard().hasContent(Config.DRAG_SONG_LIST);
     }

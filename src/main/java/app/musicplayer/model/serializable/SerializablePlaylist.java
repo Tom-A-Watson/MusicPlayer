@@ -7,13 +7,15 @@
 
 package app.musicplayer.model.serializable;
 
+import app.musicplayer.model.Playlist;
+
 import java.util.List;
 
 /**
  * @author Almas Baim (https://github.com/AlmasB)
  */
 public record SerializablePlaylist(
-        int id,
+        Playlist.PlaylistType type,
         String title,
         List<Integer> songIDs
 ) { }

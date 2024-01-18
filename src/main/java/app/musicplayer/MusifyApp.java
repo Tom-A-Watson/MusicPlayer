@@ -138,7 +138,7 @@ public class MusifyApp extends Application {
             if (Files.exists(LIBRARY_FILE)) {
                 showSplashScreenView(stage);
             } else {
-                library = new Library(Paths.get("./"), Collections.emptyList());
+                library = new Library();
                 showMainView(stage);
             }
 
@@ -478,8 +478,6 @@ public class MusifyApp extends Application {
                     .toList();
 
             return new Library(
-                    Paths.get(library.musicDirectoryPath()),
-                    songs,
                     playlists
             );
         }

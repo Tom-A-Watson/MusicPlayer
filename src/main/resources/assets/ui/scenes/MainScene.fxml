@@ -71,10 +71,6 @@
    <bottom>
       <VBox>
 
-         <StackPane styleClass="transparent-pane" prefHeight="15">
-
-         </StackPane>
-
          <BorderPane prefHeight="70.0" styleClass="bottomBar" BorderPane.alignment="CENTER">
             <left>
                <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#navigateToCurrentSong" prefHeight="50.0" prefWidth="250.0" styleClass="bottomBarItem" BorderPane.alignment="CENTER">
@@ -253,11 +249,11 @@
                   </left>
 
                   <right>
-                     <Label styleClass="deleteButton" text="Delete" onMouseClicked="#onClickSettings">
-                        <padding>
-                           <Insets topRightBottomLeft="10" />
-                        </padding>
-                     </Label>
+<!--                     <Label styleClass="deleteButton" text="Delete" onMouseClicked="#onClickSettings">-->
+<!--                        <padding>-->
+<!--                           <Insets topRightBottomLeft="10" />-->
+<!--                        </padding>-->
+<!--                     </Label>-->
 
 <!--                     <HBox onMouseClicked="#onClickSettings" styleClass="sideBarItem">-->
 <!--                        <ImageView fx:id="settingsButton" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">-->

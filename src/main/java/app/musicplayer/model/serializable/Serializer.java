@@ -33,11 +33,7 @@ public final class Serializer {
         return new SerializableSong(
                 song.getId(),
                 song.getTitle(),
-                song.getArtistTitle(),
-                song.getAlbumTitle(),
                 song.getLengthInSeconds(),
-                song.getTrackNumber(),
-                song.getDiscNumber(),
                 song.getPlayCount(),
                 song.getPlayDate(),
                 song.getFile().toAbsolutePath().toString()
@@ -48,11 +44,7 @@ public final class Serializer {
         return new Song(
                 song.id(),
                 song.title(),
-                song.artistTitle(),
-                song.albumTitle(),
                 song.lengthInSeconds(),
-                song.trackNumber(),
-                song.discNumber(),
                 song.playCount(),
                 song.playDate(),
                 Paths.get(song.filePath())
@@ -61,7 +53,7 @@ public final class Serializer {
 
     public static SerializablePlaylist toSerializable(Playlist playlist) {
         return new SerializablePlaylist(
-                playlist.getId(),
+                playlist.getType(),
                 playlist.getTitle(),
                 playlist.getSongs().stream().map(Song::getId).toList()
         );
@@ -69,14 +61,12 @@ public final class Serializer {
 
     public static Playlist fromSerializable(SerializablePlaylist playlist) {
         return new Playlist(
-                playlist.id(),
-                playlist.title()
+                playlist.type(), playlist.title()
         );
     }
 
     public static SerializableLibrary toSerializable(Library library) {
         return new SerializableLibrary(
-                library.getMusicDirectory().toAbsolutePath().toString(),
                 library.getSongs().stream().map(Serializer::toSerializable).toList(),
                 library.getPlaylists().stream().map(Serializer::toSerializable).toList()
         );
@@ -107,7 +97,6 @@ public final class Serializer {
         }
         
         return new SerializableLibrary(
-                Paths.get("./").toString(),
                 Collections.emptyList(),
                 Collections.emptyList()
         );

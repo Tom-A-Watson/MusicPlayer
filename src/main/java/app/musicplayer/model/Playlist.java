@@ -7,33 +7,50 @@
 
 package app.musicplayer.model;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.List;
-
 // TODO: sort songs
-public class Playlist implements Comparable<Playlist> {
+public final class Playlist implements Comparable<Playlist> {
 
-    private int id;
-    private String title;
+    public enum PlaylistType {
+        ALL_SONGS, MOST_PLAYED, RECENTLY_PLAYED, USER_CREATED
+    }
+
     private ObservableList<Song> songs = FXCollections.observableArrayList();
+    private PlaylistType type;
+    private StringProperty title;
 
-    public Playlist(int id, String title) {
-        this.id = id;
-        this.title = title;
+
+    public Playlist(PlaylistType type, String title) {
+        this.type = type;
+        this.title = new SimpleStringProperty(title);
     }
 
-    public int getId() {
-        return id;
+    public PlaylistType getType() {
+        return type;
     }
 
-    public String getTitle() {
-        return title;
+    public boolean isModifiable() {
+        return type == PlaylistType.USER_CREATED;
     }
 
     public ObservableList<Song> getSongs() {
         return songs;
+    }
+
+    public String getTitle() {
+        return title.get();
+    }
+
+    public StringProperty titleProperty() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title.set(title);
     }
     
     public void addSong(Song song) {
@@ -48,11 +65,19 @@ public class Playlist implements Comparable<Playlist> {
 
     @Override
     public int compareTo(Playlist other) {
-        return Integer.compare(getId(), other.getId());
+        if (!isModifiable() && other.isModifiable()) {
+            return -1;
+        }
+
+        if (isModifiable() && !other.isModifiable()) {
+            return 1;
+        }
+
+        return getTitle().compareTo(other.getTitle());
     }
 
     @Override
     public String toString() {
-        return title;
+        return getTitle();
     }
 }

@@ -7,54 +7,59 @@
 
 package app.musicplayer.model;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.nio.file.Path;
 import java.util.*;
+
+import static app.musicplayer.model.Playlist.PlaylistType.*;
 
 /**
  * A library is a collection songs, artists, albums and playlists.
  */
 public final class Library {
 
-    private ObservableList<Song> songs = FXCollections.observableArrayList();
     private List<Playlist> playlists = new ArrayList<>();
-
-    private Path musicDirectory;
 
     /**
      * Ctor for importing library from music directory.
      */
-    public Library(Path musicDirectory, List<Song> songs) {
-        this(musicDirectory, songs, List.of(
-                new Playlist(-3, "All songs"),
-                new MostPlayedPlaylist(-2),
-                new RecentlyPlayedPlaylist(-1)
+    public Library() {
+        this(List.of(
+                new Playlist(ALL_SONGS, "All songs"),
+                new Playlist(MOST_PLAYED, "Most Played"),
+                new Playlist(RECENTLY_PLAYED, "Recently Played")
         ));
     }
 
     /**
      * Ctor for loading library from its serialized form.
      */
-    public Library(Path musicDirectory, List<Song> songs, List<Playlist> playlists) {
-        this.musicDirectory = musicDirectory;
-        this.songs.addAll(songs);
+    public Library(List<Playlist> playlists) {
         this.playlists.addAll(playlists);
 
-        Collections.sort(this.songs);
-        Collections.sort(this.playlists);
+        // TODO: sort?
+        //Collections.sort(this.songs);
 
-        // TODO:
-        //this.playlists.get(0).getSongs().addAll(songs);
+        // no need to sort playlists since UI sorts them on its own
+        //Collections.sort(this.playlists);
+
+        // TODO: check that all 3 built-in playlist types are present
     }
 
-    public Path getMusicDirectory() {
-        return musicDirectory;
+    public void addSongsNoDuplicateCheck(List<Song> songs) {
+        getLibraryPlaylist().getSongs().addAll(songs);
+    }
+
+    public void addSong(Song song) {
+        getLibraryPlaylist().addSong(song);
+    }
+
+    public void removeSong(Song song) {
+        getLibraryPlaylist().getSongs().remove(song);
     }
 
     public ObservableList<Song> getSongs() {
-        return songs;
+        return getLibraryPlaylist().getSongs();
     }
 
     public List<Playlist> getPlaylists() {
@@ -62,8 +67,18 @@ public final class Library {
     }
 
     public Optional<Song> findSongByTitle(String title) {
-        return songs.stream()
+        return getSongs().stream()
                 .filter(song -> title.equals(song.getTitle()))
+                .findFirst();
+    }
+
+    public Playlist getLibraryPlaylist() {
+        return findPlaylistByType(ALL_SONGS).get();
+    }
+
+    public Optional<Playlist> findPlaylistByType(Playlist.PlaylistType type) {
+        return playlists.stream()
+                .filter(playlist -> playlist.getType() == type)
                 .findFirst();
     }
 
@@ -74,12 +89,7 @@ public final class Library {
     }
 
     public Playlist addPlaylist(String title) {
-        int highestID = playlists.stream()
-                .max(Comparator.comparingInt(Playlist::getId))
-                .map(Playlist::getId)
-                .orElse(0);
-
-        var p = new Playlist(highestID + 1, title);
+        var p = new Playlist(USER_CREATED, title);
 
         playlists.add(p);
 

@@ -37,6 +37,8 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -228,7 +230,15 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                 songTableViewController.setSongs(playlist.getSongs());
             });
 
-            playlistBox.getChildren().add(0, playlistView);
+            playlistBox.getChildren().add(playlistView);
+
+            // sort using array list, rather than in the scene graph
+            var tmpCopy = new ArrayList<>(playlistBox.getChildren());
+            tmpCopy.sort(
+                    Comparator.comparing(view -> (Playlist) view.getProperties().get("PLAYLIST"))
+            );
+
+            playlistBox.getChildren().setAll(tmpCopy);
 
         } catch (Exception e) {
             log.warning("Cannot load playlist view for: " + playlist, e);
@@ -333,6 +343,9 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 
     @Override
     public void onClickRemovePlaylist(Playlist playlist) {
+        if (!playlist.isModifiable())
+            return;
+
         playlistBox.getChildren()
                 .stream()
                 .filter(view -> view.getProperties().get("PLAYLIST") == playlist)
@@ -485,4 +498,26 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 
         public record SearchResult(List<Song> songResults) { }
     }
+
+
+    // TODO:
+//    @Override
+//    public List<Song> getSongs() {
+//        return MusifyApp.getLibrary().getSongs().stream()
+//                .filter(song -> song.getPlayCount() > 0)
+//                .sorted((s1, s2) -> s2.getPlayDate().compareTo(s1.getPlayDate()))
+//                .limit(100)
+//                .collect(Collectors.toList());
+//    }
+
+    // TODO:
+//    @Override
+//    public List<Song> getSongs() {
+//        return MusifyApp.getLibrary().getSongs()
+//                .stream()
+//                .filter(song -> song.getPlayCount() > 0)
+//                .sorted((s1, s2) -> Integer.compare(s2.getPlayCount(), s1.getPlayCount()))
+//                .limit(100)
+//                .collect(Collectors.toList());
+//    }
 }

@@ -15,11 +15,7 @@ import java.time.LocalDateTime;
 public record SerializableSong(
         int id,
         String title,
-        String artistTitle,
-        String albumTitle,
         int lengthInSeconds,
-        int trackNumber,
-        int discNumber,
         int playCount,
         LocalDateTime playDate,
         String filePath

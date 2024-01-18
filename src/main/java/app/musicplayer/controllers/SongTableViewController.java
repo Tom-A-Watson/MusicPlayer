@@ -9,6 +9,7 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
 import app.musicplayer.MusifyApp;
+import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -65,7 +66,6 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 
 		tableView.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
 			tableView.requestFocus();
-			event.consume();
 		});
 
 		initRowFactory();
@@ -204,10 +204,27 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 		}
 	}
 
+
+
+
+
+
+	public void setPlaylist(Playlist playlist) {
+		// TODO: check playlist type and update as appropriate
+	}
+
+
+
+
     @Override
     public void onClickPlaySong() {
         play();
     }
+
+	@FXML
+	private void onClickImport() {
+		System.out.println("IMPORT");
+	}
 
     @Override
     public void onClickAddToPlaylist() {

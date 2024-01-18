@@ -16,11 +16,7 @@ public final class Song implements Comparable<Song> {
 
     private IntegerProperty id;
     private StringProperty title;
-    private StringProperty artistTitle;
-    private StringProperty albumTitle;
     private IntegerProperty lengthInSeconds;
-    private IntegerProperty trackNumber;
-    private IntegerProperty discNumber;
     private IntegerProperty playCount;
     private ObjectProperty<LocalDateTime> playDate;
     private ObjectProperty<Path> file;
@@ -32,22 +28,14 @@ public final class Song implements Comparable<Song> {
     public Song(
             int id,
             String title,
-            String artistTitle,
-            String albumTitle,
             int lengthInSeconds,
-            int trackNumber,
-            int discNumber,
             int playCount,
             LocalDateTime playDate,
             Path file
     ) {
         this.id = new SimpleIntegerProperty(id);
         this.title = new SimpleStringProperty(title);
-        this.artistTitle = new SimpleStringProperty(artistTitle);
-        this.albumTitle = new SimpleStringProperty(albumTitle);
         this.lengthInSeconds = new SimpleIntegerProperty(lengthInSeconds);
-        this.trackNumber = new SimpleIntegerProperty(trackNumber);
-        this.discNumber = new SimpleIntegerProperty(discNumber);
         this.playCount = new SimpleIntegerProperty(playCount);
         this.playDate = new SimpleObjectProperty<>(playDate);
         this.file = new SimpleObjectProperty<>(file);
@@ -85,30 +73,6 @@ public final class Song implements Comparable<Song> {
         this.title.set(title);
     }
 
-    public String getArtistTitle() {
-        return artistTitle.get();
-    }
-
-    public StringProperty artistTitleProperty() {
-        return artistTitle;
-    }
-
-    public void setArtistTitle(String artistTitle) {
-        this.artistTitle.set(artistTitle);
-    }
-
-    public String getAlbumTitle() {
-        return albumTitle.get();
-    }
-
-    public StringProperty albumTitleProperty() {
-        return albumTitle;
-    }
-
-    public void setAlbumTitle(String albumTitle) {
-        this.albumTitle.set(albumTitle);
-    }
-
     public int getLengthInSeconds() {
         return lengthInSeconds.get();
     }
@@ -119,30 +83,6 @@ public final class Song implements Comparable<Song> {
 
     public void setLengthInSeconds(int lengthInSeconds) {
         this.lengthInSeconds.set(lengthInSeconds);
-    }
-
-    public int getTrackNumber() {
-        return trackNumber.get();
-    }
-
-    public IntegerProperty trackNumberProperty() {
-        return trackNumber;
-    }
-
-    public void setTrackNumber(int trackNumber) {
-        this.trackNumber.set(trackNumber);
-    }
-
-    public int getDiscNumber() {
-        return discNumber.get();
-    }
-
-    public IntegerProperty discNumberProperty() {
-        return discNumber;
-    }
-
-    public void setDiscNumber(int discNumber) {
-        this.discNumber.set(discNumber);
     }
 
     public int getPlayCount() {
@@ -215,13 +155,7 @@ public final class Song implements Comparable<Song> {
 
     @Override
     public int compareTo(Song other) {
-        int discComparison = Integer.compare(this.getDiscNumber(), other.getDiscNumber());
-
-        if (discComparison != 0) {
-            return discComparison;
-        }
-
-        return Integer.compare(this.getTrackNumber(), other.getTrackNumber());
+        return getTitle().compareTo(other.getTitle());
     }
 
     @Override

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
 
 <TableView fx:id="tableView"
            fx:controller="app.musicplayer.controllers.SongTableViewController"
@@ -11,7 +12,12 @@
            xmlns:fx="http://javafx.com/fxml/1">
 
     <placeholder>
-        <Label text="Add songs by clicking the + button" />
+        <VBox spacing="50" alignment="CENTER">
+            <Label text="Add songs by clicking the + button" />
+
+            <Button fx:id="importMusicButton" mnemonicParsing="false" focusTraversable="false"
+                    onMouseClicked="#onClickImport" prefHeight="45.0" prefWidth="400.0" text="Add Songs From Folder" />
+        </VBox>
     </placeholder>
 
     <columns>

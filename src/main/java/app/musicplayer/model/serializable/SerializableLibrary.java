@@ -13,7 +13,6 @@ import java.util.List;
  * @author Almas Baim (https://github.com/AlmasB)
  */
 public record SerializableLibrary(
-        String musicDirectoryPath,
         List<SerializableSong> songs,
         List<SerializablePlaylist> playlists
 ) { }
