@@ -7,7 +7,9 @@
 
 package app.musicplayer.model;
 
+import com.almasb.fxgl.core.util.LazyValue;
 import javafx.beans.property.*;
+import javafx.scene.image.Image;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -19,6 +21,7 @@ public final class Song implements Comparable<Song> {
     private IntegerProperty lengthInSeconds;
     private IntegerProperty playCount;
     private ObjectProperty<LocalDateTime> playDate;
+    private ObjectProperty<Image> artwork;
     private ObjectProperty<Path> file;
 
     private StringProperty displayLength;
@@ -38,6 +41,7 @@ public final class Song implements Comparable<Song> {
         this.lengthInSeconds = new SimpleIntegerProperty(lengthInSeconds);
         this.playCount = new SimpleIntegerProperty(playCount);
         this.playDate = new SimpleObjectProperty<>(playDate);
+        this.artwork = new SimpleObjectProperty<>(null);
         this.file = new SimpleObjectProperty<>(file);
 
         int minutes = lengthInSeconds / 60;
@@ -107,6 +111,18 @@ public final class Song implements Comparable<Song> {
 
     public void setPlayDate(LocalDateTime playDate) {
         this.playDate.set(playDate);
+    }
+
+    public Image getArtwork() {
+        return artwork.get();
+    }
+
+    public ObjectProperty<Image> artworkProperty() {
+        return artwork;
+    }
+
+    public void setArtwork(Image artwork) {
+        this.artwork.set(artwork);
     }
 
     public Path getFile() {

@@ -11,6 +11,7 @@ import javafx.scene.input.DataFormat;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 public final class Config {
 
@@ -19,6 +20,8 @@ public final class Config {
     public static final Path LIBRARY_FILE = Paths.get("library.json");
 
     public static final DataFormat DRAG_SONG_LIST = new DataFormat("application/javafx-song-list");
+
+    public static final List<String> SUPPORTED_FILE_EXTENSIONS = List.of("mp3", "mp4", "m4a", "m4v", "wav");
 
     public static final String FXML = "/assets/ui/";
     public static final String IMG = "/assets/textures/";

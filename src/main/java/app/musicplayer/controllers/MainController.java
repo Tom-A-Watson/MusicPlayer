@@ -154,12 +154,11 @@ public class MainController implements Initializable, PlaylistBoxController.Play
         Song song = MusifyApp.getNowPlaying();
         if (song != null) {
             nowPlayingTitle.setText(song.getTitle());
-            nowPlayingArtist.setText("// TODO:");
+            nowPlayingArtist.setText("");
             //nowPlayingArtwork.setImage(song.getAlbum().getArtwork());
         } else {
             nowPlayingTitle.setText("");
             nowPlayingArtist.setText("");
-            nowPlayingArtwork.setImage(null);
         }
     }
 
@@ -227,7 +226,9 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             controller.setHandler(this);
 
             title.setOnMouseClicked(e -> {
-                songTableViewController.setSongs(playlist.getSongs());
+                songTableViewController.setPlaylist(playlist);
+
+                //songTableViewController.setSongs(playlist.getSongs());
             });
 
             playlistBox.getChildren().add(playlistView);
@@ -247,7 +248,9 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 
     @FXML
     private void onClickYourLibrary() {
-        songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
+        // TODO: button needed?
+        songTableViewController.setPlaylist(MusifyApp.getLibrary().getLibraryPlaylist());
+        //songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
     }
     
     @FXML

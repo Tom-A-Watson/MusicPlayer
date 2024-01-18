@@ -3,6 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.layout.StackPane?>
 <TableView fx:id="tableView"
            fx:controller="app.musicplayer.controllers.SongTableViewController"
            stylesheets="@/assets/ui/css/Songs.css"
@@ -12,12 +13,15 @@
            xmlns:fx="http://javafx.com/fxml/1">
 
     <placeholder>
-        <VBox spacing="50" alignment="CENTER">
-            <Label text="Add songs by clicking the + button" />
+        <StackPane>
+            <Label text="Add songs by dragging them into this playlist" visible="${!controller.allSongsPlaylist}" />
 
-            <Button fx:id="importMusicButton" mnemonicParsing="false" focusTraversable="false"
-                    onMouseClicked="#onClickImport" prefHeight="45.0" prefWidth="400.0" text="Add Songs From Folder" />
-        </VBox>
+            <Button onMouseClicked="#onClickImport"
+                    text="Add Songs From Folder"
+                    visible="${controller.allSongsPlaylist}"
+                    mnemonicParsing="false" focusTraversable="false"
+                    prefHeight="45.0" prefWidth="400.0"  />
+        </StackPane>
     </placeholder>
 
     <columns>
