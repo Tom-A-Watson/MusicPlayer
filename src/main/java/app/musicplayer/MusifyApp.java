@@ -47,10 +47,7 @@ import java.util.logging.LogManager;
 
 import static app.musicplayer.Config.*;
 
-// TODO: adding new songs after app closed
-// TODO: adding new songs when app is running (add rescan button?)
 // TODO: serialization version for future updates
-// TODO: most played and recently played are not serialized back as instances of classes
 // TODO: volume is not serialized
 // TODO: light and dark themes
 // TODO: on startup "Your Library" is not focused
@@ -60,8 +57,6 @@ import static app.musicplayer.Config.*;
 // TODO: update to high res app icon
 // TODO: update project title as Musify is taken
 // TODO: consider free streaming music API online
-// TODO: playlists panel scroll bar apply css
-// TODO: playlists + panel should be outside of the scroll bar
 // TODO: remove songs from library
 // TODO: if song is removed from folder
 // TODO: check shuffle and loop
@@ -96,9 +91,7 @@ public class MusifyApp extends Application {
     private static class GameApp extends GameApplication {
 
         @Override
-        protected void initSettings(GameSettings settings) {
-
-        }
+        protected void initSettings(GameSettings settings) { }
     }
 
     @Override
@@ -107,21 +100,20 @@ public class MusifyApp extends Application {
             // disable java.util.logging.Logger from jaudiotagger lib
             LogManager.getLogManager().reset();
 
-            //Logger.addOutput(new ConsoleOutput(), LoggerLevel.DEBUG);
-            log.info("start(Stage)");
-
             // TODO: fully headless start if no game app needed?
             GameApplication.embeddedLaunch(new GameApp());
+
+            log.info("start(Stage)");
 
             executorService = Executors.newScheduledThreadPool(4);
             executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
 
             MusifyApp.stage = stage;
-            MusifyApp.stage.setMinWidth(850);
-            MusifyApp.stage.setMinHeight(600);
-            MusifyApp.stage.setTitle("Musify " + VERSION);
-            MusifyApp.stage.getIcons().add(new Image(this.getClass().getResource(IMG + "Logo.png").toString()));
-            MusifyApp.stage.setOnCloseRequest(event -> {
+            stage.setMinWidth(850);
+            stage.setMinHeight(600);
+            stage.setTitle("Musify " + VERSION);
+            stage.getIcons().add(new Image(this.getClass().getResource(IMG + "Logo.png").toString()));
+            stage.setOnCloseRequest(event -> {
 
                 try {
                     if (library != null)
