@@ -268,6 +268,8 @@ public class MainController implements Initializable, PlaylistBoxController.Play
     };
 
     public void onExit() {
+        mediaPaneController.onExit();
+
         Serializer.writeToFile(library, LIBRARY_FILE);
     }
 

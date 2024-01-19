@@ -12,7 +12,6 @@ import com.almasb.fxgl.dsl.FXGL;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -22,10 +21,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 //   TODO:
 //    private static List<Song> nowPlayingList;
@@ -33,7 +36,6 @@ import java.util.ResourceBundle;
 //    private static int secondsPlayed = 0;
 //    private static boolean isLoopActive = false;
 //    private static boolean isShuffleActive = false;
-//    private static boolean isMuted = false;
 
 /**
  * @author Almas Baim (https://github.com/AlmasB)
@@ -57,10 +59,16 @@ public final class MediaPaneController implements Initializable {
     private Slider timeSlider;
     @FXML
     private Region frontSliderTrack;
+
+    @FXML
+    private Rectangle frontSliderRect;
+
     @FXML
     private Label timePassedLabel;
     @FXML
     private Label timeRemainingLabel;
+
+    private ScheduledExecutorService executorService;
 
     /**
      * Each tick in this counter is 250ms.
@@ -76,7 +84,8 @@ public final class MediaPaneController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         initTimeSlider();
 
-        FXGL.getExecutor().schedule(new TimeUpdater(), Duration.millis(250));
+        executorService = Executors.newScheduledThreadPool(4);
+        executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
     }
 
     private void initTimeSlider() {
@@ -138,7 +147,7 @@ public final class MediaPaneController implements Initializable {
         mediaPlayer = new MediaPlayer(media);
         mediaPlayer.volumeProperty().bind(volumePaneController.volumeProperty().divide(200));
         mediaPlayer.setOnEndOfMedia(this::skip);
-        mediaPlayer.muteProperty().bind(volumePaneController.mutedProperty().not());
+        mediaPlayer.muteProperty().bind(volumePaneController.mutedProperty());
 
         isPlaying.bind(mediaPlayer.statusProperty().isEqualTo(MediaPlayer.Status.PLAYING));
 
@@ -315,9 +324,9 @@ public final class MediaPaneController implements Initializable {
     @FXML
     private void navigateToCurrentSong() {
         // TODO:
-//        Song song = MusifyApp.getNowPlaying();
-//
-//        var songsController = (SongsController) loadView("ongs");
-//        songsController.selectSong(song);
+    }
+
+    public void onExit() {
+        executorService.shutdownNow();
     }
 }

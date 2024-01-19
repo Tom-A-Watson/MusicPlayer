@@ -8,6 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 
+<?import javafx.scene.shape.Rectangle?>
 <VBox fx:controller="app.musicplayer.controllers.MediaPaneController"
       xmlns:fx="http://javafx.com/fxml/1">
 
@@ -119,11 +120,15 @@
 
                <center>
                   <StackPane BorderPane.alignment="CENTER">
-                     <Region fx:id="backSliderTrack" prefHeight="2.0" styleClass="backSliderTrack" StackPane.alignment="CENTER_LEFT"/>
-                     <Region fx:id="frontSliderTrack" prefHeight="2.0" styleClass="frontSliderTrack" StackPane.alignment="CENTER_LEFT"/>
-                     <Region prefWidth="15.0" styleClass="block" StackPane.alignment="CENTER_LEFT"/>
-                     <Region prefWidth="15.0" styleClass="block" StackPane.alignment="CENTER_RIGHT"/>
-                     <Slider fx:id="timeSlider" max="1" blockIncrement="1.0" pickOnBounds="false" StackPane.alignment="CENTER_LEFT" focusTraversable="false"/>
+                     <Region fx:id="backSliderTrack" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="2.0" styleClass="backSliderTrack" StackPane.alignment="CENTER_LEFT" />
+                     <Region fx:id="frontSliderTrack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="2.0" styleClass="frontSliderTrack" StackPane.alignment="CENTER_LEFT" />
+                     <Region maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="block" StackPane.alignment="CENTER_LEFT">
+                        <StackPane.margin>
+                           <Insets />
+                        </StackPane.margin>
+                     </Region>
+                     <Region maxWidth="-Infinity" minWidth="-Infinity" prefWidth="15.0" styleClass="block" StackPane.alignment="CENTER_RIGHT" />
+                     <Slider fx:id="timeSlider" blockIncrement="1.0" pickOnBounds="false" StackPane.alignment="CENTER_LEFT" />
                   </StackPane>
                </center>
             </BorderPane>

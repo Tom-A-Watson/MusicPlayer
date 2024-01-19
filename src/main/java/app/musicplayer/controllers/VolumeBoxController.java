@@ -11,12 +11,10 @@ import com.almasb.fxgl.logging.Logger;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
 import java.net.URL;
@@ -35,12 +33,6 @@ public final class VolumeBoxController implements Initializable {
     @FXML
     private Label volumeLabel;
 
-    @FXML
-    private Pane muteButton;
-
-    @FXML
-    private Pane mutedButton;
-
     private BooleanProperty muted = new SimpleBooleanProperty(false);
 
     @Override
@@ -52,33 +44,27 @@ public final class VolumeBoxController implements Initializable {
         );
 
         volumeLabel.textProperty().bind(volumeSlider.valueProperty().asString("%.0f"));
-
-        volumeSlider.setOnMousePressed(e -> {
-            if (mutedButton.isVisible()) {
-                onClickMute();
-            }
-        });
     }
 
-    DoubleProperty volumeProperty() {
+    public DoubleProperty volumeProperty() {
         return volumeSlider.valueProperty();
     }
 
-    BooleanProperty mutedProperty() {
+    public boolean isMuted() {
+        return muted.get();
+    }
+
+    public BooleanProperty mutedProperty() {
         return muted;
     }
 
     @FXML
     private void onClickMute() {
-        // TODO: check pseudo class impl
-        PseudoClass mutedClass = PseudoClass.getPseudoClass("muted");
-        boolean isMuted = mutedButton.isVisible();
-        muteButton.setVisible(isMuted);
-        mutedButton.setVisible(!isMuted);
-        volumeSlider.pseudoClassStateChanged(mutedClass, !isMuted);
-        frontVolumeTrack.pseudoClassStateChanged(mutedClass, !isMuted);
-        volumeLabel.pseudoClassStateChanged(mutedClass, !isMuted);
+        muted.set(true);
+    }
 
-        muted.set(isMuted);
+    @FXML
+    private void onClickUnmute() {
+        muted.set(false);
     }
 }
