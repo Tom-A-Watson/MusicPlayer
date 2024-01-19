@@ -8,7 +8,7 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
-import app.musicplayer.MusifyApp;
+import app.musicplayer.FXGLMusicApp;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
 import javafx.beans.binding.Bindings;
@@ -104,9 +104,9 @@ public final class PlaylistBoxController {
         playlistBox.setOnDragDropped(event -> {
             if (event.getDragboard().hasContent(Config.DRAG_SONG_LIST)) {
                 // TODO: extra ref to App
-                List<Song> songs = MusifyApp.getDraggedItems();
-
-                songs.forEach(playlist::addSong);
+//                List<Song> songs = FXGLMusicApp.getDraggedItems();
+//
+//                songs.forEach(playlist::addSong);
             }
 
             event.consume();

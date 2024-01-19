@@ -8,7 +8,7 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
-import app.musicplayer.MusifyApp;
+import app.musicplayer.FXGLMusicApp;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
 import com.almasb.fxgl.logging.Logger;
@@ -30,7 +30,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
@@ -179,7 +178,9 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 				Dragboard db = row.startDragAndDrop(TransferMode.ANY);
 
 				List<Song> draggedSongs = new ArrayList<>(tableView.getSelectionModel().getSelectedItems());
-				MusifyApp.setDraggedItems(draggedSongs);
+
+				// TODO:
+				//FXGLMusicApp.setDraggedItems(draggedSongs);
 
 				db.setContent(Map.of(Config.DRAG_SONG_LIST, ""));
 
@@ -266,13 +267,13 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 			return;
 		}
 
-		var task = new LoadSongsTask(selectedDir.toPath());
-        task.setOnSucceeded(e -> {
-            var lib = MusifyApp.getLibrary();
-            lib.addSongsNoDuplicateCheck(task.getValue());
-        });
-
-        MusifyApp.getExecutorService().submit(task);
+//		var task = new LoadSongsTask(selectedDir.toPath());
+//        task.setOnSucceeded(e -> {
+//            var lib = FXGLMusicApp.getLibrary();
+//            lib.addSongsNoDuplicateCheck(task.getValue());
+//        });
+//
+//        FXGLMusicApp.getExecutorService().submit(task);
 	}
 
 	private static class LoadSongsTask extends Task<List<Song>> {
