@@ -9,8 +9,11 @@ package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
 import app.musicplayer.FXGLMusicApp;
+import app.musicplayer.events.UserDataEvent;
+import app.musicplayer.events.UserEvent;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.logging.Logger;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -30,6 +33,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
@@ -47,6 +51,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static app.musicplayer.Config.SUPPORTED_FILE_EXTENSIONS;
+import static app.musicplayer.events.UserDataEvent.PLAY_SONG;
+import static com.almasb.fxgl.dsl.FXGL.*;
 
 public final class SongTableViewController implements Initializable, ControlBoxController.ControlBoxHandler {
 
@@ -64,6 +70,7 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 	private BooleanProperty isAllSongsPlaylist = new SimpleBooleanProperty(true);
 
 	private Playlist playlist = null;
+	private Song selectedSong = null;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -80,12 +87,12 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 		titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
 		lengthColumn.setCellValueFactory(new PropertyValueFactory<>("displayLength"));
 
-		// TODO: needed?
-//		tableView.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-//			tableView.requestFocus();
-//		});
-
 		initRowFactory();
+
+		tableView.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
+			tableView.requestFocus();
+			e.consume();
+		});
 
 		tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
 			if (oldSelection != null) {
@@ -94,8 +101,7 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 
 			if (newSelection != null && tableView.getSelectionModel().getSelectedIndices().size() == 1) {
 				newSelection.setSelected(true);
-				// TODO:
-				//selectedSong = newSelection;
+				selectedSong = newSelection;
 			}
 		});
 
@@ -203,18 +209,11 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 		return isAllSongsPlaylist.get();
 	}
 
-	public void play() {
-		// TODO: extract MusifyApp class
-//		Song song = selectedSong;
-//		ObservableList<Song> songList = tableView.getItems();
-//		if (MusifyApp.isShuffleActive()) {
-//			Collections.shuffle(songList);
-//			songList.remove(song);
-//			songList.add(0, song);
-//		}
-//		MusifyApp.setNowPlayingList(songList);
-//		MusifyApp.setNowPlaying(song);
-//		MusifyApp.play();
+	private void play() {
+		if (selectedSong == null)
+			return;
+
+		fire(new UserDataEvent<>(PLAY_SONG, selectedSong));
 	}
 
 	public void selectSong(Song selectedSong) {
@@ -231,21 +230,22 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 		}
 	}
 
-
-
-
-
-
 	public void setPlaylist(Playlist playlist) {
+		this.playlist = playlist;
+
 		isAllSongsPlaylist.set(playlist.getType() == Playlist.PlaylistType.ALL_SONGS);
 
-		// TODO: placeholder text for all other playlists
-
-		System.out.println(isAllSongsPlaylist);
+		setSongs(playlist.getSongs());
 	}
 
+	public Playlist getPlaylist() {
+		return playlist;
+	}
 
-
+	@FXML
+	private void onClickImport() {
+		fire(new UserEvent(UserEvent.CLICK_IMPORT));
+	}
 
 	@Override
 	public void onClickPlaySong() {
@@ -254,111 +254,7 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 
 	@Override
 	public void onClickAddToPlaylist() {
-
-	}
-
-	@FXML
-	private void onClickImport() {
-		var dirChooser = new DirectoryChooser();
-		File selectedDir = dirChooser.showDialog(tableView.getScene().getWindow());
-
-		if (selectedDir == null) {
-			log.info("User did not select any directory");
-			return;
-		}
-
-//		var task = new LoadSongsTask(selectedDir.toPath());
-//        task.setOnSucceeded(e -> {
-//            var lib = FXGLMusicApp.getLibrary();
-//            lib.addSongsNoDuplicateCheck(task.getValue());
-//        });
-//
-//        FXGLMusicApp.getExecutorService().submit(task);
-	}
-
-	private static class LoadSongsTask extends Task<List<Song>> {
-
-		private final Path directory;
-
-		private LoadSongsTask(Path directory) {
-			this.directory = directory;
-		}
-
-		@Override
-		protected List<Song> call() throws Exception {
-			List<Song> songs = new ArrayList<>();
-
-			try (Stream<Path> filesStream = Files.walk(directory)) {
-				var files = filesStream
-						.filter(file -> Files.isRegularFile(file) && isSupportedFileType(file))
-						.toList();
-
-				int id = 0;
-				int numFiles = files.size();
-
-				for (var file : files) {
-					updateMessage("Loading: " + file.getFileName());
-
-					var song = loadSongData(id++, file);
-					songs.add(song);
-
-					updateProgress(id, numFiles);
-				}
-
-			} catch (Exception e) {
-				log.warning("Failed to load song data", e);
-			}
-
-			return songs;
-		}
-
-		private Song loadSongData(int id, Path file) throws Exception {
-			AudioFile audioFile = AudioFileIO.read(file.toFile());
-
-			int lengthSeconds = 0;
-
-			if (audioFile != null && audioFile.getAudioHeader() != null)
-				lengthSeconds = audioFile.getAudioHeader().getTrackLength();
-
-			String fileName = file.getFileName().toString();
-			String title = fileName.substring(0, fileName.lastIndexOf('.'));
-
-			return new Song(
-					id,
-					title,
-					lengthSeconds,
-					0,
-					LocalDateTime.now(),
-					file
-			);
-		}
-
-        private static boolean isSupportedFileType(Path file) {
-            var fileName = file.toString();
-
-            return SUPPORTED_FILE_EXTENSIONS.stream()
-                    .anyMatch(fileName::endsWith);
-        }
-	}
-
-	private static Image loadArtwork(Path songFile) {
-		try {
-			AudioFile audioFile = AudioFileIO.read(songFile.toFile());
-			Tag tag = audioFile.getTag();
-
-			if (tag.getFirstArtwork() != null) {
-				byte[] bytes = tag.getFirstArtwork().getBinaryData();
-				ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-				Image artwork = new Image(in, 300, 300, true, true);
-
-				if (!artwork.isError())
-					return artwork;
-			}
-		} catch (Exception e) {
-			log.warning("Failed to load artwork for: " + songFile, e);
-		}
-
-		return new Image(Config.IMG + "albumsIcon.png");
+		// TODO:
 	}
 
 	private class ControlPanelTableCell<S, T> extends TableCell<S, T> {

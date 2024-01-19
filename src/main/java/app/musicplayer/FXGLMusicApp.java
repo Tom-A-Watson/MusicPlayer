@@ -7,6 +7,7 @@
 
 package app.musicplayer;
 
+import app.musicplayer.controllers.MainController;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.core.EngineService;
@@ -85,17 +86,19 @@ public class FXGLMusicApp extends Application {
         // disable java.util.logging.Logger from jaudiotagger lib
         LogManager.getLogManager().reset();
 
+        FXMLLoader loader = new FXMLLoader(FXGL.getAssetLoader().getURL("/assets/ui/scenes/MainScene.fxml"));
+        Parent view = loader.load();
+        MainController controller = loader.getController();
+
         stage.setMinWidth(850);
         stage.setMinHeight(600);
         stage.setTitle(TITLE + " " + VERSION);
         stage.getIcons().add(FXGL.image("Logo.png"));
         stage.setOnCloseRequest(event -> {
+            controller.onExit();
             log.info("Closing stage");
             FXGL.getGameController().exit();
         });
-
-        FXMLLoader loader = new FXMLLoader(FXGL.getAssetLoader().getURL("/assets/ui/scenes/MainScene.fxml"));
-        Parent view = loader.load();
 
         Scene scene = new Scene(view);
         scene.getStylesheets().add(FXGL.getAssetLoader().loadCSS("Global.css").getExternalForm());

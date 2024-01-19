@@ -76,10 +76,6 @@ public final class MediaPaneController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         initTimeSlider();
 
-//        volumePaneController.mutedProperty().addListener((observable, wasMuted, isMuted) -> {
-//            mute(isMuted);
-//        });
-
         FXGL.getExecutor().schedule(new TimeUpdater(), Duration.millis(250));
     }
 
@@ -142,10 +138,11 @@ public final class MediaPaneController implements Initializable {
         mediaPlayer = new MediaPlayer(media);
         mediaPlayer.volumeProperty().bind(volumePaneController.volumeProperty().divide(200));
         mediaPlayer.setOnEndOfMedia(this::skip);
-        mediaPlayer.muteProperty().bind(volumePaneController.mutedProperty());
+        mediaPlayer.muteProperty().bind(volumePaneController.mutedProperty().not());
 
         isPlaying.bind(mediaPlayer.statusProperty().isEqualTo(MediaPlayer.Status.PLAYING));
 
+        play();
 
 //        if (nowPlayingList.contains(song)) {
 //
@@ -227,8 +224,7 @@ public final class MediaPaneController implements Initializable {
         mediaPlayer.seek(Duration.seconds(seconds));
         timerCounter = seconds * 4;
 
-        timePassedLabel.setText(getTimePassed());
-        timeRemainingLabel.setText(getTimeRemaining());
+        updateTimeLabels();
     }
 
     private String getTimePassed() {
@@ -263,6 +259,11 @@ public final class MediaPaneController implements Initializable {
 //        }
     }
 
+    private void updateTimeLabels() {
+        timePassedLabel.setText(getTimePassed());
+        timeRemainingLabel.setText(getTimeRemaining());
+    }
+
     private class TimeUpdater implements Runnable {
 
         @Override
@@ -277,8 +278,7 @@ public final class MediaPaneController implements Initializable {
                     timerCounter++;
 
                     if (timerCounter % 4 == 0) {
-                        // TODO:
-                        //updateTimeLabels();
+                        updateTimeLabels();
                     }
 
                     // called every tick (250 ms) because max value is length in seconds * 4

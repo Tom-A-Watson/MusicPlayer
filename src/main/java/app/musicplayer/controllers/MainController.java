@@ -8,8 +8,14 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
+import app.musicplayer.FXGLMusicApp;
+import app.musicplayer.events.UserDataEvent;
+import app.musicplayer.events.UserEvent;
+import app.musicplayer.model.Library;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
+import app.musicplayer.model.serializable.Serializer;
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -19,25 +25,38 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.Tag;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
+
+import static app.musicplayer.Config.LIBRARY_FILE;
+import static app.musicplayer.Config.SUPPORTED_FILE_EXTENSIONS;
+import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class MainController implements Initializable, PlaylistBoxController.PlaylistBoxHandler {
 
     private static final Logger log = Logger.get(MainController.class);
-
-    @FXML
-    private ScrollPane subViewRoot;
 
     @FXML
     private VBox sideBar;
@@ -58,14 +77,45 @@ public class MainController implements Initializable, PlaylistBoxController.Play
     @FXML
     private TextField searchField;
 
+    private Library library;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         log.info("initialize()");
 
-        initSearchField();
-        initPlaylists();
+        onEvent(UserEvent.CLICK_IMPORT, event -> {
+            onClickImport();
+        });
 
-        //songTableViewController.setSongs(FXGLMusicApp.getLibrary().getSongs());
+        onEvent(UserDataEvent.PLAY_SONG, event -> {
+            Song song = (Song) event.getData();
+
+            mediaPaneController.play(song);
+
+            // TODO:
+
+//		ObservableList<Song> songList = tableView.getItems();
+//		if (MusifyApp.isShuffleActive()) {
+//			Collections.shuffle(songList);
+//			songList.remove(song);
+//			songList.add(0, song);
+//		}
+        });
+
+        initSearchField();
+
+        if (Files.exists(LIBRARY_FILE)) {
+            var task = new DeserializeLibraryTask(LIBRARY_FILE);
+            task.setOnSucceeded(e -> {
+                library = task.getValue();
+                initPlaylists();
+            });
+            getExecutor().startAsync(task);
+        } else {
+            library = new Library();
+
+            initPlaylists();
+        }
     }
 
     private void initSearchField() {
@@ -76,6 +126,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                 //songTableViewController.setSongs(FXGLMusicApp.getLibrary().getSongs());
 
             } else {
+                // TODO: search in current playlist?
                 Search.search(text);
             }
         });
@@ -91,9 +142,11 @@ public class MainController implements Initializable, PlaylistBoxController.Play
     }
 
     private void initPlaylists() {
-//        for (Playlist playlist : FXGLMusicApp.getLibrary().getPlaylists()) {
-//            addNewPlaylistToUI(playlist);
-//        }
+        for (Playlist playlist : library.getPlaylists()) {
+            addNewPlaylistToUI(playlist);
+        }
+
+        songTableViewController.setPlaylist(library.getLibraryPlaylist());
     }
 
     private void addNewPlaylistToUI(Playlist playlist) {
@@ -113,8 +166,6 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 
             title.setOnMouseClicked(e -> {
                 songTableViewController.setPlaylist(playlist);
-
-                //songTableViewController.setSongs(playlist.getSongs());
             });
 
             playlistBox.getChildren().add(playlistView);
@@ -150,16 +201,16 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                     String text = textBox.getText();
 
                     if (!text.isEmpty()) {
-//                        if (FXGLMusicApp.getLibrary().findPlaylistByTitle(text).isPresent()) {
-//                            System.out.println("TODO: Playlist already exists");
-//                        } else {
-//
-//                            // TODO: if too long title
-//
-//                            var playlist = FXGLMusicApp.getLibrary().addPlaylist(text);
-//
-//                            addNewPlaylistToUI(playlist);
-//                        }
+                        if (library.findPlaylistByTitle(text).isPresent()) {
+                            System.out.println("TODO: Playlist already exists");
+                        } else {
+
+                            // TODO: if too long title
+
+                            var playlist = library.addPlaylist(text);
+
+                            addNewPlaylistToUI(playlist);
+                        }
                     }
                 }
             });
@@ -191,34 +242,14 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                 .filter(view -> view.getProperties().get("PLAYLIST") == playlist)
                 .findAny()
                 .ifPresent(view -> {
-                    // TODO: only set songs from different playlist if we are removing the selected one
-                    //songTableViewController.setPlaylist(FXGLMusicApp.getLibrary().getLibraryPlaylist());
-                    //songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
-                    //FXGLMusicApp.getLibrary().removePlaylist(playlist);
+                    if (songTableViewController.getPlaylist() == playlist) {
+                        songTableViewController.setPlaylist(library.getLibraryPlaylist());
+                    }
+
+                    library.removePlaylist(playlist);
                     playlistBox.getChildren().remove(view);
                 });
     }
-
-    private Animation loadViewAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-        }
-        protected void interpolate(double frac) {
-            subViewRoot.setVvalue(0);
-            subViewRoot.getContent().setOpacity(frac);
-        }
-    };
-
-    private Animation unloadViewAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(250));
-            setInterpolator(Interpolator.EASE_BOTH);
-        }
-        protected void interpolate(double frac) {
-            subViewRoot.getContent().setOpacity(1 - frac);
-        }
-    };
 
     private Animation newPlaylistAnimation = new Transition() {
         {
@@ -235,6 +266,10 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             }
         }
     };
+
+    public void onExit() {
+        Serializer.writeToFile(library, LIBRARY_FILE);
+    }
 
     public static class Search {
 
@@ -349,71 +384,160 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 //                .collect(Collectors.toList());
 //    }
 
-//
-//    public static Library getLibrary() {
-//        return library;
-//    }
-//
-//    private static class DeserializeLibraryTask extends Task<Library> {
-//
-//        private final Path file;
-//
-//        private int songIndex = 0;
-//        private int playlistIndex = 0;
-//
-//        private DeserializeLibraryTask(Path file) {
-//            this.file = file;
-//        }
-//
-//        @Override
-//        protected Library call() throws Exception {
-//            updateMessage("Loading library");
-//
-//            var library = Serializer.readFromFile(file);
-//
-//            updateMessage("Loading songs");
-//
-//            var numSongs = library.songs().size();
-//            var numPlaylists = library.playlists().size();
-//
-//            var songs = library.songs()
-//                    .stream()
-//                    .map(song -> {
-//                        updateProgress(songIndex++, numSongs);
-//
-//                        return Serializer.fromSerializable(song);
-//                    })
-//                    .toList();
-//
-//            updateMessage("Loading playlists");
-//
-//            var playlists = library.playlists()
-//                    .stream()
-//                    .map(p -> {
-//                        updateProgress(playlistIndex++, numPlaylists);
-//
-//                        var playlist = Serializer.fromSerializable(p);
-//
-//                        p.songIDs().forEach(id -> {
-//                            songs.stream()
-//                                    .filter(s -> s.getId() == id)
-//                                    .findAny()
-//                                    .ifPresent(playlist::addSong);
-//                        });
-//
-//                        return playlist;
-//                    })
-//                    .toList();
-//
-//            return new Library(
-//                    playlists
-//            );
-//        }
-//    }
+    private void onClickImport() {
+        var dirChooser = new DirectoryChooser();
+        File selectedDir = dirChooser.showDialog(songTableView.getScene().getWindow());
 
+        if (selectedDir == null) {
+            log.info("User did not select any directory");
+            return;
+        }
 
-//                    if (library != null)
-//                        Serializer.writeToFile(library, LIBRARY_FILE);
-//
-//                    executorService.shutdownNow();
+        var task = new LoadSongsTask(selectedDir.toPath());
+        task.setOnSucceeded(e -> {
+            library.addSongsNoDuplicateCheck(task.getValue());
+        });
+
+        getExecutor().startAsync(task);
+    }
+
+    private static class LoadSongsTask extends Task<List<Song>> {
+
+        private final Path directory;
+
+        private LoadSongsTask(Path directory) {
+            this.directory = directory;
+        }
+
+        @Override
+        protected List<Song> call() throws Exception {
+            List<Song> songs = new ArrayList<>();
+
+            try (Stream<Path> filesStream = Files.walk(directory)) {
+                var files = filesStream
+                        .filter(file -> Files.isRegularFile(file) && isSupportedFileType(file))
+                        .toList();
+
+                int id = 0;
+                int numFiles = files.size();
+
+                for (var file : files) {
+                    updateMessage("Loading: " + file.getFileName());
+
+                    var song = loadSongData(id++, file);
+                    songs.add(song);
+
+                    updateProgress(id, numFiles);
+                }
+
+            } catch (Exception e) {
+                log.warning("Failed to load song data", e);
+            }
+
+            return songs;
+        }
+
+        private Song loadSongData(int id, Path file) throws Exception {
+            AudioFile audioFile = AudioFileIO.read(file.toFile());
+
+            int lengthSeconds = 0;
+
+            if (audioFile != null && audioFile.getAudioHeader() != null)
+                lengthSeconds = audioFile.getAudioHeader().getTrackLength();
+
+            String fileName = file.getFileName().toString();
+            String title = fileName.substring(0, fileName.lastIndexOf('.'));
+
+            return new Song(
+                    id,
+                    title,
+                    lengthSeconds,
+                    0,
+                    LocalDateTime.now(),
+                    file
+            );
+        }
+
+        private static boolean isSupportedFileType(Path file) {
+            var fileName = file.toString();
+
+            return SUPPORTED_FILE_EXTENSIONS.stream()
+                    .anyMatch(fileName::endsWith);
+        }
+    }
+
+    private static Image loadArtwork(Path songFile) {
+        try {
+            AudioFile audioFile = AudioFileIO.read(songFile.toFile());
+            Tag tag = audioFile.getTag();
+
+            if (tag.getFirstArtwork() != null) {
+                byte[] bytes = tag.getFirstArtwork().getBinaryData();
+                ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+                Image artwork = new Image(in, 300, 300, true, true);
+
+                if (!artwork.isError())
+                    return artwork;
+            }
+        } catch (Exception e) {
+            log.warning("Failed to load artwork for: " + songFile, e);
+        }
+
+        return new Image(Config.IMG + "albumsIcon.png");
+    }
+
+    private static class DeserializeLibraryTask extends Task<Library> {
+
+        private final Path file;
+
+        private int songIndex = 0;
+        private int playlistIndex = 0;
+
+        private DeserializeLibraryTask(Path file) {
+            this.file = file;
+        }
+
+        @Override
+        protected Library call() throws Exception {
+            updateMessage("Loading library");
+
+            var library = Serializer.readFromFile(file);
+
+            updateMessage("Loading songs");
+
+            var numSongs = library.songs().size();
+            var numPlaylists = library.playlists().size();
+
+            var songs = library.songs()
+                    .stream()
+                    .map(song -> {
+                        updateProgress(songIndex++, numSongs);
+
+                        return Serializer.fromSerializable(song);
+                    })
+                    .toList();
+
+            updateMessage("Loading playlists");
+
+            var playlists = library.playlists()
+                    .stream()
+                    .map(p -> {
+                        updateProgress(playlistIndex++, numPlaylists);
+
+                        var playlist = Serializer.fromSerializable(p);
+
+                        p.songIDs().forEach(id -> {
+                            songs.stream()
+                                    .filter(s -> s.getId() == id)
+                                    .findAny()
+                                    .ifPresent(playlist::addSong);
+                        });
+
+                        return playlist;
+                    })
+                    .toList();
+
+            return new Library(playlists);
+        }
+    }
 }
