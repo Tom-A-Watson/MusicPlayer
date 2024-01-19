@@ -8,11 +8,8 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
-import app.musicplayer.FXGLMusicApp;
-import app.musicplayer.model.Library;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
-import app.musicplayer.model.serializable.Serializer;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -20,195 +17,80 @@ import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
-import javafx.concurrent.Task;
-import javafx.css.PseudoClass;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.net.URL;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class MainController implements Initializable, PlaylistBoxController.PlaylistBoxHandler {
 
     private static final Logger log = Logger.get(MainController.class);
 
-    @FXML private ScrollPane subViewRoot;
-    @FXML private VBox sideBar;
-    @FXML private VBox playlistBox;
-    @FXML private ImageView nowPlayingArtwork;
-    @FXML private Label nowPlayingTitle;
-    @FXML private Label nowPlayingArtist;
-    @FXML private Slider timeSlider;
-    @FXML private Region frontSliderTrack;
-    @FXML private Label timePassed;
-    @FXML private Label timeRemaining;
-
-
-    @FXML private Pane playButton;
-    @FXML private Pane pauseButton;
-    @FXML private Pane loopButton;
-    @FXML private Pane shuffleButton;
-    @FXML private HBox controlBox;
+    @FXML
+    private ScrollPane subViewRoot;
 
     @FXML
-    private TextField searchField;
+    private VBox sideBar;
+
+    @FXML
+    private VBox playlistBox;
+
+    @FXML
+    private VBox mediaPane;
+    @FXML
+    private MediaPaneController mediaPaneController;
 
     @FXML
     private TableView<Song> songTableView;
     @FXML
     private SongTableViewController songTableViewController;
 
+    @FXML
+    private TextField searchField;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         log.info("initialize()");
 
-        // remove pause button until needed
-//        controlBox.getChildren().remove(3);
-//
-//        frontSliderTrack.prefWidthProperty().bind(timeSlider.widthProperty().multiply(timeSlider.valueProperty().divide(timeSlider.maxProperty())));
-//
-//        PseudoClass active = PseudoClass.getPseudoClass("active");
-//        loopButton.setOnMouseClicked(x -> {
-//            sideBar.requestFocus();
-//            //FXGLMusicApp.toggleLoop();
-//            //loopButton.pseudoClassStateChanged(active, FXGLMusicApp.isLoopActive());
-//        });
-//        shuffleButton.setOnMouseClicked(x -> {
-//            sideBar.requestFocus();
-//            //FXGLMusicApp.toggleShuffle();
-//            //shuffleButton.pseudoClassStateChanged(active, FXGLMusicApp.isShuffleActive());
-//        });
-//
-//        timeSlider.valueChangingProperty().addListener((slider, wasChanging, isChanging) -> {
-//            if (wasChanging) {
-//                int seconds = (int) Math.round(timeSlider.getValue() / 4.0);
-//                timeSlider.setValue(seconds * 4);
-//                //FXGLMusicApp.seek(seconds);
-//            }
-//        });
-//
-//        timeSlider.valueProperty().addListener((slider, oldValue, newValue) -> {
-//            double previous = oldValue.doubleValue();
-//            double current = newValue.doubleValue();
-//            if (!timeSlider.isValueChanging() && current != previous + 1 && !timeSlider.isPressed()) {
-//                int seconds = (int) Math.round(current / 4.0);
-//                timeSlider.setValue(seconds * 4);
-//                //FXGLMusicApp.seek(seconds);
-//            }
-//        });
-//
-//        searchField.textProperty().addListener((observable, oldText, newText) -> {
-//            String text = newText.trim();
-//            if (text.isEmpty()) {
-//                // TODO: what if playlist is selected
-//                //songTableViewController.setSongs(FXGLMusicApp.getLibrary().getSongs());
-//
-//            } else {
-//                Search.search(text);
-//            }
-//        });
-//
-//        Search.hasResultsProperty().addListener((observable, hadResults, hasResults) -> {
-//            if (hasResults) {
-//                Search.SearchResult result = Search.getResult();
-//                Platform.runLater(() -> {
-//
-//                    songTableViewController.setSongs(FXCollections.observableArrayList(result.songResults()));
-//                });
-//            }
-//        });
+        initSearchField();
+        initPlaylists();
 
-
-
-
-        updateNowPlayingButton();
-        initializeTimeSlider();
-        initializeTimeLabels();
-        initializePlaylists();
-
-        subViewRoot.setContent(songTableView);
         //songTableViewController.setSongs(FXGLMusicApp.getLibrary().getSongs());
     }
 
-    public void updateNowPlayingButton() {
-//        Song song = FXGLMusicApp.getNowPlaying();
-//        if (song != null) {
-//            nowPlayingTitle.setText(song.getTitle());
-//            nowPlayingArtist.setText("");
-//            //nowPlayingArtwork.setImage(song.getAlbum().getArtwork());
-//        } else {
-//            nowPlayingTitle.setText("");
-//            nowPlayingArtist.setText("");
-//        }
+    private void initSearchField() {
+        searchField.textProperty().addListener((obs, oldText, newText) -> {
+            String text = newText.trim();
+            if (text.isEmpty()) {
+                // TODO: what if playlist is selected
+                //songTableViewController.setSongs(FXGLMusicApp.getLibrary().getSongs());
+
+            } else {
+                Search.search(text);
+            }
+        });
+
+        Search.hasResultsProperty().addListener((observable, hadResults, hasResults) -> {
+            if (hasResults) {
+                Search.SearchResult result = Search.getResult();
+                Platform.runLater(() -> {
+                    songTableViewController.setSongs(FXCollections.observableArrayList(result.songResults()));
+                });
+            }
+        });
     }
 
-    public void initializeTimeSlider() {
-//        Song song = FXGLMusicApp.getNowPlaying();
-//        if (song != null) {
-//            timeSlider.setMin(0);
-//            timeSlider.setMax(song.getLengthInSeconds() * 4);
-//            timeSlider.setValue(0);
-//            timeSlider.setBlockIncrement(1);
-//        } else {
-//            timeSlider.setMin(0);
-//            timeSlider.setMax(1);
-//            timeSlider.setValue(0);
-//            timeSlider.setBlockIncrement(1);
-//        }
-    }
-
-    public void updateTimeSlider() {
-        if (!timeSlider.isPressed()) {
-            timeSlider.increment();
-        }
-    }
-
-    public void initializeTimeLabels() {
-//        Song song = FXGLMusicApp.getNowPlaying();
-//        if (song != null) {
-//            timePassed.setText("0:00");
-//
-//            int minutes = song.getLengthInSeconds() / 60;
-//            int seconds = song.getLengthInSeconds() % 60;
-//            var totalTime = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
-//
-//            timeRemaining.setText(totalTime);
-//        } else {
-//            timePassed.setText("");
-//            timeRemaining.setText("");
-//        }
-    }
-
-    public void updateTimeLabels() {
-//        timePassed.setText(FXGLMusicApp.getTimePassed());
-//        timeRemaining.setText(FXGLMusicApp.getTimeRemaining());
-    }
-
-    private void initializePlaylists() {
+    private void initPlaylists() {
 //        for (Playlist playlist : FXGLMusicApp.getLibrary().getPlaylists()) {
 //            addNewPlaylistToUI(playlist);
 //        }
@@ -250,13 +132,6 @@ public class MainController implements Initializable, PlaylistBoxController.Play
         }
     }
 
-    @FXML
-    private void onClickYourLibrary() {
-        // TODO: button needed?
-        //songTableViewController.setPlaylist(FXGLMusicApp.getLibrary().getLibraryPlaylist());
-        //songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
-    }
-    
     @FXML
     private void onClickAddNewPlaylist() {
         if (!newPlaylistAnimation.getStatus().equals(Status.RUNNING)) {
@@ -306,8 +181,6 @@ public class MainController implements Initializable, PlaylistBoxController.Play
         }
     }
 
-
-
     @Override
     public void onClickRemovePlaylist(Playlist playlist) {
         if (!playlist.isModifiable())
@@ -319,19 +192,11 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                 .findAny()
                 .ifPresent(view -> {
                     // TODO: only set songs from different playlist if we are removing the selected one
-                    onClickYourLibrary();
+                    //songTableViewController.setPlaylist(FXGLMusicApp.getLibrary().getLibraryPlaylist());
+                    //songTableViewController.setSongs(MusifyApp.getLibrary().getSongs());
                     //FXGLMusicApp.getLibrary().removePlaylist(playlist);
                     playlistBox.getChildren().remove(view);
                 });
-    }
-
-    public void updatePlayPauseIcon(boolean isPlaying) {
-        controlBox.getChildren().remove(2);
-        if (isPlaying) {
-            controlBox.getChildren().add(2, pauseButton);
-        } else {
-            controlBox.getChildren().add(2, playButton);
-        }
     }
 
     private Animation loadViewAnimation = new Transition() {
@@ -484,263 +349,9 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 //                .collect(Collectors.toList());
 //    }
 
-
-
-//
-//    private static MainController mainController;
-//    private static MediaPlayer mediaPlayer;
-//    private static List<Song> nowPlayingList;
-//    private static int nowPlayingIndex;
-//    private static Song nowPlaying;
-//    private static int timerCounter = 0;
-//    private static int secondsPlayed = 0;
-//    private static boolean isLoopActive = false;
-//    private static boolean isShuffleActive = false;
-//    private static boolean isMuted = false;
-//    private static List<Song> draggedItems = new ArrayList<>();
-//    private static ScheduledExecutorService executorService;
-//
-//    private static Library library;
-//
-//    private static Stage stage;
-//
-//    void start() {
-//        executorService = Executors.newScheduledThreadPool(4);
-//        executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
-//    }
-//
-//
-//    private static class TimeUpdater implements Runnable {
-//
-//        @Override
-//        public void run() {
-//            if (!isPlaying())
-//                return;
-//
-//            int length = getNowPlaying().getLengthInSeconds() * 4;
-//
-//            Platform.runLater(() -> {
-//                if (timerCounter < length) {
-//                    if (++timerCounter % 4 == 0) {
-//                        mainController.updateTimeLabels();
-//                        secondsPlayed++;
-//                    }
-//
-//                    // called every tick (250 ms) because in main controller max value is length in seconds * 4
-//                    mainController.updateTimeSlider();
-//                }
-//            });
-//        }
-//    }
-//
-//    /**
-//     * Plays selected song.
-//     */
-//    public static void play() {
-//        if (mediaPlayer != null && !isPlaying()) {
-//            mediaPlayer.play();
-//            mainController.updatePlayPauseIcon(true);
-//        }
-//    }
-//
-//    /**
-//     * Checks if a song is playing.
-//     */
-//    public static boolean isPlaying() {
-//        return mediaPlayer != null && MediaPlayer.Status.PLAYING.equals(mediaPlayer.getStatus());
-//    }
-//
-//    /**
-//     * Pauses selected song.
-//     */
-//    public static void pause() {
-//        if (isPlaying()) {
-//            mediaPlayer.pause();
-//            mainController.updatePlayPauseIcon(false);
-//        }
-//    }
-//
-//    public static void seek(int seconds) {
-//        if (mediaPlayer != null) {
-//            mediaPlayer.seek(new Duration(seconds * 1000));
-//            timerCounter = seconds * 4;
-//            mainController.updateTimeLabels();
-//        }
-//    }
-//
-//    /**
-//     * Skips song.
-//     */
-//    public static void skip() {
-//        if (nowPlayingIndex < nowPlayingList.size() - 1) {
-//            boolean isPlaying = isPlaying();
-//            mainController.updatePlayPauseIcon(isPlaying);
-//            setNowPlaying(nowPlayingList.get(nowPlayingIndex + 1));
-//            if (isPlaying) {
-//                play();
-//            }
-//        } else if (isLoopActive) {
-//            boolean isPlaying = isPlaying();
-//            mainController.updatePlayPauseIcon(isPlaying);
-//            nowPlayingIndex = 0;
-//            setNowPlaying(nowPlayingList.get(nowPlayingIndex));
-//            if (isPlaying) {
-//                play();
-//            }
-//        } else {
-//            mainController.updatePlayPauseIcon(false);
-//            nowPlayingIndex = 0;
-//            setNowPlaying(nowPlayingList.get(nowPlayingIndex));
-//        }
-//    }
-//
-//    public static void back() {
-//        if (timerCounter > 20 || nowPlayingIndex == 0) {
-//            mainController.initializeTimeSlider();
-//            seek(0);
-//        } else {
-//            boolean isPlaying = isPlaying();
-//            setNowPlaying(nowPlayingList.get(nowPlayingIndex - 1));
-//            if (isPlaying) {
-//                play();
-//            }
-//        }
-//    }
-//
-//    public static void mute(boolean isMuted) {
-//        FXGLMusicApp.isMuted = !isMuted;
-//        if (mediaPlayer != null) {
-//            mediaPlayer.setMute(!isMuted);
-//        }
-//    }
-//
-//    public static void toggleLoop() {
-//        isLoopActive = !isLoopActive;
-//    }
-//
-//    public static boolean isLoopActive() {
-//        return isLoopActive;
-//    }
-//
-//    public static void toggleShuffle() {
-//        isShuffleActive = !isShuffleActive;
-//
-//        if (isShuffleActive) {
-//            Collections.shuffle(nowPlayingList);
-//        } else {
-//            Collections.sort(nowPlayingList);
-//        }
-//
-//        nowPlayingIndex = nowPlayingList.indexOf(nowPlaying);
-//    }
-//
-//    public static boolean isShuffleActive() {
-//        return isShuffleActive;
-//    }
-//
-//    public static Stage getStage() {
-//        return stage;
-//    }
-//
-//    public static MainController getMainController() {
-//        return mainController;
-//    }
-//
-//    /**
-//     * Gets currently playing song list.
-//     * @return arraylist of now playing songs
-//     */
-//    public static ArrayList<Song> getNowPlayingList() {
-//        return nowPlayingList == null ? new ArrayList<>() : new ArrayList<>(nowPlayingList);
-//    }
-//
-//    public static void addSongToNowPlayingList(Song song) {
-//        if (!nowPlayingList.contains(song)) {
-//            nowPlayingList.add(song);
-//        }
-//    }
-//
-//    public static void setNowPlayingList(List<Song> list) {
-//        nowPlayingList = new ArrayList<>(list);
-//    }
-//
-//    public static void setNowPlaying(Song song) {
-//        if (nowPlayingList.contains(song)) {
-//
-//            updatePlayCount();
-//            nowPlayingIndex = nowPlayingList.indexOf(song);
-//            if (nowPlaying != null) {
-//                nowPlaying.setPlaying(false);
-//            }
-//            nowPlaying = song;
-//            nowPlaying.setPlaying(true);
-//            if (mediaPlayer != null) {
-//                mediaPlayer.stop();
-//                mediaPlayer.dispose();
-//            }
-//
-//            timerCounter = 0;
-//            secondsPlayed = 0;
-//
-//            Media media = new Media(song.getFile().toUri().toString());
-//            mediaPlayer = new MediaPlayer(media);
-//            mediaPlayer.volumeProperty().bind(mainController.volumeProperty().divide(200));
-//            mediaPlayer.setOnEndOfMedia(FXGLMusicApp::skip);
-//            mediaPlayer.setMute(isMuted);
-//            mainController.updateNowPlayingButton();
-//            mainController.initializeTimeSlider();
-//            mainController.initializeTimeLabels();
-//        }
-//    }
-//
-//    private static void updatePlayCount() {
-//        if (nowPlaying != null) {
-//            int length = nowPlaying.getLengthInSeconds();
-//            if ((100 * secondsPlayed / length) > 50) {
-//                songPlayed(nowPlaying);
-//            }
-//        }
-//    }
-//
-//    private static void songPlayed(Song song) {
-//        song.playCountProperty().set(song.playCountProperty().get() + 1);
-//        song.setPlayDate(LocalDateTime.now());
-//    }
-//
-//    public static Song getNowPlaying() {
-//        return nowPlaying;
-//    }
-//
-//    public static String getTimePassed() {
-//        int secondsPassed = timerCounter / 4;
-//        int minutes = secondsPassed / 60;
-//        int seconds = secondsPassed % 60;
-//        return minutes + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
-//    }
-//
-//    public static String getTimeRemaining() {
-//        int secondsPassed = timerCounter / 4;
-//        int totalSeconds = getNowPlaying().getLengthInSeconds();
-//        int secondsRemaining = totalSeconds - secondsPassed;
-//        int minutes = secondsRemaining / 60;
-//        int seconds = secondsRemaining % 60;
-//        return minutes + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
-//    }
-//
-//    public static void setDraggedItems(List<Song> draggedItems) {
-//        FXGLMusicApp.draggedItems = draggedItems;
-//    }
-//
-//    public static List<Song> getDraggedItems() {
-//        return draggedItems;
-//    }
 //
 //    public static Library getLibrary() {
 //        return library;
-//    }
-//
-//    public static ExecutorService getExecutorService() {
-//        return executorService;
 //    }
 //
 //    private static class DeserializeLibraryTask extends Task<Library> {

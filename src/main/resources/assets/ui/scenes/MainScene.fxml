@@ -124,7 +124,7 @@
    </center>
 
    <bottom>
-      <fx:include source="../controls/MediaPane.fxml"/>
+      <fx:include fx:id="mediaPane" source="../controls/MediaPane.fxml"/>
    </bottom>
 
 </BorderPane>
