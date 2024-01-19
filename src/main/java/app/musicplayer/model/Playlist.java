@@ -23,7 +23,6 @@ public final class Playlist implements Comparable<Playlist> {
     private PlaylistType type;
     private StringProperty title;
 
-
     public Playlist(PlaylistType type, String title) {
         this.type = type;
         this.title = new SimpleStringProperty(title);

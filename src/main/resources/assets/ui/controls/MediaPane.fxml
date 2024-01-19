@@ -38,7 +38,7 @@
 
       <center>
          <VBox spacing="-5.0" alignment="CENTER" BorderPane.alignment="CENTER">
-            <HBox fx:id="controlPane" alignment="CENTER">
+            <HBox alignment="CENTER">
                <padding>
                   <Insets top="5.0"/>
                </padding>

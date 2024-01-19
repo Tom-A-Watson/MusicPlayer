@@ -8,7 +8,6 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.model.Song;
-import com.almasb.fxgl.dsl.FXGL;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -21,10 +20,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 //   TODO:
 //    private static List<Song> nowPlayingList;
 //    private static int nowPlayingIndex;
-//    private static int secondsPlayed = 0;
 //    private static boolean isLoopActive = false;
 //    private static boolean isShuffleActive = false;
 
@@ -53,15 +51,9 @@ public final class MediaPaneController implements Initializable {
     private Label nowPlayingTitle;
 
     @FXML
-    private HBox controlPane;
-
-    @FXML
     private Slider timeSlider;
     @FXML
     private Region frontSliderTrack;
-
-    @FXML
-    private Rectangle frontSliderRect;
 
     @FXML
     private Label timePassedLabel;
@@ -134,6 +126,8 @@ public final class MediaPaneController implements Initializable {
 
         this.song = song;
 
+        song.setPlayCount(song.getPlayCount() + 1);
+        song.setPlayDate(LocalDateTime.now());
         song.setPlaying(true);
 
         nowPlayingTitle.textProperty().bind(song.titleProperty());
@@ -152,19 +146,6 @@ public final class MediaPaneController implements Initializable {
         isPlaying.bind(mediaPlayer.statusProperty().isEqualTo(MediaPlayer.Status.PLAYING));
 
         play();
-
-//        if (nowPlayingList.contains(song)) {
-//
-//            updatePlayCount();
-//            nowPlayingIndex = nowPlayingList.indexOf(song);
-//        }
-    }
-
-    public void mute(boolean isMuted) {
-        if (mediaPlayer == null)
-            return;
-
-        mediaPlayer.setMute(!isMuted);
     }
 
     public void back() {
@@ -181,6 +162,18 @@ public final class MediaPaneController implements Initializable {
 //            }
         }
     }
+
+    //    public static void toggleShuffle() {
+//        isShuffleActive = !isShuffleActive;
+//
+//        if (isShuffleActive) {
+//            Collections.shuffle(nowPlayingList);
+//        } else {
+//            Collections.sort(nowPlayingList);
+//        }
+//
+//        nowPlayingIndex = nowPlayingList.indexOf(nowPlaying);
+//    }
 
     /**
      * Skips the currently playing song.
@@ -236,6 +229,11 @@ public final class MediaPaneController implements Initializable {
         updateTimeLabels();
     }
 
+    private void updateTimeLabels() {
+        timePassedLabel.setText(getTimePassed());
+        timeRemainingLabel.setText(getTimeRemaining());
+    }
+
     private String getTimePassed() {
         int secondsPassed = timerCounter / 4;
         int minutes = secondsPassed / 60;
@@ -250,27 +248,6 @@ public final class MediaPaneController implements Initializable {
         int minutes = secondsRemaining / 60;
         int seconds = secondsRemaining % 60;
         return minutes + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
-    }
-
-    public void initializeTimeLabels() {
-//        Song song = FXGLMusicApp.getNowPlaying();
-//        if (song != null) {
-//            timePassed.setText("0:00");
-//
-//            int minutes = song.getLengthInSeconds() / 60;
-//            int seconds = song.getLengthInSeconds() % 60;
-//            var totalTime = minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
-//
-//            timeRemaining.setText(totalTime);
-//        } else {
-//            timePassed.setText("");
-//            timeRemaining.setText("");
-//        }
-    }
-
-    private void updateTimeLabels() {
-        timePassedLabel.setText(getTimePassed());
-        timeRemainingLabel.setText(getTimeRemaining());
     }
 
     private class TimeUpdater implements Runnable {
@@ -292,34 +269,12 @@ public final class MediaPaneController implements Initializable {
 
                     // called every tick (250 ms) because max value is length in seconds * 4
                     if (!timeSlider.isPressed()) {
-                        timeSlider.increment();
+                        timeSlider.setValue(timerCounter);
                     }
                 }
             });
         }
     }
-
-//    public static void toggleShuffle() {
-//        isShuffleActive = !isShuffleActive;
-//
-//        if (isShuffleActive) {
-//            Collections.shuffle(nowPlayingList);
-//        } else {
-//            Collections.sort(nowPlayingList);
-//        }
-//
-//        nowPlayingIndex = nowPlayingList.indexOf(nowPlaying);
-//    }
-
-//    private static void updatePlayCount() {
-//        if (nowPlaying != null) {
-//            int length = nowPlaying.getLengthInSeconds();
-//            if ((100 * secondsPlayed / length) > 50) {
-//                  song.playCountProperty().set(song.playCountProperty().get() + 1);
-//                  song.setPlayDate(LocalDateTime.now());
-//            }
-//        }
-//    }
 
     @FXML
     private void navigateToCurrentSong() {
@@ -327,6 +282,11 @@ public final class MediaPaneController implements Initializable {
     }
 
     public void onExit() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.dispose();
+        }
+
         executorService.shutdownNow();
     }
 }

@@ -8,14 +8,12 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
-import app.musicplayer.FXGLMusicApp;
 import app.musicplayer.events.UserDataEvent;
 import app.musicplayer.events.UserEvent;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
 import app.musicplayer.model.serializable.Serializer;
-import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -30,7 +28,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
@@ -47,19 +46,20 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
 import static app.musicplayer.Config.LIBRARY_FILE;
 import static app.musicplayer.Config.SUPPORTED_FILE_EXTENSIONS;
+import static app.musicplayer.model.Playlist.PlaylistType.*;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
 public class MainController implements Initializable, PlaylistBoxController.PlaylistBoxHandler {
 
     private static final Logger log = Logger.get(MainController.class);
-
-    @FXML
-    private VBox sideBar;
 
     @FXML
     private VBox playlistBox;
@@ -122,12 +122,9 @@ public class MainController implements Initializable, PlaylistBoxController.Play
         searchField.textProperty().addListener((obs, oldText, newText) -> {
             String text = newText.trim();
             if (text.isEmpty()) {
-                // TODO: what if playlist is selected
-                //songTableViewController.setSongs(FXGLMusicApp.getLibrary().getSongs());
-
+                songTableViewController.setSongs(songTableViewController.getPlaylist().getSongs());
             } else {
-                // TODO: search in current playlist?
-                Search.search(text);
+                Search.search(songTableViewController.getPlaylist(), text);
             }
         });
 
@@ -166,6 +163,14 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 
             title.setOnMouseClicked(e -> {
                 songTableViewController.setPlaylist(playlist);
+
+                if (playlist.getType() == MOST_PLAYED) {
+                    playlist.getSongs().setAll(getMostPlayedSongs());
+                }
+
+                if (playlist.getType() == RECENTLY_PLAYED) {
+                    playlist.getSongs().setAll(getRecentSongs());
+                }
             });
 
             playlistBox.getChildren().add(playlistView);
@@ -217,7 +222,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 
             textBox.setOnKeyPressed(x -> {
                 if (x.getCode() == KeyCode.ENTER)  {
-                    sideBar.requestFocus();
+                    playlistBox.requestFocus();
                 }
             });
 
@@ -288,7 +293,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             return result;
         }
 
-        public static void search(String searchText) {
+        public static void search(Playlist playlist, String searchText) {
             if (searchThread != null && searchThread.isAlive()) {
                 searchThread.interrupt();
             }
@@ -299,22 +304,22 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                 try {
                     hasResults.set(false);
 
-//                    List<Song> songResults = FXGLMusicApp.getLibrary()
-//                            .getSongs()
-//                            .stream()
-//                            .filter(song -> song.getTitle().toUpperCase().contains(text))
-//                            .sorted((x, y) -> {
-//                                return compareSearchString(x.getTitle().toUpperCase(), y.getTitle().toUpperCase(), text);
-//                            })
-//                            // TODO: 10 search items
-//                            .limit(10)
-//                            .collect(Collectors.toList());
-//
-//                    if (searchThread.isInterrupted()) {
-//                        throw new InterruptedException();
-//                    }
-//
-//                    result = new SearchResult(songResults);
+                    List<Song> songResults = playlist
+                            .getSongs()
+                            .stream()
+                            .filter(song -> song.getTitle().toUpperCase().contains(text))
+                            .sorted((x, y) -> {
+                                return compareSearchString(x.getTitle().toUpperCase(), y.getTitle().toUpperCase(), text);
+                            })
+                            // TODO: 10 search items
+                            .limit(10)
+                            .toList();
+
+                    if (searchThread.isInterrupted()) {
+                        throw new InterruptedException();
+                    }
+
+                    result = new SearchResult(songResults);
 
                     hasResults.set(true);
 
@@ -364,27 +369,23 @@ public class MainController implements Initializable, PlaylistBoxController.Play
         public record SearchResult(List<Song> songResults) { }
     }
 
+    private List<Song> getRecentSongs() {
+        return library.getSongs()
+                .stream()
+                .filter(song -> song.getPlayCount() > 0)
+                .sorted((s1, s2) -> s2.getPlayDate().compareTo(s1.getPlayDate()))
+                .limit(100)
+                .toList();
+    }
 
-    // TODO:
-//    @Override
-//    public List<Song> getSongs() {
-//        return MusifyApp.getLibrary().getSongs().stream()
-//                .filter(song -> song.getPlayCount() > 0)
-//                .sorted((s1, s2) -> s2.getPlayDate().compareTo(s1.getPlayDate()))
-//                .limit(100)
-//                .collect(Collectors.toList());
-//    }
-
-    // TODO:
-//    @Override
-//    public List<Song> getSongs() {
-//        return MusifyApp.getLibrary().getSongs()
-//                .stream()
-//                .filter(song -> song.getPlayCount() > 0)
-//                .sorted((s1, s2) -> Integer.compare(s2.getPlayCount(), s1.getPlayCount()))
-//                .limit(100)
-//                .collect(Collectors.toList());
-//    }
+    private List<Song> getMostPlayedSongs() {
+        return library.getSongs()
+                .stream()
+                .filter(song -> song.getPlayCount() > 0)
+                .sorted((s1, s2) -> Integer.compare(s2.getPlayCount(), s1.getPlayCount()))
+                .limit(100)
+                .toList();
+    }
 
     private void onClickImport() {
         var dirChooser = new DirectoryChooser();
