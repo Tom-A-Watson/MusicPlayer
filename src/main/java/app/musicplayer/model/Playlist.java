@@ -12,7 +12,10 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-// TODO: sort songs
+/**
+ * A playlist is a collection of songs.
+ * The order (in user created playlists) is defined by the user.
+ */
 public final class Playlist implements Comparable<Playlist> {
 
     public enum PlaylistType {

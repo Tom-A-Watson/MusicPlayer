@@ -8,19 +8,16 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
-import app.musicplayer.FXGLMusicApp;
 import app.musicplayer.events.UserDataEvent;
 import app.musicplayer.events.UserEvent;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
-import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.logging.Logger;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,30 +26,23 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.control.*;
 import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
-import javafx.stage.DirectoryChooser;
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.tag.Tag;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
-import static app.musicplayer.Config.SUPPORTED_FILE_EXTENSIONS;
+import static app.musicplayer.Config.VAR_DRAGGED_SONGS;
 import static app.musicplayer.events.UserDataEvent.PLAY_SONG;
-import static com.almasb.fxgl.dsl.FXGL.*;
+import static com.almasb.fxgl.dsl.FXGL.fire;
+import static com.almasb.fxgl.dsl.FXGL.set;
 
 public final class SongTableViewController implements Initializable, ControlBoxController.ControlBoxHandler {
 
@@ -69,11 +59,16 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 
 	private BooleanProperty isAllSongsPlaylist = new SimpleBooleanProperty(true);
 
-	private Playlist playlist = null;
+	// playlist is never null after MainController is initialized
+	private Playlist playlist;
+
+	// this can be null (e.g. if the playlist has no songs)
 	private Song selectedSong = null;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		log.info("initialize()");
+
 		tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		// 70 (controlColumn)
@@ -89,7 +84,9 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 
 		initRowFactory();
 
-		tableView.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
+		// this filter allows each cell to be selected
+		// TODO: cannot be present by default or button import songs cannot be pressed
+		tableView.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
 			tableView.requestFocus();
 			e.consume();
 		});
@@ -102,13 +99,6 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 			if (newSelection != null && tableView.getSelectionModel().getSelectedIndices().size() == 1) {
 				newSelection.setSelected(true);
 				selectedSong = newSelection;
-			}
-		});
-
-		// Plays selected song when enter key is pressed.
-		tableView.setOnKeyPressed(event -> {
-			if (event.getCode().equals(KeyCode.ENTER)) {
-				play();
 			}
 		});
 	}
@@ -168,6 +158,7 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 						sm.select(row.getItem());
 					}
 				} else {
+
 					if (sm.getSelectedIndices().size() > 1) {
 						sm.clearSelection();
 						sm.select(row.getItem());
@@ -181,12 +172,18 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 			});
 
 			row.setOnDragDetected(event -> {
+				var sm = tableView.getSelectionModel();
+
+				if (!sm.isSelected(row.getIndex())) {
+					sm.clearSelection();
+					sm.select(row.getIndex());
+				}
+
 				Dragboard db = row.startDragAndDrop(TransferMode.ANY);
 
 				List<Song> draggedSongs = new ArrayList<>(tableView.getSelectionModel().getSelectedItems());
 
-				// TODO:
-				//FXGLMusicApp.setDraggedItems(draggedSongs);
+				set(VAR_DRAGGED_SONGS, draggedSongs);
 
 				db.setContent(Map.of(Config.DRAG_SONG_LIST, ""));
 

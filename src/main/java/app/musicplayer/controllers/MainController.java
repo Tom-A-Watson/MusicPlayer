@@ -52,8 +52,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
-import static app.musicplayer.Config.LIBRARY_FILE;
-import static app.musicplayer.Config.SUPPORTED_FILE_EXTENSIONS;
+import static app.musicplayer.Config.*;
 import static app.musicplayer.model.Playlist.PlaylistType.*;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
@@ -90,7 +89,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
         onEvent(UserDataEvent.PLAY_SONG, event -> {
             Song song = (Song) event.getData();
 
-            mediaPaneController.play(song);
+            mediaPaneController.play(songTableViewController.getPlaylist(), song);
 
             // TODO:
 
@@ -210,18 +209,21 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                             System.out.println("TODO: Playlist already exists");
                         } else {
 
-                            // TODO: if too long title
+                            if (text.length() > MAX_PLAYLIST_TITLE_LENGTH) {
+                                System.out.println("TODO: Playlist title is too long");
+                            } else {
+                                // all good
+                                var playlist = library.addPlaylist(text);
 
-                            var playlist = library.addPlaylist(text);
-
-                            addNewPlaylistToUI(playlist);
+                                addNewPlaylistToUI(playlist);
+                            }
                         }
                     }
                 }
             });
 
-            textBox.setOnKeyPressed(x -> {
-                if (x.getCode() == KeyCode.ENTER)  {
+            textBox.setOnKeyPressed(e -> {
+                if (e.getCode() == KeyCode.ENTER)  {
                     playlistBox.requestFocus();
                 }
             });
@@ -247,6 +249,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                 .filter(view -> view.getProperties().get("PLAYLIST") == playlist)
                 .findAny()
                 .ifPresent(view -> {
+                    // if the current playlist is the one we are removing, then set the default playlist
                     if (songTableViewController.getPlaylist() == playlist) {
                         songTableViewController.setPlaylist(library.getLibraryPlaylist());
                     }

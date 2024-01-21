@@ -39,6 +39,9 @@ import static app.musicplayer.Config.*;
 // TODO: if song is removed from folder
 // TODO: check shuffle and loop
 // TODO: fix song table view selection when moving from a different playlist, that song is selected in the new one
+// TODO: global controls e.g. spacebar to pause/resume
+// TODO: allow playlist song reorder
+// TODO: loop 1, loop all
 public class FXGLMusicApp extends Application {
 
     private static final Logger log = Logger.get(FXGLMusicApp.class);
