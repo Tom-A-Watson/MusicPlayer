@@ -14,6 +14,7 @@ import app.musicplayer.model.Library;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
 import app.musicplayer.model.serializable.Serializer;
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -53,6 +54,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
 import static app.musicplayer.Config.*;
+import static app.musicplayer.events.UserDataEvent.*;
 import static app.musicplayer.model.Playlist.PlaylistType.*;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
@@ -86,19 +88,24 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             onClickImport();
         });
 
-        onEvent(UserDataEvent.PLAY_SONG, event -> {
+        onEvent(PLAY_SONG, event -> {
             Song song = (Song) event.getData();
 
             mediaPaneController.play(songTableViewController.getPlaylist(), song);
+        });
 
-            // TODO:
+        onEvent(LOAD_SONG_ARTWORK, event -> {
+            Song song = (Song) event.getData();
 
-//		ObservableList<Song> songList = tableView.getItems();
-//		if (MusifyApp.isShuffleActive()) {
-//			Collections.shuffle(songList);
-//			songList.remove(song);
-//			songList.add(0, song);
-//		}
+            var image = loadArtwork(song.getFile());
+            song.setArtwork(image);
+        });
+
+        onEvent(NAGIVATE_TO_SONG, event -> {
+            PlaylistAndSong data = (PlaylistAndSong) event.getData();
+
+            songTableViewController.setPlaylist(data.playlist());
+            songTableViewController.selectSong(data.song());
         });
 
         initSearchField();
@@ -477,7 +484,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             AudioFile audioFile = AudioFileIO.read(songFile.toFile());
             Tag tag = audioFile.getTag();
 
-            if (tag.getFirstArtwork() != null) {
+            if (tag != null && tag.getFirstArtwork() != null) {
                 byte[] bytes = tag.getFirstArtwork().getBinaryData();
                 ByteArrayInputStream in = new ByteArrayInputStream(bytes);
                 Image artwork = new Image(in, 300, 300, true, true);
@@ -489,7 +496,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             log.warning("Failed to load artwork for: " + songFile, e);
         }
 
-        return new Image(Config.IMG + "albumsIcon.png");
+        return image("albumsIcon.png");
     }
 
     private static class DeserializeLibraryTask extends Task<Library> {

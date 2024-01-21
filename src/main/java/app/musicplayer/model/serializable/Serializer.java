@@ -52,6 +52,8 @@ public final class Serializer {
     }
 
     public static SerializablePlaylist toSerializable(Playlist playlist) {
+        playlist.restoreFromShuffle();
+
         return new SerializablePlaylist(
                 playlist.getType(),
                 playlist.getTitle(),

@@ -14,7 +14,7 @@ import java.util.*;
 import static app.musicplayer.model.Playlist.PlaylistType.*;
 
 /**
- * A library is a collection songs, artists, albums and playlists.
+ * A library is a collection of playlists.
  */
 public final class Library {
 
@@ -36,12 +36,6 @@ public final class Library {
      */
     public Library(List<Playlist> playlists) {
         this.playlists.addAll(playlists);
-
-        // TODO: sort?
-        //Collections.sort(this.songs);
-
-        // no need to sort playlists since UI sorts them on its own
-        //Collections.sort(this.playlists);
 
         // TODO: check that all 3 built-in playlist types are present
     }

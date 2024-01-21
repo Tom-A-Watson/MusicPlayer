@@ -12,6 +12,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * A playlist is a collection of songs.
  * The order (in user created playlists) is defined by the user.
@@ -22,13 +27,63 @@ public final class Playlist implements Comparable<Playlist> {
         ALL_SONGS, MOST_PLAYED, RECENTLY_PLAYED, USER_CREATED
     }
 
+    private List<Integer> originalOrder = new ArrayList<>();
     private ObservableList<Song> songs = FXCollections.observableArrayList();
+
+    /**
+     * Tells us if we can trust the view in [songs].
+     */
+    private boolean isViewDirty = false;
+
     private PlaylistType type;
     private StringProperty title;
 
     public Playlist(PlaylistType type, String title) {
         this.type = type;
         this.title = new SimpleStringProperty(title);
+    }
+
+    public void shuffle() {
+        if (isViewDirty)
+            return;
+
+        originalOrder.clear();
+        originalOrder.addAll(
+                songs.stream()
+                        .map(Song::getId)
+                        .toList()
+        );
+
+        // do not shuffle potentially live scene graph
+        var tmp = new ArrayList<>(songs);
+        Collections.shuffle(tmp);
+        songs.setAll(tmp);
+
+        isViewDirty = true;
+    }
+
+    public void restoreFromShuffle() {
+        if (!isViewDirty)
+            return;
+
+        var idsToRemove = originalOrder.stream()
+                .filter(id -> songs.stream().noneMatch(s -> s.getId() == id))
+                .toList();
+
+        originalOrder.removeAll(idsToRemove);
+
+        songs.forEach(s -> {
+            if (!originalOrder.contains(s.getId())) {
+                originalOrder.add(s.getId());
+            }
+        });
+
+        // do not sort potentially live scene graph
+        var tmp = new ArrayList<>(songs);
+        tmp.sort(Comparator.comparingInt(song -> originalOrder.indexOf(song.getId())));
+        songs.setAll(tmp);
+
+        isViewDirty = false;
     }
 
     public PlaylistType getType() {

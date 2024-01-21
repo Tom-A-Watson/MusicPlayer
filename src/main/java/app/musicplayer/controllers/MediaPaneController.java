@@ -7,9 +7,10 @@
 
 package app.musicplayer.controllers;
 
+import app.musicplayer.events.UserDataEvent;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
-import com.almasb.fxgl.core.math.FXGLMath;
+import com.almasb.fxgl.dsl.FXGL;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -28,16 +29,14 @@ import javafx.util.Duration;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-//   TODO:
-//    private static List<Song> nowPlayingList;
-//    private static int nowPlayingIndex;
-//    private static boolean isLoopActive = false;
-//    private static boolean isShuffleActive = false;
+import static app.musicplayer.events.UserDataEvent.*;
+import static com.almasb.fxgl.dsl.FXGL.*;
 
 /**
  * @author Almas Baim (https://github.com/AlmasB)
@@ -92,6 +91,12 @@ public final class MediaPaneController implements Initializable {
             shuffleButton.pseudoClassStateChanged(PseudoClass.getPseudoClass("active"), isActive);
         });
 
+        nowPlayingArtwork.imageProperty().addListener((o, oldImage, newImage) -> {
+            if (newImage == null) {
+                fire(new UserDataEvent<>(LOAD_SONG_ARTWORK, song));
+            }
+        });
+
         executorService = Executors.newScheduledThreadPool(4);
         executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
     }
@@ -131,10 +136,7 @@ public final class MediaPaneController implements Initializable {
             var prevSong = this.song;
             prevSong.setPlaying(false);
 
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
-                mediaPlayer.dispose();
-            }
+            releaseMediaPlayer();
         }
 
         this.playlist = playlist;
@@ -165,32 +167,17 @@ public final class MediaPaneController implements Initializable {
         if (!isReady)
             return;
 
-
-        // TODO: || nowPlayingIndex == 0
-        if (timerCounter > 20) {
+        if (timerCounter > 20 || currentSongIndex == 0) {
             seek(0);
-        } else {
-            // TODO:
-//            boolean isPlaying = isPlaying();
-//            setNowPlaying(nowPlayingList.get(nowPlayingIndex - 1));
-//
-//            if (isPlaying) {
-//                play();
-//            }
+            return;
         }
-    }
 
-    //    public static void toggleShuffle() {
-//        isShuffleActive = !isShuffleActive;
-//
-//        if (isShuffleActive) {
-//            Collections.shuffle(nowPlayingList);
-//        } else {
-//            Collections.sort(nowPlayingList);
-//        }
-//
-//        nowPlayingIndex = nowPlayingList.indexOf(nowPlaying);
-//    }
+        boolean wasPlaying = isPlaying();
+        setSong(playlist, playlist.getSongs().get(currentSongIndex - 1));
+
+        if (wasPlaying)
+            play();
+    }
 
     /**
      * Moves to the next song in the playlist based on control pane criteria (e.g. shuffle, loop).
@@ -209,40 +196,23 @@ public final class MediaPaneController implements Initializable {
     }
 
     private void setNextSong() {
-        // TODO:
+        // TODO: set via UI buttons
         boolean isLoop1On = false;
         boolean isLoopAllOn = false;
 
-//        if (isLoop1On) {
-//            setSong(playlist, song);
-//            return;
-//        }
-//
-//        // we reached the playlist end
-//        if (currentSongIndex == playlist.getSongs().size() - 1) {
-//            if (isLoopAllOn) {
-//
-//            }
-//
-//
-//            setSong(playlist, playlist.getSongs().get(0));
-//            return;
-//        }
-//
-//        // TODO: this shuffle is endless
-//        if (isShuffleOn()) {
-//            FXGLMath.random(playlist.getSongs())
-//                    .ifPresent(song -> {
-//                        setSong(playlist, song);
-//                    });
-//            return;
-//        }
-
-        // if there are still songs in the playlist, then play the next
-        if (currentSongIndex < playlist.getSongs().size() - 1) {
-            setSong(playlist, playlist.getSongs().get(currentSongIndex + 1));
+        if (isLoop1On) {
+            setSong(playlist, song);
             return;
         }
+
+        // we reached the playlist end, if loop all is on, then play first song
+        if (currentSongIndex == playlist.getSongs().size() - 1 && isLoopAllOn) {
+            setSong(playlist, playlist.getSongs().get(0));
+            return;
+        }
+
+        // we know there are still songs in the playlist, then play the next
+        setSong(playlist, playlist.getSongs().get(currentSongIndex + 1));
     }
 
     /**
@@ -281,7 +251,13 @@ public final class MediaPaneController implements Initializable {
 
         isShuffleOn.set(!isShuffleOn());
 
-        System.out.println("TODO: toggle shuffle");
+        if (isShuffleOn()) {
+            playlist.shuffle();
+        } else {
+            playlist.restoreFromShuffle();
+        }
+
+        currentSongIndex = playlist.getSongs().indexOf(song);
     }
 
     @FXML
@@ -297,7 +273,7 @@ public final class MediaPaneController implements Initializable {
         if (!isReady)
             return;
 
-        // TODO:
+        fire(new UserDataEvent<>(NAGIVATE_TO_SONG, new PlaylistAndSong(playlist, song)));
     }
 
     private void seek(int seconds) {
@@ -376,11 +352,19 @@ public final class MediaPaneController implements Initializable {
         }
     }
 
+    private void releaseMediaPlayer() {
+        if (mediaPlayer == null)
+            return;
+
+        mediaPlayer.volumeProperty().unbind();
+        mediaPlayer.muteProperty().unbind();
+        mediaPlayer.setOnEndOfMedia(null);
+        mediaPlayer.stop();
+        mediaPlayer.dispose();
+    }
+
     public void onExit() {
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.dispose();
-        }
+        releaseMediaPlayer();
 
         executorService.shutdownNow();
     }

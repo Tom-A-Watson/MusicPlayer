@@ -7,6 +7,8 @@
 
 package app.musicplayer.events;
 
+import app.musicplayer.model.Playlist;
+import app.musicplayer.model.Song;
 import javafx.event.EventType;
 
 /**
@@ -17,6 +19,8 @@ public class UserDataEvent<T> extends UserEvent {
     public static final EventType<UserDataEvent<?>> ANY = new EventType<>(UserEvent.ANY, "USER_DATA_EVENT_ANY");
 
     public static final EventType<UserDataEvent<?>> PLAY_SONG = new EventType<>(ANY, "PLAY_SONG_DATA_EVENT");
+    public static final EventType<UserDataEvent<?>> LOAD_SONG_ARTWORK = new EventType<>(ANY, "LOAD_SONG_ARTWORK_DATA_EVENT");
+    public static final EventType<UserDataEvent<?>> NAGIVATE_TO_SONG = new EventType<>(ANY, "NAGIVATE_TO_SONG_DATA_EVENT");
 
     private T data;
 
@@ -28,4 +32,6 @@ public class UserDataEvent<T> extends UserEvent {
     public T getData() {
         return data;
     }
+
+    public record PlaylistAndSong(Playlist playlist, Song song) {}
 }

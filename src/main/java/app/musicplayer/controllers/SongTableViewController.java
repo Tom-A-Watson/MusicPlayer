@@ -214,12 +214,13 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 	}
 
 	public void selectSong(Song selectedSong) {
+		tableView.getSelectionModel().clearSelection();
 		tableView.getSelectionModel().select(selectedSong);
+		tableView.scrollTo(selectedSong);
 	}
 
 	public void setSongs(ObservableList<Song> songs) {
 		tableView.getSelectionModel().clearSelection();
-
 		tableView.setItems(songs);
 
 		if (!songs.isEmpty()) {
