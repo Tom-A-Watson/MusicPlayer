@@ -28,12 +28,10 @@ import static app.musicplayer.Config.*;
 // TODO: serialization version for future updates
 // TODO: volume is not serialized
 // TODO: light and dark themes
-// TODO: on startup "Your Library" is not focused
 // TODO: rename playlist option
 // TODO: remember stage width height
 // TODO: remember last played song
 // TODO: update to high res app icon
-// TODO: update project title as Musify is taken
 // TODO: consider free streaming music API online
 // TODO: remove songs from library
 // TODO: if song is removed from folder
