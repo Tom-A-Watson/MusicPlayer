@@ -22,13 +22,18 @@ import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -78,12 +83,44 @@ public class MainController implements Initializable, PlaylistBoxController.Play
     @FXML
     private TextField searchField;
 
+    private ObjectProperty<Parent> selectedPlaylistView = new SimpleObjectProperty<>(null);
+
     private Library library;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         log.info("initialize()");
 
+        var pseudoClass = PseudoClass.getPseudoClass("selected");
+
+        selectedPlaylistView.addListener((o, oldView, newView) -> {
+            if (oldView != null) {
+                oldView.getChildrenUnmodifiable().get(1).pseudoClassStateChanged(pseudoClass, false);
+            }
+
+            if (newView != null) {
+                newView.getChildrenUnmodifiable().get(1).pseudoClassStateChanged(pseudoClass, true);
+            }
+        });
+
+        initEventHandlers();
+        initSearchField();
+
+        if (Files.exists(LIBRARY_FILE)) {
+            var task = new DeserializeLibraryTask(LIBRARY_FILE);
+            task.setOnSucceeded(e -> {
+                library = task.getValue();
+                initPlaylists();
+            });
+            getExecutor().startAsync(task);
+        } else {
+            library = new Library();
+
+            initPlaylists();
+        }
+    }
+
+    private void initEventHandlers() {
         onEvent(UserEvent.CLICK_IMPORT, event -> {
             onClickImport();
         });
@@ -107,21 +144,6 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             songTableViewController.setPlaylist(data.playlist());
             songTableViewController.selectSong(data.song());
         });
-
-        initSearchField();
-
-        if (Files.exists(LIBRARY_FILE)) {
-            var task = new DeserializeLibraryTask(LIBRARY_FILE);
-            task.setOnSucceeded(e -> {
-                library = task.getValue();
-                initPlaylists();
-            });
-            getExecutor().startAsync(task);
-        } else {
-            library = new Library();
-
-            initPlaylists();
-        }
     }
 
     private void initSearchField() {
@@ -149,6 +171,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             addNewPlaylistToUI(playlist);
         }
 
+        selectedPlaylistView.set((Parent) playlistBox.getChildren().get(0));
         songTableViewController.setPlaylist(library.getLibraryPlaylist());
     }
 
@@ -168,6 +191,8 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             controller.setHandler(this);
 
             title.setOnMouseClicked(e -> {
+                selectedPlaylistView.set(playlistView);
+
                 songTableViewController.setPlaylist(playlist);
 
                 if (playlist.getType() == MOST_PLAYED) {
@@ -258,6 +283,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                 .ifPresent(view -> {
                     // if the current playlist is the one we are removing, then set the default playlist
                     if (songTableViewController.getPlaylist() == playlist) {
+                        selectedPlaylistView.set((Parent) playlistBox.getChildren().get(0));
                         songTableViewController.setPlaylist(library.getLibraryPlaylist());
                     }
 

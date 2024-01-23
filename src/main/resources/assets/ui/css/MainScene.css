@@ -23,14 +23,6 @@
     -fx-padding: 0;
 }
 
-.letter:hover {
-    -fx-text-fill: #c2c2c2;
-}
-
-.letter:pressed {
-    -fx-text-fill: #dadada;
-}
-
 .bottomBarLabel {
     -fx-font-family: verdana;
     -fx-font-size: 12px;
@@ -38,20 +30,20 @@
     -fx-text-fill: #ffffff;
 }
 
-.sideBarItem:hover, .sideBarItemSelected:hover {
+.sideBarItem: hover {
     -fx-background-color: #dadada;
 }
 
-.sideBarItem:pressed, .sideBarItemSelected:pressed {
+.sideBarItem: pressed {
     -fx-background-color: #c2c2c2;
 }
 
-.sideBarItemSelected > .label {
-    -fx-text-fill: rgb(52, 109, 207);
+.sideBarItem: selected {
+    -fx-background-color: -fx-main-color;
 }
 
-.sideBarItemSelected > .iconContainer > .icon {
-    -fx-fill: rgb(52, 109, 207);
+.sideBarItem: selected .label {
+    -fx-text-fill: white;
 }
 
 .controlPane:hover > .control,
