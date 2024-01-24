@@ -32,6 +32,9 @@ public final class PlaylistBoxController {
     private HBox playlistBox;
 
     @FXML
+    private HBox titleBox;
+
+    @FXML
     private Label playlistTitleLabel;
 
     private Playlist playlist;
@@ -85,13 +88,13 @@ public final class PlaylistBoxController {
         // TODO: this toggles .sideBarItem:hover from MainScene.css
         playlistBox.setOnDragEntered(event -> {
             if (canDragDrop(event)) {
-                playlistBox.pseudoClassStateChanged(hover, true);
+                titleBox.pseudoClassStateChanged(hover, true);
             }
         });
 
         playlistBox.setOnDragExited(event -> {
             if (canDragDrop(event)) {
-                playlistBox.pseudoClassStateChanged(hover, false);
+                titleBox.pseudoClassStateChanged(hover, false);
             }
         });
 

@@ -7,6 +7,7 @@
 
 package app.musicplayer.controllers;
 
+import app.musicplayer.Config;
 import app.musicplayer.events.UserDataEvent;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
@@ -35,6 +36,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static app.musicplayer.Config.PREFERENCES;
 import static app.musicplayer.events.UserDataEvent.*;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
@@ -96,6 +98,8 @@ public final class MediaPaneController implements Initializable {
                 fire(new UserDataEvent<>(LOAD_SONG_ARTWORK, song));
             }
         });
+
+        volumePaneController.volumeProperty().bindBidirectional(PREFERENCES.doubleProperty("volume"));
 
         executorService = Executors.newScheduledThreadPool(4);
         executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);

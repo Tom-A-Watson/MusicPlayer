@@ -10,6 +10,7 @@ package app.musicplayer.model.serializable;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
+import com.almasb.fxgl.core.collection.PropertyMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -17,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author Almas Baim (https://github.com/AlmasB)
@@ -74,6 +76,7 @@ public final class Serializer {
         );
     }
 
+    // TODO:
     public static void writeToFile(Library library, Path file) {
         try {
             var lib = Serializer.toSerializable(library);
@@ -88,7 +91,7 @@ public final class Serializer {
         }
     }
 
-    public static SerializableLibrary readFromFile(Path file) {
+    public static SerializableLibrary readLibraryFromFile(Path file) {
         try {
             var lib = mapper.readValue(file.toFile(), SerializableLibrary.class);
             
@@ -102,5 +105,31 @@ public final class Serializer {
                 Collections.emptyList(),
                 Collections.emptyList()
         );
+    }
+
+    public static void writeToFile(PropertyMap map, Path file) {
+        try {
+            var writer = mapper.writerWithDefaultPrettyPrinter();
+
+            String json = writer.writeValueAsString(map.toStringMap());
+
+            Files.writeString(file, json);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static PropertyMap readPropertiesFromFile(Path file) {
+        try {
+            Map<String, String> map = mapper.readValue(file.toFile(), Map.class);
+
+            return PropertyMap.fromStringMap(map);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new PropertyMap();
     }
 }

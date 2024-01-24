@@ -23,7 +23,7 @@
       </ImageView>
    </HBox>
 
-   <HBox styleClass="sideBarItem" HBox.hgrow="ALWAYS">
+   <HBox fx:id="titleBox" styleClass="sideBarItem" HBox.hgrow="ALWAYS">
       <Label fx:id="playlistTitleLabel"
              styleClass="playlist-title-label"
              prefHeight="30.0"

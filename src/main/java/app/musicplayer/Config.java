@@ -7,6 +7,7 @@
 
 package app.musicplayer;
 
+import com.almasb.fxgl.core.collection.PropertyMap;
 import javafx.scene.input.DataFormat;
 
 import java.nio.file.Path;
@@ -25,6 +26,7 @@ public final class Config {
     public static final int MAX_PLAYLIST_TITLE_LENGTH = 18;
 
     public static final Path LIBRARY_FILE = Paths.get("library.json");
+    public static final Path PREFERENCES_FILE = Paths.get("prefs.json");
 
     public static final DataFormat DRAG_SONG_LIST = new DataFormat("application/javafx-song-list");
 
@@ -32,7 +34,11 @@ public final class Config {
 
     public static final List<String> SUPPORTED_FILE_EXTENSIONS = List.of("mp3", "mp4", "m4a", "m4v", "wav");
 
+    public static final PropertyMap PREFERENCES = new PropertyMap();
+
     public static final String FXML = "/assets/ui/";
-    public static final String IMG = "/assets/textures/";
-    public static final String CSS = "/assets/ui/css/";
+
+    static {
+        PREFERENCES.setValue("volume", 50.0);
+    }
 }

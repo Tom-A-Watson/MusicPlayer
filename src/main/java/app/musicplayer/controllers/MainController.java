@@ -8,13 +8,12 @@
 package app.musicplayer.controllers;
 
 import app.musicplayer.Config;
-import app.musicplayer.events.UserDataEvent;
 import app.musicplayer.events.UserEvent;
 import app.musicplayer.model.Library;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
 import app.musicplayer.model.serializable.Serializer;
-import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.animation.Interpolators;
 import com.almasb.fxgl.logging.Logger;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
@@ -32,7 +31,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
+import javafx.geometry.Point2D;
 import javafx.scene.Parent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -83,6 +82,8 @@ public class MainController implements Initializable, PlaylistBoxController.Play
     @FXML
     private TextField searchField;
 
+    private boolean canAnimateNewPlaylist = true;
+
     private ObjectProperty<Parent> selectedPlaylistView = new SimpleObjectProperty<>(null);
 
     private Library library;
@@ -117,6 +118,11 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             library = new Library();
 
             initPlaylists();
+        }
+
+        if (Files.exists(PREFERENCES_FILE)) {
+            var map = Serializer.readPropertiesFromFile(PREFERENCES_FILE);
+            PREFERENCES.addAll(map);
         }
     }
 
@@ -191,6 +197,9 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             controller.setHandler(this);
 
             title.setOnMouseClicked(e -> {
+                if (playlistView.getProperties().containsKey("isRemoved"))
+                    return;
+
                 selectedPlaylistView.set(playlistView);
 
                 songTableViewController.setPlaylist(playlist);
@@ -205,6 +214,8 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             });
 
             playlistBox.getChildren().add(playlistView);
+
+            // TODO: a bug when creating playlists, the list may contain null
 
             // sort using array list, rather than in the scene graph
             var tmpCopy = new ArrayList<>(playlistBox.getChildren());
@@ -221,54 +232,59 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 
     @FXML
     private void onClickAddNewPlaylist() {
-        if (!newPlaylistAnimation.getStatus().equals(Status.RUNNING)) {
+        if (!canAnimateNewPlaylist)
+            return;
 
-            HBox cell = new HBox();
+        HBox cell = new HBox();
 
-            TextField textBox = new TextField();
-            textBox.setPrefHeight(30);
-            cell.getChildren().add(textBox);
-            HBox.setMargin(textBox, new Insets(10, 10, 10, 9));
+        TextField textBox = new TextField();
+        textBox.setPrefHeight(30);
+        cell.getChildren().add(textBox);
+        HBox.setMargin(textBox, new Insets(10, 10, 10, 9));
 
-            textBox.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-                if (wasFocused && !isFocused) {
-                    playlistBox.getChildren().remove(cell);
+        textBox.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (wasFocused && !isFocused) {
+                playlistBox.getChildren().remove(cell);
 
-                    String text = textBox.getText();
+                String text = textBox.getText();
 
-                    if (!text.isEmpty()) {
-                        if (library.findPlaylistByTitle(text).isPresent()) {
-                            System.out.println("TODO: Playlist already exists");
+                if (!text.isEmpty()) {
+                    if (library.findPlaylistByTitle(text).isPresent()) {
+                        System.out.println("TODO: Playlist already exists");
+                    } else {
+
+                        if (text.length() > MAX_PLAYLIST_TITLE_LENGTH) {
+                            System.out.println("TODO: Playlist title is too long");
                         } else {
+                            // all good
+                            var playlist = library.addPlaylist(text);
 
-                            if (text.length() > MAX_PLAYLIST_TITLE_LENGTH) {
-                                System.out.println("TODO: Playlist title is too long");
-                            } else {
-                                // all good
-                                var playlist = library.addPlaylist(text);
-
-                                addNewPlaylistToUI(playlist);
-                            }
+                            addNewPlaylistToUI(playlist);
                         }
                     }
                 }
-            });
 
-            textBox.setOnKeyPressed(e -> {
-                if (e.getCode() == KeyCode.ENTER)  {
-                    playlistBox.requestFocus();
-                }
-            });
+                canAnimateNewPlaylist = true;
+            }
+        });
 
-            cell.setPrefHeight(0);
-            cell.setOpacity(0);
+        textBox.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER)  {
+                playlistBox.requestFocus();
+            }
+        });
 
-            playlistBox.getChildren().add(0, cell);
+        playlistBox.getChildren().add(0, cell);
 
-            textBox.requestFocus();
+        textBox.requestFocus();
 
-            newPlaylistAnimation.play();
-        }
+        animationBuilder()
+                .duration(Duration.seconds(1.0))
+                .interpolator(Interpolators.EXPONENTIAL.EASE_OUT())
+                .translate(playlistBox)
+                .from(new Point2D(0, -50))
+                .to(new Point2D(0, 0))
+                .buildAndPlay();
     }
 
     @Override
@@ -281,37 +297,33 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                 .filter(view -> view.getProperties().get("PLAYLIST") == playlist)
                 .findAny()
                 .ifPresent(view -> {
+                    view.getProperties().put("isRemoved", true);
+
                     // if the current playlist is the one we are removing, then set the default playlist
                     if (songTableViewController.getPlaylist() == playlist) {
                         selectedPlaylistView.set((Parent) playlistBox.getChildren().get(0));
                         songTableViewController.setPlaylist(library.getLibraryPlaylist());
                     }
 
-                    library.removePlaylist(playlist);
-                    playlistBox.getChildren().remove(view);
+                    animationBuilder()
+                            .duration(Duration.seconds(0.65))
+                            .interpolator(Interpolators.EXPONENTIAL.EASE_OUT())
+                            .onFinished(() -> {
+                                library.removePlaylist(playlist);
+                                playlistBox.getChildren().remove(view);
+                            })
+                            .translate(view)
+                            .from(new Point2D(0, 0))
+                            .to(new Point2D(-view.getLayoutBounds().getWidth(), 0))
+                            .buildAndPlay();
                 });
     }
-
-    private Animation newPlaylistAnimation = new Transition() {
-        {
-            setCycleDuration(Duration.millis(500));
-            setInterpolator(Interpolator.EASE_BOTH);
-        }
-        protected void interpolate(double frac) {
-            HBox cell = (HBox) playlistBox.getChildren().get(0);
-            if (frac < 0.5) {
-                cell.setPrefHeight(frac * 100);
-            } else {
-                cell.setPrefHeight(50);
-                cell.setOpacity((frac - 0.5) * 2);
-            }
-        }
-    };
 
     public void onExit() {
         mediaPaneController.onExit();
 
         Serializer.writeToFile(library, LIBRARY_FILE);
+        Serializer.writeToFile(PREFERENCES, PREFERENCES_FILE);
     }
 
     public static class Search {
@@ -540,7 +552,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
         protected Library call() throws Exception {
             updateMessage("Loading library");
 
-            var library = Serializer.readFromFile(file);
+            var library = Serializer.readLibraryFromFile(file);
 
             updateMessage("Loading songs");
 

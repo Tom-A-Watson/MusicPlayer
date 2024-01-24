@@ -11,3 +11,4 @@ system/
 logs/
 target/
 library.json
+prefs.json

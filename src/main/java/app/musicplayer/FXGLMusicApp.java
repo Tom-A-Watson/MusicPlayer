@@ -26,7 +26,6 @@ import java.util.logging.LogManager;
 import static app.musicplayer.Config.*;
 
 // TODO: serialization version for future updates
-// TODO: volume is not serialized
 // TODO: light and dark themes
 // TODO: rename playlist option
 // TODO: remember stage width height
