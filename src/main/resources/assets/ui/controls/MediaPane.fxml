@@ -9,12 +9,13 @@
 <?import javafx.scene.image.Image?>
 
 <?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Text?>
 <VBox fx:controller="app.musicplayer.controllers.MediaPaneController"
       xmlns:fx="http://javafx.com/fxml/1">
 
    <BorderPane prefHeight="70.0" styleClass="bottomBar" BorderPane.alignment="CENTER">
       <left>
-         <HBox alignment="CENTER_LEFT" onMouseClicked="#navigateToCurrentSong" prefHeight="50.0" prefWidth="250.0"
+         <HBox alignment="CENTER_LEFT" onMouseClicked="#navigateToCurrentSong" prefHeight="50.0" prefWidth="250.0" minWidth="250.0" maxWidth="250.0"
                styleClass="bottomBarItem" BorderPane.alignment="CENTER">
 
             <ImageView fx:id="nowPlayingArtwork" cache="true" fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
@@ -26,12 +27,11 @@
             </ImageView>
 
             <VBox prefHeight="50.0">
-
-               <Label fx:id="nowPlayingTitle" prefHeight="20.0" prefWidth="190.0" styleClass="bottomBarLabel" textOverrun="CLIP">
+               <Text fx:id="nowPlayingTitle" styleClass="bottomBarLabel">
                   <VBox.margin>
                      <Insets left="5.0" right="5.0" top="5.0"/>
                   </VBox.margin>
-               </Label>
+               </Text>
             </VBox>
          </HBox>
       </left>

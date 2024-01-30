@@ -7,17 +7,17 @@
 
 package app.musicplayer.controllers;
 
-import app.musicplayer.Config;
 import app.musicplayer.events.UserDataEvent;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
-import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.animation.Animation;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.ImageView;
@@ -26,11 +26,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -53,7 +56,7 @@ public final class MediaPaneController implements Initializable {
     @FXML
     private ImageView nowPlayingArtwork;
     @FXML
-    private Label nowPlayingTitle;
+    private Text nowPlayingTitle;
 
     @FXML
     private Slider timeSlider;
@@ -85,6 +88,8 @@ public final class MediaPaneController implements Initializable {
     private Song song = null;
     private int currentSongIndex = 0;
 
+    private List<Animation<?>> animations = new ArrayList<>();
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initTimeSlider();
@@ -103,6 +108,54 @@ public final class MediaPaneController implements Initializable {
 
         executorService = Executors.newScheduledThreadPool(4);
         executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(() -> tick(), 0, 16, TimeUnit.MILLISECONDS);
+    }
+
+    private void tick() {
+        Platform.runLater(() -> {
+            animations.forEach(a -> a.onUpdate(0.016));
+        });
+    }
+
+    private void startNewPlayingTitleAnimation() {
+        animations.forEach(Animation::stop);
+        animations.clear();
+
+        nowPlayingTitle.setClip(null);
+
+        // TODO: what if running first time, no calculation of width?
+        var width = nowPlayingTitle.getLayoutBounds().getWidth();
+
+        if (width > 190) {
+            // TODO: these values are calculated from MediaPane.fxml
+            var clip = new Rectangle(190, 100);
+            nowPlayingTitle.setClip(clip);
+
+            var dist = width - 190;
+
+            var anim1 = animationBuilder()
+                    .duration(Duration.seconds(5))
+                    .repeatInfinitely()
+                    .autoReverse(true)
+                    .translate(clip)
+                    .from(new Point2D(0, -50))
+                    .to(new Point2D(dist, -50))
+                    .build();
+
+            var anim2 = animationBuilder()
+                    .duration(Duration.seconds(5))
+                    .repeatInfinitely()
+                    .autoReverse(true)
+                    .translate(nowPlayingTitle)
+                    .from(new Point2D(0, 0))
+                    .to(new Point2D(-dist, 0))
+                    .build();
+
+            animations.add(anim1);
+            animations.add(anim2);
+
+            animations.forEach(Animation::start);
+        }
     }
 
     private void initTimeSlider() {
@@ -150,6 +203,8 @@ public final class MediaPaneController implements Initializable {
 
         nowPlayingTitle.textProperty().bind(song.titleProperty());
         nowPlayingArtwork.imageProperty().bind(song.artworkProperty());
+
+        startNewPlayingTitleAnimation();
 
         timeSlider.setMax(song.getLengthInSeconds() * 4);
 
