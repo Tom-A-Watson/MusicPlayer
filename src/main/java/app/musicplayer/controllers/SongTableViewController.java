@@ -229,11 +229,17 @@ public final class SongTableViewController implements Initializable, ControlBoxC
 	}
 
 	public void setPlaylist(Playlist playlist) {
+		if (this.playlist != null) {
+			this.playlist.setLastSelectedSong(selectedSong);
+		}
+
 		this.playlist = playlist;
 
 		isAllSongsPlaylist.set(playlist.getType() == Playlist.PlaylistType.ALL_SONGS);
 
 		setSongs(playlist.getSongs());
+
+		playlist.lastSelectedSong().ifPresent(this::selectSong);
 	}
 
 	public Playlist getPlaylist() {

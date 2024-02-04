@@ -11,11 +11,13 @@ import app.musicplayer.Config;
 import app.musicplayer.model.Playlist;
 import app.musicplayer.model.Song;
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.ui.FontType;
 import javafx.beans.binding.Bindings;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.input.DragEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 
@@ -26,10 +28,13 @@ import static app.musicplayer.Config.VAR_DRAGGED_SONGS;
 /**
  * @author Almas Baim (https://github.com/AlmasB)
  */
-public final class PlaylistBoxController {
+public final class PlaylistViewController {
 
     @FXML
     private HBox playlistBox;
+
+    @FXML
+    private HBox menuButton;
 
     @FXML
     private HBox titleBox;
@@ -42,7 +47,7 @@ public final class PlaylistBoxController {
     // TODO: unnecessary code, here and in ControlBox
     private PlaylistBoxHandler handler = new PlaylistBoxHandler() {
         @Override
-        public void onClickRemovePlaylist(Playlist playlist) {
+        public void onClickPlaylistMenu(MouseEvent e, Playlist playlist) {
         }
     };
 
@@ -60,7 +65,7 @@ public final class PlaylistBoxController {
         switch (playlist.getType()) {
             case ALL_SONGS, USER_CREATED -> {
                 playlistTitleLabel.textProperty().bind(
-                        Bindings.size(playlist.getSongs()).asString(playlist.getTitle() + " (%d)")
+                        playlist.titleProperty().concat(Bindings.size(playlist.getSongs()).asString(" (%d)"))
                 );
             }
 
@@ -71,18 +76,10 @@ public final class PlaylistBoxController {
             }
         }
 
-        // TODO: drag playlist to other playlists
-//        playlistBox.setOnDragDetected(event -> {
-//            PseudoClass pressed = PseudoClass.getPseudoClass("pressed");
-//            playlistBox.pseudoClassStateChanged(pressed, false);
-//            Dragboard db = playlistBox.startDragAndDrop(TransferMode.ANY);
-//            ClipboardContent content = new ClipboardContent();
-//            content.putString("Playlist");
-//            db.setContent(content);
-//            MusifyApp.setDraggedItem(playlist);
-//            db.setDragView(playlistBox.snapshot(null, null), 125, 25);
-//            event.consume();
-//        });
+        if (!playlist.isModifiable()) {
+            playlistBox.getChildren().remove(menuButton);
+            return;
+        }
 
         PseudoClass hover = PseudoClass.getPseudoClass("hover");
         // TODO: this toggles .sideBarItem:hover from MainScene.css
@@ -124,11 +121,11 @@ public final class PlaylistBoxController {
     }
 
     @FXML
-    private void onClickMenu() {
-        handler.onClickRemovePlaylist(playlist);
+    private void onClickPlaylistMenu(MouseEvent e) {
+        handler.onClickPlaylistMenu(e, playlist);
     }
 
     public interface PlaylistBoxHandler {
-        void onClickRemovePlaylist(Playlist playlist);
+        void onClickPlaylistMenu(MouseEvent e, Playlist playlist);
     }
 }

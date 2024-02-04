@@ -7,13 +7,13 @@
 <?import javafx.scene.image.Image?>
 
 <HBox fx:id="playlistBox"
-      fx:controller="app.musicplayer.controllers.PlaylistBoxController"
+      fx:controller="app.musicplayer.controllers.PlaylistViewController"
       stylesheets="@/assets/ui/css/PlaylistBox.css"
       prefHeight="50.0"
       prefWidth="250.0"
       xmlns:fx="http://javafx.com/fxml/1">
 
-   <HBox onMouseClicked="#onClickMenu" styleClass="sideBarItem" prefWidth="40" prefHeight="40" alignment="CENTER">
+   <HBox fx:id="menuButton" onMouseClicked="#onClickPlaylistMenu" styleClass="sideBarItem" prefWidth="40" prefHeight="40" alignment="CENTER">
       <ImageView fitHeight="25.0" fitWidth="25.0" preserveRatio="true">
          <Image url="@/assets/textures/MenuIcon.png"/>
 
@@ -23,7 +23,7 @@
       </ImageView>
    </HBox>
 
-   <HBox fx:id="titleBox" styleClass="sideBarItem" HBox.hgrow="ALWAYS">
+   <HBox fx:id="titleBox" id="titleBox" styleClass="sideBarItem" HBox.hgrow="ALWAYS">
       <Label fx:id="playlistTitleLabel"
              styleClass="playlist-title-label"
              prefHeight="30.0"

@@ -12,10 +12,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A playlist is a collection of songs.
@@ -37,6 +34,7 @@ public final class Playlist implements Comparable<Playlist> {
 
     private PlaylistType type;
     private StringProperty title;
+    private Song lastSelectedSong = null;
 
     public Playlist(PlaylistType type, String title) {
         this.type = type;
@@ -118,6 +116,14 @@ public final class Playlist implements Comparable<Playlist> {
     
     public void removeSong(int songId) {
         songs.removeIf(s -> s.getId() == songId);
+    }
+
+    public Optional<Song> lastSelectedSong() {
+        return Optional.ofNullable(lastSelectedSong);
+    }
+
+    public void setLastSelectedSong(Song lastSelectedSong) {
+        this.lastSelectedSong = lastSelectedSong;
     }
 
     @Override

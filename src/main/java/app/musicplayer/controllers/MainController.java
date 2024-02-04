@@ -15,10 +15,6 @@ import app.musicplayer.model.Song;
 import app.musicplayer.model.serializable.Serializer;
 import com.almasb.fxgl.animation.Interpolators;
 import com.almasb.fxgl.logging.Logger;
-import javafx.animation.Animation;
-import javafx.animation.Animation.Status;
-import javafx.animation.Interpolator;
-import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -32,14 +28,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Popup;
 import javafx.util.Duration;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -51,18 +50,16 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static app.musicplayer.Config.*;
 import static app.musicplayer.events.UserDataEvent.*;
-import static app.musicplayer.model.Playlist.PlaylistType.*;
+import static app.musicplayer.model.Playlist.PlaylistType.MOST_PLAYED;
+import static app.musicplayer.model.Playlist.PlaylistType.RECENTLY_PLAYED;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
-public class MainController implements Initializable, PlaylistBoxController.PlaylistBoxHandler {
+public class MainController implements Initializable, PlaylistViewController.PlaylistBoxHandler {
 
     private static final Logger log = Logger.get(MainController.class);
 
@@ -82,6 +79,8 @@ public class MainController implements Initializable, PlaylistBoxController.Play
     @FXML
     private TextField searchField;
 
+    private Popup popup = new Popup();
+
     private boolean canAnimateNewPlaylist = true;
 
     private ObjectProperty<Parent> selectedPlaylistView = new SimpleObjectProperty<>(null);
@@ -96,11 +95,11 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 
         selectedPlaylistView.addListener((o, oldView, newView) -> {
             if (oldView != null) {
-                oldView.getChildrenUnmodifiable().get(1).pseudoClassStateChanged(pseudoClass, false);
+                oldView.lookup("#titleBox").pseudoClassStateChanged(pseudoClass, false);
             }
 
             if (newView != null) {
-                newView.getChildrenUnmodifiable().get(1).pseudoClassStateChanged(pseudoClass, true);
+                newView.lookup("#titleBox").pseudoClassStateChanged(pseudoClass, true);
             }
         });
 
@@ -123,6 +122,17 @@ public class MainController implements Initializable, PlaylistBoxController.Play
         if (Files.exists(PREFERENCES_FILE)) {
             var map = Serializer.readPropertiesFromFile(PREFERENCES_FILE);
             PREFERENCES.addAll(map);
+        }
+
+        // TODO: async
+        try {
+            Parent playlistMenu = FXMLLoader.load(getAssetLoader().getURL("/assets/ui/controls/PlaylistMenuVBox.fxml"));
+
+            popup.getContent().add(playlistMenu);
+            popup.setAutoHide(true);
+
+        } catch (Exception e) {
+            log.warning("Could not load playlist menu", e);
         }
     }
 
@@ -183,7 +193,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
 
     private void addNewPlaylistToUI(Playlist playlist) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(Config.FXML + "controls/PlaylistBox.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(Config.FXML + "controls/PlaylistView.fxml"));
             HBox playlistView = loader.load();
 
             // TODO: safety
@@ -192,7 +202,7 @@ public class MainController implements Initializable, PlaylistBoxController.Play
             // TODO: maybe move to FXML + controller
             var title = playlistView.getChildren().get(1);
 
-            PlaylistBoxController controller = loader.getController();
+            PlaylistViewController controller = loader.getController();
             controller.setPlaylist(playlist);
             controller.setHandler(this);
 
@@ -287,15 +297,86 @@ public class MainController implements Initializable, PlaylistBoxController.Play
                 .buildAndPlay();
     }
 
+    private Optional<Node> getPlaylistView(Playlist playlist) {
+        return playlistBox.getChildren()
+                .stream()
+                .filter(view -> view.getProperties().get("PLAYLIST") == playlist)
+                .findAny();
+    }
+
     @Override
-    public void onClickRemovePlaylist(Playlist playlist) {
+    public void onClickPlaylistMenu(MouseEvent e, Playlist playlist) {
+        Node source = (Node) e.getSource();
+
+        Node popupContent = popup.getContent().get(0);
+        Node renameButton = popupContent.lookup("#renameButton");
+        Node deleteButton = popupContent.lookup("#deleteButton");
+
+        renameButton.setOnMouseClicked(ev -> {
+            popup.hide();
+
+            // TODO: duplicate
+
+            HBox cell = new HBox();
+
+            TextField textBox = new TextField();
+            textBox.setPrefHeight(30);
+            cell.getChildren().add(textBox);
+            HBox.setMargin(textBox, new Insets(10, 10, 10, 9));
+
+            HBox view = (HBox) getPlaylistView(playlist).get();
+            Node titleBox = view.lookup("#titleBox");
+
+            view.getChildren().remove(titleBox);
+            view.getChildren().add(cell);
+
+            textBox.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (wasFocused && !isFocused) {
+                    view.getChildren().remove(cell);
+                    view.getChildren().add(titleBox);
+
+                    String text = textBox.getText();
+
+                    if (!text.isEmpty()) {
+                        if (library.findPlaylistByTitle(text).isPresent()) {
+                            System.out.println("TODO: Playlist already exists");
+                        } else {
+
+                            if (text.length() > MAX_PLAYLIST_TITLE_LENGTH) {
+                                System.out.println("TODO: Playlist title is too long");
+                            } else {
+                                // all good
+                                playlist.setTitle(text);
+                            }
+                        }
+                    }
+                }
+            });
+
+            textBox.setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ENTER)  {
+                    playlistBox.requestFocus();
+                }
+            });
+
+            textBox.requestFocus();
+        });
+
+        deleteButton.setOnMouseClicked(ev -> {
+            popup.hide();
+            removePlaylist(playlist);
+        });
+
+        var p = source.localToScreen(0, 40);
+
+        popup.show(playlistBox.getScene().getWindow(), p.getX(), p.getY());
+    }
+
+    private void removePlaylist(Playlist playlist) {
         if (!playlist.isModifiable())
             return;
 
-        playlistBox.getChildren()
-                .stream()
-                .filter(view -> view.getProperties().get("PLAYLIST") == playlist)
-                .findAny()
+        getPlaylistView(playlist)
                 .ifPresent(view -> {
                     view.getProperties().put("isRemoved", true);
 

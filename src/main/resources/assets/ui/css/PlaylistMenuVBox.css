@@ -1,0 +1,15 @@
+.playlistMenuVBox {
+    -fx-background-color: darkgray;
+}
+
+.menuItemLabel {
+    -fx-font-size: 16px;
+}
+
+.sideBarItem: hover {
+    -fx-background-color: #dadada;
+}
+
+.sideBarItem: pressed {
+    -fx-background-color: #c2c2c2;
+}
