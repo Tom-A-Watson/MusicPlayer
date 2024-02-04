@@ -14,6 +14,7 @@ import com.almasb.fxgl.animation.Animation;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -75,11 +76,6 @@ public final class MediaPaneController implements Initializable {
 
     private boolean isReady = false;
 
-    /**
-     * Each tick in this counter is 250ms.
-     */
-    private int timerCounter = 0;
-
     private BooleanProperty isPlaying = new SimpleBooleanProperty(false);
     private BooleanProperty isShuffleOn = new SimpleBooleanProperty(false);
 
@@ -87,6 +83,12 @@ public final class MediaPaneController implements Initializable {
     private Playlist playlist = null;
     private Song song = null;
     private int currentSongIndex = 0;
+
+    private ChangeListener<Duration> timeChangeListener = (o, oldTime, currentTime) -> {
+        if (mediaPlayer != null) {
+            updateTimeLabels(currentTime, mediaPlayer.getMedia().getDuration());
+        }
+    };
 
     private List<Animation<?>> animations = new ArrayList<>();
 
@@ -107,7 +109,6 @@ public final class MediaPaneController implements Initializable {
         volumePaneController.volumeProperty().bindBidirectional(PREFERENCES.doubleProperty("volume"));
 
         executorService = Executors.newScheduledThreadPool(4);
-        executorService.scheduleAtFixedRate(new TimeUpdater(), 0, 250, TimeUnit.MILLISECONDS);
         executorService.scheduleAtFixedRate(() -> tick(), 0, 16, TimeUnit.MILLISECONDS);
     }
 
@@ -159,22 +160,9 @@ public final class MediaPaneController implements Initializable {
     }
 
     private void initTimeSlider() {
-        timeSlider.valueChangingProperty().addListener((slider, wasChanging, isChanging) -> {
-            if (wasChanging) {
-                int seconds = (int) Math.round(timeSlider.getValue() / 4.0);
-                timeSlider.setValue(seconds * 4);
-                seek(seconds);
-            }
-        });
-
-        timeSlider.valueProperty().addListener((slider, oldValue, newValue) -> {
-            double previous = oldValue.doubleValue();
-            double current = newValue.doubleValue();
-            if (!timeSlider.isValueChanging() && current != previous + 1 && !timeSlider.isPressed()) {
-                int seconds = (int) Math.round(current / 4.0);
-                timeSlider.setValue(seconds * 4);
-                seek(seconds);
-            }
+        timeSlider.setOnMouseReleased(e -> {
+            int seconds = (int) Math.round(timeSlider.getValue() / 4.0);
+            seek(seconds);
         });
 
         frontSliderTrack.prefWidthProperty().bind(timeSlider.widthProperty().multiply(timeSlider.valueProperty().divide(timeSlider.maxProperty())));
@@ -208,15 +196,12 @@ public final class MediaPaneController implements Initializable {
 
         timeSlider.setMax(song.getLengthInSeconds() * 4);
 
-        // TODO: this and other properties of media player
-        //mediaPlayer.getCurrentTime()
-        timerCounter = 0;
-
         Media media = new Media(song.getFile().toUri().toString());
         mediaPlayer = new MediaPlayer(media);
         mediaPlayer.volumeProperty().bind(volumePaneController.volumeProperty().divide(200));
         mediaPlayer.muteProperty().bind(volumePaneController.mutedProperty());
         mediaPlayer.setOnEndOfMedia(this::next);
+        mediaPlayer.currentTimeProperty().addListener(timeChangeListener);
 
         isPlaying.bind(mediaPlayer.statusProperty().isEqualTo(MediaPlayer.Status.PLAYING));
     }
@@ -226,7 +211,7 @@ public final class MediaPaneController implements Initializable {
         if (!isReady)
             return;
 
-        if (timerCounter > 20 || currentSongIndex == 0) {
+        if (currentSongIndex == 0) {
             seek(0);
             return;
         }
@@ -340,30 +325,22 @@ public final class MediaPaneController implements Initializable {
             return;
 
         mediaPlayer.seek(Duration.seconds(seconds));
-        timerCounter = seconds * 4;
-
-        updateTimeLabels();
     }
 
-    private void updateTimeLabels() {
-        timePassedLabel.setText(getTimePassed());
-        timeRemainingLabel.setText(getTimeRemaining());
+    private void updateTimeLabels(Duration currentTime, Duration songTime) {
+        if (!timeSlider.isPressed()) {
+            timeSlider.setValue(currentTime.toSeconds() * 4);
+        }
+
+        timePassedLabel.setText(format((int) currentTime.toSeconds()));
+        timeRemainingLabel.setText(format((int) songTime.toSeconds() - (int) currentTime.toSeconds()));
     }
 
-    private String getTimePassed() {
-        int secondsPassed = timerCounter / 4;
-        int minutes = secondsPassed / 60;
-        int seconds = secondsPassed % 60;
-        return minutes + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
-    }
+    private String format(int seconds) {
+        int min = seconds / 60;
+        int sec = seconds % 60;
 
-    private String getTimeRemaining() {
-        int secondsPassed = timerCounter / 4;
-        int totalSeconds = song.getLengthInSeconds();
-        int secondsRemaining = totalSeconds - secondsPassed;
-        int minutes = secondsRemaining / 60;
-        int seconds = secondsRemaining % 60;
-        return minutes + ":" + (seconds < 10 ? "0" + seconds : Integer.toString(seconds));
+        return min + ":" + (sec < 10 ? "0" : "") + sec;
     }
 
     public BooleanProperty playingProperty() {
@@ -385,36 +362,11 @@ public final class MediaPaneController implements Initializable {
         return isShuffleOn.get();
     }
 
-    private class TimeUpdater implements Runnable {
-
-        @Override
-        public void run() {
-            if (!isPlaying())
-                return;
-
-            int length = song.getLengthInSeconds() * 4;
-
-            Platform.runLater(() -> {
-                if (timerCounter < length) {
-                    timerCounter++;
-
-                    if (timerCounter % 4 == 0) {
-                        updateTimeLabels();
-                    }
-
-                    // called every tick (250 ms) because max value is length in seconds * 4
-                    if (!timeSlider.isPressed()) {
-                        timeSlider.setValue(timerCounter);
-                    }
-                }
-            });
-        }
-    }
-
     private void releaseMediaPlayer() {
         if (mediaPlayer == null)
             return;
 
+        mediaPlayer.currentTimeProperty().removeListener(timeChangeListener);
         mediaPlayer.volumeProperty().unbind();
         mediaPlayer.muteProperty().unbind();
         mediaPlayer.setOnEndOfMedia(null);

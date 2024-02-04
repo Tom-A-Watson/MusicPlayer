@@ -27,7 +27,6 @@ import static app.musicplayer.Config.*;
 
 // TODO: serialization version for future updates
 // TODO: light and dark themes
-// TODO: rename playlist option
 // TODO: remember stage width height
 // TODO: remember last played song
 // TODO: update to high res app icon
