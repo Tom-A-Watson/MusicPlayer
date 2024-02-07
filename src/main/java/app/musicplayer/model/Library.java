@@ -9,6 +9,7 @@ package app.musicplayer.model;
 
 import javafx.collections.ObservableList;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 import static app.musicplayer.model.Playlist.PlaylistType.*;
@@ -35,7 +36,13 @@ public final class Library {
      * Ctor for loading library from its serialized form.
      */
     public Library(List<Playlist> playlists) {
-        this.playlists.addAll(playlists);
+        boolean allPlaylistTypesArePresent = findPlaylistByType(ALL_SONGS).isPresent() &&
+                findPlaylistByType(MOST_PLAYED).isPresent() &&
+                findPlaylistByType(RECENTLY_PLAYED).isPresent();
+
+        if (allPlaylistTypesArePresent) {
+            this.playlists.addAll(playlists);
+        }
 
         // TODO: check that all 3 built-in playlist types are present
     }
